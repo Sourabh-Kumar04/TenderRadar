@@ -18,7 +18,12 @@ from app.db import (
     get_tender,
     get_tenders_stats,
     log_scan,
-    get_scan_logs
+    get_scan_logs,
+    save_tender,
+    unsave_tender,
+    is_tender_saved,
+    update_saved_tender_notes,
+    get_saved_tenders
 )
 
 
@@ -160,3 +165,69 @@ def test_scan_logging(test_db):
     assert len(logs) == 1
     assert logs[0]["items_found"] == 10
     assert logs[0]["items_new"] == 3
+
+
+def test_saved_tenders_crud_and_persistence(test_db):
+    t_id = insert_tender(test_db, {
+        "title": "Solar Installation at AIIMS",
+        "canonical_url": "https://gem.gov.in/bids/TEST-1",
+        "original_url": "https://gem.gov.in/bids/TEST-1?sp=1",
+        "portal_name": "GeM"
+    })
+    assert t_id is not None
+
+    # Initially not saved
+    assert is_tender_saved(test_db, t_id) is False
+    t_before = get_tender(test_db, t_id)
+    assert t_before["is_saved"] is False
+
+    # 1. Save tender with notes
+    res = save_tender(test_db, t_id, notes="Initial contractor review")
+    assert res is not None
+    assert res["tender_id"] == t_id
+    assert res["notes"] == "Initial contractor review"
+    assert is_tender_saved(test_db, t_id) is True
+
+    # Check detail view reflection
+    t_saved = get_tender(test_db, t_id)
+    assert t_saved["is_saved"] is True
+    assert t_saved["saved_notes"] == "Initial contractor review"
+
+    # 2. Update notes
+    updated = update_saved_tender_notes(test_db, t_id, "Updated: shortlisted for bid")
+    assert updated is True
+    assert get_tender(test_db, t_id)["saved_notes"] == "Updated: shortlisted for bid"
+
+    # 3. Check stats
+    stats = get_tenders_stats(test_db)
+    assert stats["saved_count"] == 1
+
+    # 4. Persistence verification: verify saved state survives new connection
+    assert is_tender_saved(test_db, t_id) is True
+
+    # 5. Unsave tender
+    unsaved = unsave_tender(test_db, t_id)
+    assert unsaved is True
+    assert is_tender_saved(test_db, t_id) is False
+    assert get_tender(test_db, t_id)["is_saved"] is False
+
+
+def test_saved_tenders_ordering(test_db):
+    import time
+    t1 = insert_tender(test_db, {"title": "Tender 1", "canonical_url": "https://gem.gov.in/1", "original_url": "https://gem.gov.in/1", "portal_name": "GeM"})
+    t2 = insert_tender(test_db, {"title": "Tender 2", "canonical_url": "https://gem.gov.in/2", "original_url": "https://gem.gov.in/2", "portal_name": "GeM"})
+    t3 = insert_tender(test_db, {"title": "Tender 3", "canonical_url": "https://gem.gov.in/3", "original_url": "https://gem.gov.in/3", "portal_name": "GeM"})
+
+    save_tender(test_db, t1, notes="Note 1")
+    time.sleep(0.01)
+    save_tender(test_db, t2, notes="Note 2")
+    time.sleep(0.01)
+    save_tender(test_db, t3, notes="Note 3")
+
+    saved_list = get_saved_tenders(test_db)
+    assert len(saved_list) == 3
+    # Newest-first ordering: t3, then t2, then t1
+    assert saved_list[0]["id"] == t3
+    assert saved_list[1]["id"] == t2
+    assert saved_list[2]["id"] == t1
+

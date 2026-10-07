@@ -113,6 +113,22 @@ class Tender(BaseModel):
     verdict: Optional[str] = None
     match_score: Optional[int] = None
     advisor_verdict: Optional[Dict[str, Any]] = None
+    portal_url: Optional[str] = None
+    is_saved: bool = False
+    saved_notes: Optional[str] = ""
+    saved_at: Optional[str] = None
+
+
+class SavedTenderSaveRequest(BaseModel):
+    notes: Optional[str] = None
+
+
+class SavedTenderItem(BaseModel):
+    id: int
+    tender_id: int
+    saved_at: str
+    notes: Optional[str] = ""
+    tender: Optional[Tender] = None
 
 
 class ScanLog(BaseModel):
@@ -128,6 +144,7 @@ class ScanLog(BaseModel):
 
 class StatsOverview(BaseModel):
     total_tenders: int = 0
+    saved_count: int = 0
     active_watchlists: int = 0
     urgent_closing_soon: int = 0
     total_scans: int = 0

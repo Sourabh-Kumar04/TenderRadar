@@ -215,3 +215,105 @@ def test_api_profile_post_and_put(client_with_temp_db):
     assert put_res.status_code == 200
     assert put_res.json()["company_name"] == "Bharat Solar & Infra Ltd"
 
+
+# ==========================================
+# Saved Tenders & Portal Link Tests
+# ==========================================
+
+def test_saved_page_view(client_with_temp_db):
+    # Empty state initially
+    res = client_with_temp_db.get("/saved")
+    assert res.status_code == 200
+    assert "Saved Tenders" in res.text
+    assert "No Saved Tenders Yet" in res.text
+
+    # Get an existing tender to save
+    tenders = client_with_temp_db.get("/api/tenders").json()
+    assert len(tenders) > 0
+    t_id = tenders[0]["id"]
+
+    # Save via web form
+    post_res = client_with_temp_db.post(
+        f"/tenders/{t_id}/save",
+        data={"notes": "Reviewed by board", "redirect_to": "/saved"},
+        follow_redirects=False
+    )
+    assert post_res.status_code == 303
+
+    # Now saved page should list it
+    res_after = client_with_temp_db.get("/saved")
+    assert res_after.status_code == 200
+    assert tenders[0]["title"] in res_after.text
+    assert "Reviewed by board" in res_after.text
+
+    # Unsave via web form
+    unsave_res = client_with_temp_db.post(
+        f"/tenders/{t_id}/unsave",
+        data={"redirect_to": "/saved"},
+        follow_redirects=False
+    )
+    assert unsave_res.status_code == 303
+
+
+def test_api_saved_tenders_crud_and_ordering(client_with_temp_db):
+    tenders = client_with_temp_db.get("/api/tenders").json()
+    assert len(tenders) >= 2
+    t1_id = tenders[0]["id"]
+    t2_id = tenders[1]["id"]
+
+    # 1. Save t1
+    save1 = client_with_temp_db.post(f"/api/tenders/{t1_id}/save", json={"notes": "First bookmark"})
+    assert save1.status_code == 200
+    assert save1.json()["saved"] is True
+    assert save1.json()["notes"] == "First bookmark"
+
+    # 2. Save t2
+    save2 = client_with_temp_db.post(f"/api/tenders/{t2_id}/save", json={"notes": "Second bookmark"})
+    assert save2.status_code == 200
+    assert save2.json()["saved"] is True
+
+    # 3. GET /api/saved ordering (newest-first)
+    saved_list = client_with_temp_db.get("/api/saved").json()
+    assert len(saved_list) >= 2
+    assert saved_list[0]["id"] == t2_id
+    assert saved_list[1]["id"] == t1_id
+    assert saved_list[1]["saved_notes"] == "First bookmark"
+
+    # 4. Update notes via PATCH
+    notes_res = client_with_temp_db.patch(f"/api/tenders/{t1_id}/notes", json={"notes": "Updated bid notes"})
+    assert notes_res.status_code == 200
+    assert notes_res.json()["notes"] == "Updated bid notes"
+
+    # 5. Delete bookmark
+    del_res = client_with_temp_db.delete(f"/api/tenders/{t1_id}/save")
+    assert del_res.status_code == 200
+    assert del_res.json()["saved"] is False
+
+    # Check that t1 is no longer in /api/saved
+    saved_after = client_with_temp_db.get("/api/saved").json()
+    saved_ids = [item["id"] for item in saved_after]
+    assert t1_id not in saved_ids
+    assert t2_id in saved_ids
+
+
+def test_rendered_portal_button_url_and_theme(client_with_temp_db):
+    tenders = client_with_temp_db.get("/api/tenders").json()
+    assert len(tenders) > 0
+    tender = tenders[0]
+    t_id = tender["id"]
+
+    # Check rendered dashboard HTML
+    dash_res = client_with_temp_db.get("/")
+    assert dash_res.status_code == 200
+    assert "Open Official Portal" in dash_res.text
+    # Check that href is an official URL and not empty
+    assert 'href="http' in dash_res.text
+    assert "btn-save" in dash_res.text
+
+    # Check rendered tender detail page HTML
+    detail_res = client_with_temp_db.get(f"/tenders/{t_id}")
+    assert detail_res.status_code == 200
+    assert "Open Official Portal" in detail_res.text or "Open Official Tender Portal" in detail_res.text
+    assert 'target="_blank"' in detail_res.text
+
+

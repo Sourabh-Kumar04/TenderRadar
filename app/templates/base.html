@@ -5,28 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}TenderRadar - Indian Government Tender Intelligence Agent{% endblock %}</title>
   <link rel="stylesheet" href="/static/css/style.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%23f26625'/><text y='.75em' x='50%' text-anchor='middle' font-size='70' font-family='sans-serif' font-weight='bold' fill='white'>T</text></svg>">
 </head>
 <body>
   <!-- Navigation Header -->
   <nav class="navbar">
     <div class="nav-container">
       <a href="/" class="nav-brand">
-        <div class="brand-logo">🎯</div>
+        <div class="brand-logo">T</div>
         <div>
           <span class="brand-name">TenderRadar</span>
-          <span class="brand-badge">India Gov · SerpApi</span>
+          <span class="brand-badge">SerpApi · India 2026</span>
         </div>
       </a>
       <div class="nav-links">
         <a href="/" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}">📊 Dashboard</a>
-        <a href="/profile" class="nav-link {% if active_page == 'profile' %}active{% endif %}">🎯 Bid Advisor Profile</a>
+        <a href="/saved" class="nav-link {% if active_page == 'saved' %}active{% endif %}">★ Saved</a>
+        <a href="/profile" class="nav-link {% if active_page == 'profile' %}active{% endif %}">🎯 Profile</a>
         <a href="/watchlists" class="nav-link {% if active_page == 'watchlists' %}active{% endif %}">🔍 Watchlists</a>
-        <a href="/scans" class="nav-link {% if active_page == 'scans' %}active{% endif %}">⏱️ Scan Monitor</a>
-        <a href="/export/csv" class="btn btn-secondary btn-sm" title="Export tenders to CSV">📥 Export CSV</a>
+        <a href="/scans" class="nav-link {% if active_page == 'scans' %}active{% endif %}">⏱️ Scans</a>
+        <a href="/export/csv" class="btn btn-secondary btn-sm" title="Export tenders to CSV">📥 CSV</a>
         <form action="/scan" method="POST" style="display:inline;">
-          <button type="submit" class="btn btn-primary btn-sm scan-btn" title="Run instant scan across portals">
-            ⚡ Scan Portals Now
+          <button type="submit" class="btn btn-primary btn-sm scan-btn" title="Run discovery scan across portals">
+            ⚡ Scan Portals
           </button>
         </form>
       </div>
@@ -54,11 +55,10 @@
     <div class="footer-container">
       <div>
         <strong>TenderRadar</strong> — Built for <em>SerpApi India Hackathon 2026</em>.
-        Automated Indian government tender tracking across GeM, CPPP, IREPS & State Portals.
+        Discovery & AI Bid Intelligence across GeM, CPPP, IREPS & State portals.
       </div>
       <div>
-        <span>Powered by <strong>SerpApi</strong> Google Search API</span> · 
-        <a href="https://github.com" target="_blank" rel="noopener">GitHub</a> · Apache-2.0 License
+        <span>Powered by <strong>SerpApi</strong> & Fireworks AI (DeepSeek V4P1 Flash)</span> · Apache-2.0
       </div>
     </div>
   </footer>

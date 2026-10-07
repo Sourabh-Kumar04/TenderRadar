@@ -7,7 +7,8 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Powered by SerpApi](https://img.shields.io/badge/Powered%20by-SerpApi%20Google%20Search-orange.svg)](https://serpapi.com)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
-[![Tests](https://img.shields.io/badge/Tests-50%20Passed-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-74%20Passed-brightgreen.svg)]()
+[![Design](https://img.shields.io/badge/Theme-YC%20Minimalist-orange.svg)]()
 
 ---
 
@@ -257,6 +258,54 @@ Single active, fully editable organizational profile stored in SQLite:
 
 ---
 
+## 📌 Saved Tenders (Bookmark + Review Later)
+
+Contractors often need to flag high-potential tenders, consult internal engineering teams, and draft queries before cutoff. TenderRadar provides a dedicated **Saved Tenders** subsystem:
+
+* **Persistent SQLite Storage:** Table `saved_tenders` stores `(tender_id, saved_at, notes)` with foreign key cascade on tender deletion. State survives server restarts.
+* **Dedicated Saved Page (`/saved`):**
+  * Displays bookmarked tenders ordered newest-first by `saved_at`.
+  * Inline interactive notes editor for private bidding strategy notes (e.g. JV partners, pre-bid queries).
+  * Direct Unsave button and "Open Official Portal" link on every card.
+  * Polished empty state when no tenders are bookmarked.
+* **REST API Endpoints:**
+  * `POST /api/tenders/{id}/save`: Bookmark a tender with optional notes in JSON body `{"notes": "..."}`.
+  * `DELETE /api/tenders/{id}/save`: Remove a bookmark.
+  * `GET /api/saved`: List all saved tenders with full details and advisory verdicts, sorted newest-first.
+  * `PATCH /api/tenders/{id}/notes`: Update user review notes for a saved tender.
+* **One-Click UI Controls:** Save / Unsave button on every tender card in the dashboard feed and on the tender detail view.
+
+---
+
+## 🔗 "Open Official Tender Portal" Link Correctness
+
+Government procurement portals in India (CPPP `eprocure.gov.in`, `etenders.gov.in`, GeM `gem.gov.in`, state NIC instances) use specialized servlet routing, parameter encoding, and session states:
+
+* **Architecture Decision:** `canonical_url` is strictly used for deduplication (stripping volatile session tokens and tracking tags), while the portal button utilizes `select_portal_url` to guarantee users reach the actual tender document page.
+* **Robust URL Selection (`app/normalizer.py`):**
+  1. **HTML Entity Unescaping:** Automatically fixes Google snippet artifact entities like `&amp;` -> `&` (e.g. on `etenders.hry.nic.in`).
+  2. **Search Redirect Unwrapping:** Extracts destination target URLs from Google/SerpApi redirects (`google.com/url?q=...`), bypassing search redirect hops.
+  3. **Parameter Preservation:** Retains crucial routing parameters (`component=$DirectLink`, `page=FrontEndTenderDetails`, `service=direct`, `sp=...`) required by Central and State NIC systems.
+  4. **Fallback Safety:** Gracefully falls back to `canonical_url` if the original link is absent or malformed.
+* **Real Verification in Database:** Verified across live Indian government tenders returning HTTP 200 on official domains (`etenders.gov.in`, `eprocure.gov.in`, `etenders.hry.nic.in`).
+
+---
+
+## 🎨 Y Combinator Inspired Minimalist UI Theme
+
+TenderRadar features a clean, professional theme inspired by **Y Combinator** and Hacker News:
+* **Off-White Canvas:** Clean `#f6f6ef` background providing high contrast and low visual fatigue for contractor workflows.
+* **YC Orange Accents:** `#f26625` primary buttons, accents, and brand badge.
+* **Typography:** System sans-serif stack (`-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto`), dark charcoal headings (`#222222`), and clear visual hierarchy.
+* **Subtle Borders & Generous Whitespace:** Replaced heavy shadows with subtle borders (`1px solid #e5e5dc`), clean cards, and generous spacing.
+* **Complete Product Polish:**
+  * Consistent sticky navbar with logo mark, Dashboard, Saved, Profile, Watchlists, and Scans links.
+  * Interactive loading feedback on all scan buttons (`⚡ Scanning...`).
+  * Responsive layout designed to adapt fluidly down to mobile viewports without horizontal breakage.
+  * Polished empty states across dashboard, saved items, and scan logs.
+
+---
+
 ## 🧪 Testing & Quality Gates
 
 Run the comprehensive pytest suite in offline mock mode (no API keys required):
@@ -265,9 +314,12 @@ Run the comprehensive pytest suite in offline mock mode (no API keys required):
 MOCK_SERPAPI=1 MOCK_LLM=1 pytest -v
 ```
 
-The test suite covers:
+The test suite covers (74 tests passing):
 * ✅ Watchlist CRUD and input validation.
 * ✅ URL normalization and canonical deduplication.
+* ✅ Portal button URL selection logic (`select_portal_url`) with redirect unwrapping & entity decoding.
+* ✅ Saved tenders database CRUD, note editing, newest-first ordering, and SQLite restart persistence.
+* ✅ Saved tenders REST API (`POST`, `DELETE`, `GET /api/saved`, `PATCH /notes`).
 * ✅ Search cache TTL and SerpApi credit conservation.
 * ✅ Bidder profile CRUD, range validation (`min <= max`, non-negative), and stable hashing.
 * ✅ Deterministic pre-filter (category match, value bracket, EMD capacity).
@@ -275,3 +327,5 @@ The test suite covers:
 * ✅ Mock-mode verdict determinism (identical results across runs).
 * ✅ Cache invalidation on profile change.
 * ✅ "Recommended for me" filtering across Web UI and REST API.
+* ✅ Web route rendering (`/`, `/saved`, `/profile`, `/watchlists`, `/scans`, `/tenders/{id}`) and portal button hrefs.
+

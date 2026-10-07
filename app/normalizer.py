@@ -6,7 +6,9 @@ volatile snippet titles.
 """
 
 import re
-from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
+import html
+from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode, parse_qs, unquote
+from typing import Optional
 
 # Tracking and volatile parameters to discard
 TRACKING_PARAMS = {
@@ -138,3 +140,63 @@ def detect_portal_name(url: str) -> str:
         return f"Gov Portal ({host.replace('www.', '')})"
     else:
         return host.replace("www.", "")
+
+
+def select_portal_url(original_url: Optional[str], canonical_url: Optional[str] = None) -> str:
+    """Selects and cleans the best official portal URL for outbound navigation.
+    
+    The button MUST open the tender's real official portal page.
+    1. canonical_url is strictly for deduplication; the button must prioritize
+       the best original URL to preserve essential government session tokens,
+       parameters, and landing routes.
+    2. Unescapes HTML entities (e.g. &amp; -> &).
+    3. Unwraps search-engine redirects (e.g. google.com/url?q=... or google.com/url?url=...).
+    4. Falls back gracefully to canonical_url if original_url is missing, empty, or invalid.
+    """
+    candidate = (original_url or "").strip()
+    if not candidate and canonical_url:
+        candidate = canonical_url.strip()
+    if not candidate:
+        return ""
+
+    # 1. Unescape HTML entities
+    candidate = html.unescape(candidate).strip()
+
+    # 2. Ensure scheme is present
+    if not candidate.startswith(("http://", "https://")):
+        candidate = "https://" + candidate
+
+    parsed = urlparse(candidate)
+    host = parsed.netloc.lower()
+
+    # 3. Unwrap search redirects (e.g., Google or SerpApi search redirects)
+    if any(host == g or host.endswith("." + g) for g in ("google.com", "google.co.in", "google.co", "google.org")):
+        # Check regex match for q= or url= to preserve query params of destination URL even if unquoted
+        m = re.search(r"[?&](?:q|url)=(https?%3A%2F%2F[^&]+|https?://.*?)(?:&(?:sa|ved|usg|sig|ei|source)=|$)", candidate, re.IGNORECASE)
+        if m:
+            raw_target = m.group(1)
+            target = unquote(raw_target).strip()
+            target = html.unescape(target).strip()
+            if target.startswith(("http://", "https://")):
+                candidate = target
+                parsed = urlparse(candidate)
+                host = parsed.netloc.lower()
+        else:
+            qs = parse_qs(parsed.query)
+            target = qs.get("q", [None])[0] or qs.get("url", [None])[0]
+            if target:
+                target = unquote(target).strip()
+                target = html.unescape(target).strip()
+                if target.startswith(("http://", "https://")):
+                    candidate = target
+                    parsed = urlparse(candidate)
+                    host = parsed.netloc.lower()
+
+    # 4. If candidate ended up malformed without valid host, fall back to canonical_url
+    if not host and canonical_url:
+        fallback = html.unescape(canonical_url).strip()
+        if fallback and not fallback.startswith(("http://", "https://")):
+            fallback = "https://" + fallback
+        return fallback
+
+    return candidate

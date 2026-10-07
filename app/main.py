@@ -31,15 +31,22 @@ from app.db import (
     get_tenders_stats,
     get_scan_logs,
     get_bidder_profile,
-    save_bidder_profile
+    save_bidder_profile,
+    save_tender,
+    unsave_tender,
+    is_tender_saved,
+    update_saved_tender_notes,
+    get_saved_tenders
 )
 from app.models import (
     WatchlistCreate,
     WatchlistUpdate,
     Tender,
     StatsOverview,
-    BidVerdict
+    BidVerdict,
+    SavedTenderSaveRequest
 )
+from app.normalizer import select_portal_url
 from app.bidder_profile import (
     BidderProfile,
     get_default_profile,
@@ -96,6 +103,7 @@ app = FastAPI(
 # Static and Templates
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+templates.env.globals["select_portal_url"] = select_portal_url
 
 
 # ==========================================
@@ -391,6 +399,81 @@ async def tender_detail_view(request: Request, tender_id: int):
     )
 
 
+@app.get("/saved", response_class=HTMLResponse)
+async def saved_view(
+    request: Request,
+    message: Optional[str] = Query(None),
+    error: Optional[str] = Query(None)
+):
+    settings = get_settings()
+    profile_dict = get_bidder_profile(settings.DATABASE_PATH)
+    profile = BidderProfile(**profile_dict) if profile_dict else get_default_profile()
+    profile_hash = compute_profile_hash(profile)
+
+    saved_tenders = get_saved_tenders(settings.DATABASE_PATH, profile_hash=profile_hash)
+    for t in saved_tenders:
+        if not t.get("advisor_verdict"):
+            verd = get_or_compute_verdict(t, profile, settings.DATABASE_PATH)
+            t["verdict"] = verd.get("verdict")
+            t["match_score"] = verd.get("match_score")
+            t["advisor_verdict"] = verd
+
+    stats = get_tenders_stats(settings.DATABASE_PATH)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="saved.html",
+        context={
+            "active_page": "saved",
+            "tenders": saved_tenders,
+            "stats": stats,
+            "profile": profile,
+            "message": message,
+            "error": error
+        }
+    )
+
+
+@app.post("/tenders/{tender_id}/save")
+async def save_tender_form(
+    tender_id: int,
+    notes: Optional[str] = Form(None),
+    redirect_to: Optional[str] = Form(None)
+):
+    settings = get_settings()
+    res = save_tender(settings.DATABASE_PATH, tender_id, notes=notes)
+    if not res:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    target = redirect_to or "/saved?message=Tender+saved+to+your+bookmarks."
+    return RedirectResponse(url=target, status_code=status.HTTP_303_SEE_OTHER)
+
+
+@app.post("/tenders/{tender_id}/unsave")
+async def unsave_tender_form(
+    tender_id: int,
+    redirect_to: Optional[str] = Form(None)
+):
+    settings = get_settings()
+    unsave_tender(settings.DATABASE_PATH, tender_id)
+    target = redirect_to or "/saved?message=Tender+removed+from+bookmarks."
+    return RedirectResponse(url=target, status_code=status.HTTP_303_SEE_OTHER)
+
+
+@app.post("/tenders/{tender_id}/notes")
+async def update_notes_form(
+    tender_id: int,
+    notes: str = Form(""),
+    redirect_to: Optional[str] = Form("/saved")
+):
+    settings = get_settings()
+    if not is_tender_saved(settings.DATABASE_PATH, tender_id):
+        save_tender(settings.DATABASE_PATH, tender_id, notes=notes)
+    else:
+        update_saved_tender_notes(settings.DATABASE_PATH, tender_id, notes=notes)
+    target = f"{redirect_to}?message=Notes+saved+successfully."
+    return RedirectResponse(url=target, status_code=status.HTTP_303_SEE_OTHER)
+
+
 # ==========================================
 # CSV Export Route
 # ==========================================
@@ -622,6 +705,72 @@ async def api_get_tender_verdict_route(tender_id: int):
     if not tender:
         raise HTTPException(status_code=404, detail="Tender not found")
     return get_or_compute_verdict(tender, profile, settings.DATABASE_PATH)
+
+
+@app.post("/api/tenders/{tender_id}/save")
+async def api_save_tender(
+    tender_id: int,
+    payload: Optional[SavedTenderSaveRequest] = None,
+    notes: Optional[str] = Query(None)
+):
+    settings = get_settings()
+    note_text = payload.notes if payload and payload.notes is not None else notes
+    res = save_tender(settings.DATABASE_PATH, tender_id, notes=note_text)
+    if not res:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    return {
+        "status": "success",
+        "saved": True,
+        "tender_id": tender_id,
+        "notes": res.get("notes", ""),
+        "saved_at": res.get("saved_at", "")
+    }
+
+
+@app.delete("/api/tenders/{tender_id}/save")
+async def api_unsave_tender(tender_id: int):
+    settings = get_settings()
+    tender = get_tender(settings.DATABASE_PATH, tender_id)
+    if not tender:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    unsave_tender(settings.DATABASE_PATH, tender_id)
+    return {
+        "status": "success",
+        "saved": False,
+        "tender_id": tender_id
+    }
+
+
+@app.get("/api/saved")
+async def api_get_saved_tenders():
+    settings = get_settings()
+    profile_dict = get_bidder_profile(settings.DATABASE_PATH)
+    profile = BidderProfile(**profile_dict) if profile_dict else get_default_profile()
+    p_hash = compute_profile_hash(profile)
+
+    saved = get_saved_tenders(settings.DATABASE_PATH, profile_hash=p_hash)
+    for t in saved:
+        if not t.get("advisor_verdict"):
+            verd = get_or_compute_verdict(t, profile, settings.DATABASE_PATH)
+            t["verdict"] = verd.get("verdict")
+            t["match_score"] = verd.get("match_score")
+            t["advisor_verdict"] = verd
+    return saved
+
+
+@app.patch("/api/tenders/{tender_id}/notes")
+@app.put("/api/tenders/{tender_id}/notes")
+async def api_update_saved_notes(tender_id: int, payload: SavedTenderSaveRequest):
+    settings = get_settings()
+    if not is_tender_saved(settings.DATABASE_PATH, tender_id):
+        raise HTTPException(status_code=404, detail="Saved tender not found")
+    update_saved_tender_notes(settings.DATABASE_PATH, tender_id, payload.notes or "")
+    return {
+        "status": "success",
+        "tender_id": tender_id,
+        "notes": payload.notes or ""
+    }
+
 
 
 @app.post("/api/scan")

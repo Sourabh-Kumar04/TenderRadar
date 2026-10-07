@@ -1,7 +1,7 @@
 """Unit tests for URL normalization and deduplication engine."""
 
 import pytest
-from app.normalizer import normalize_url, detect_portal_name
+from app.normalizer import normalize_url, detect_portal_name, select_portal_url
 
 
 def test_normalize_url_strips_tracking_params():
@@ -50,3 +50,53 @@ def test_detect_portal_names():
     assert "MahaTenders" in detect_portal_name("https://mahatenders.gov.in/nicgep/app")
     assert "KPPP" in detect_portal_name("https://kppp.karnataka.gov.in/portal")
     assert "Odisha" in detect_portal_name("https://tendersodisha.gov.in/nicgep/app")
+
+
+# ==========================================
+# Portal Button URL Selection Logic Tests
+# ==========================================
+
+def test_select_portal_url_preserves_original_query_params():
+    orig = "https://eprocure.gov.in/eprocure/app?component=$DirectLink&page=FrontEndTenderDetails&service=direct&sp=STenderRef89110"
+    canonical = "https://eprocure.gov.in/eprocure/app?component=%24DirectLink&page=FrontEndTenderDetails&service=direct&sp=STenderRef89110"
+    selected = select_portal_url(orig, canonical)
+    assert selected == orig
+    assert "sp=STenderRef89110" in selected
+
+
+def test_select_portal_url_unescapes_html_entities():
+    orig = "https://etenders.hry.nic.in/nicgep/app?page=FrontEndTenderDetailsExternal&amp;service=page&amp;tnid=610601"
+    selected = select_portal_url(orig)
+    assert "&amp;" not in selected
+    assert "service=page&tnid=610601" in selected
+
+
+def test_select_portal_url_unwraps_google_redirect():
+    from urllib.parse import quote
+    target = "https://eprocure.gov.in/eprocure/app?component=view&page=Details&sp=101"
+    
+    # 1. Standard URL-encoded redirect
+    encoded_redirect = f"https://www.google.com/url?q={quote(target)}&sa=U&ved=2ahUKEwj"
+    assert select_portal_url(encoded_redirect) == target
+
+    # 2. Raw redirect with params
+    raw_redirect = f"https://www.google.com/url?q={target}&sa=U&ved=2ahUKEwj"
+    assert select_portal_url(raw_redirect) == target
+
+
+
+def test_select_portal_url_fallback_to_canonical():
+    canonical = "https://gem.gov.in/bids/GEM-2026-B-100"
+    assert select_portal_url(None, canonical) == canonical
+    assert select_portal_url("", canonical) == canonical
+    assert select_portal_url("   ", canonical) == canonical
+
+
+def test_select_portal_url_adds_missing_scheme():
+    assert select_portal_url("eprocure.gov.in/tender/101") == "https://eprocure.gov.in/tender/101"
+
+
+def test_select_portal_url_empty_or_none():
+    assert select_portal_url(None, None) == ""
+    assert select_portal_url("", "") == ""
+

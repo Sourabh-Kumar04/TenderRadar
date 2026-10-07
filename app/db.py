@@ -12,6 +12,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional, List, Dict, Any, Tuple
 from app.models import compute_urgency
+from app.normalizer import select_portal_url
 
 
 def get_db_connection(db_path: str) -> sqlite3.Connection:
@@ -108,12 +109,21 @@ def init_db(db_path: str) -> None:
                 UNIQUE(tender_id, profile_hash)
             );
 
+            CREATE TABLE IF NOT EXISTS saved_tenders (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tender_id INTEGER NOT NULL UNIQUE REFERENCES tenders(id) ON DELETE CASCADE,
+                saved_at TEXT NOT NULL,
+                notes TEXT DEFAULT ''
+            );
+
             CREATE INDEX IF NOT EXISTS idx_tenders_canonical ON tenders(canonical_url);
             CREATE INDEX IF NOT EXISTS idx_tenders_deadline ON tenders(deadline_date);
             CREATE INDEX IF NOT EXISTS idx_tenders_watchlist ON tenders(watchlist_id);
             CREATE INDEX IF NOT EXISTS idx_watchlists_active ON watchlists(is_active);
             CREATE INDEX IF NOT EXISTS idx_scan_logs_created ON scan_logs(created_at);
             CREATE INDEX IF NOT EXISTS idx_verdicts_lookup ON tender_verdicts(tender_id, profile_hash);
+            CREATE INDEX IF NOT EXISTS idx_saved_tenders_saved_at ON saved_tenders(saved_at DESC);
+            CREATE INDEX IF NOT EXISTS idx_saved_tenders_tender ON saved_tenders(tender_id);
         """)
         conn.commit()
 
@@ -294,18 +304,24 @@ def get_tender(db_path: str, tender_id: int, profile_hash: Optional[str] = None)
             query = """
                 SELECT t.*, w.keyword AS watchlist_keyword, w.category AS watchlist_category,
                        tv.verdict, tv.match_score, tv.key_details_json, tv.reasons_json, tv.flags_json,
-                       tv.tender_updated_at AS verdict_tender_updated_at
+                       tv.tender_updated_at AS verdict_tender_updated_at,
+                       st.saved_at, st.notes AS saved_notes,
+                       (st.id IS NOT NULL) AS is_saved
                 FROM tenders t
                 LEFT JOIN watchlists w ON t.watchlist_id = w.id
                 LEFT JOIN tender_verdicts tv ON t.id = tv.tender_id AND tv.profile_hash = ?
+                LEFT JOIN saved_tenders st ON t.id = st.tender_id
                 WHERE t.id = ?
             """
             row = conn.execute(query, (profile_hash, tender_id)).fetchone()
         else:
             query = """
-                SELECT t.*, w.keyword AS watchlist_keyword, w.category AS watchlist_category
+                SELECT t.*, w.keyword AS watchlist_keyword, w.category AS watchlist_category,
+                       st.saved_at, st.notes AS saved_notes,
+                       (st.id IS NOT NULL) AS is_saved
                 FROM tenders t
                 LEFT JOIN watchlists w ON t.watchlist_id = w.id
+                LEFT JOIN saved_tenders st ON t.id = st.tender_id
                 WHERE t.id = ?
             """
             row = conn.execute(query, (tender_id,)).fetchone()
@@ -313,6 +329,10 @@ def get_tender(db_path: str, tender_id: int, profile_hash: Optional[str] = None)
         if not row:
             return None
         d = dict(row)
+        d["urgency_status"] = compute_urgency(d.get("deadline_date")).value
+        d["portal_url"] = select_portal_url(d.get("original_url"), d.get("canonical_url"))
+        d["is_saved"] = bool(d.get("is_saved"))
+        d["saved_notes"] = d.get("saved_notes") or ""
         if profile_hash and d.get("verdict"):
             try:
                 d["advisor_verdict"] = {
@@ -396,15 +416,25 @@ def get_tenders(
         select_fields = """
             t.*, w.keyword AS watchlist_keyword, w.category AS watchlist_category,
             tv.verdict, tv.match_score, tv.key_details_json, tv.reasons_json, tv.flags_json,
-            tv.tender_updated_at AS verdict_tender_updated_at
+            tv.tender_updated_at AS verdict_tender_updated_at,
+            st.saved_at, st.notes AS saved_notes,
+            (st.id IS NOT NULL) AS is_saved
         """
         join_clause = """
             LEFT JOIN watchlists w ON t.watchlist_id = w.id
             LEFT JOIN tender_verdicts tv ON t.id = tv.tender_id AND tv.profile_hash = ?
+            LEFT JOIN saved_tenders st ON t.id = st.tender_id
         """
     else:
-        select_fields = "t.*, w.keyword AS watchlist_keyword, w.category AS watchlist_category"
-        join_clause = "LEFT JOIN watchlists w ON t.watchlist_id = w.id"
+        select_fields = """
+            t.*, w.keyword AS watchlist_keyword, w.category AS watchlist_category,
+            st.saved_at, st.notes AS saved_notes,
+            (st.id IS NOT NULL) AS is_saved
+        """
+        join_clause = """
+            LEFT JOIN watchlists w ON t.watchlist_id = w.id
+            LEFT JOIN saved_tenders st ON t.id = st.tender_id
+        """
 
     query = f"""
         SELECT {select_fields}
@@ -423,6 +453,9 @@ def get_tenders(
             d = dict(r)
             # Recompute urgency in real-time in case time progressed
             d["urgency_status"] = compute_urgency(d.get("deadline_date")).value
+            d["portal_url"] = select_portal_url(d.get("original_url"), d.get("canonical_url"))
+            d["is_saved"] = bool(d.get("is_saved"))
+            d["saved_notes"] = d.get("saved_notes") or ""
             if profile_hash and d.get("verdict"):
                 try:
                     d["advisor_verdict"] = {
@@ -444,6 +477,10 @@ def get_tenders_stats(db_path: str) -> Dict[str, Any]:
         total_tenders = conn.execute("SELECT COUNT(*) FROM tenders").fetchone()[0]
         active_watchlists = conn.execute("SELECT COUNT(*) FROM watchlists WHERE is_active = 1").fetchone()[0]
         total_scans = conn.execute("SELECT COUNT(*) FROM scan_logs").fetchone()[0]
+        try:
+            saved_count = conn.execute("SELECT COUNT(*) FROM saved_tenders").fetchone()[0]
+        except sqlite3.OperationalError:
+            saved_count = 0
 
         # Count urgent & closing soon
         tenders = conn.execute("SELECT deadline_date FROM tenders").fetchall()
@@ -464,6 +501,8 @@ def get_tenders_stats(db_path: str) -> Dict[str, Any]:
 
         return {
             "total_tenders": total_tenders,
+            "saved_count": saved_count,
+            "saved_tenders": saved_count,
             "active_watchlists": active_watchlists,
             "urgent_closing_soon": urgent_count,
             "total_scans": total_scans,
@@ -718,4 +757,147 @@ def delete_tender_verdicts(db_path: str, profile_hash: Optional[str] = None) -> 
             cursor = conn.execute("DELETE FROM tender_verdicts")
         conn.commit()
         return cursor.rowcount
+
+
+# ==========================================
+# Saved Tenders Operations (Bookmarks + Notes)
+# ==========================================
+
+def save_tender(db_path: str, tender_id: int, notes: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    """Bookmarks a tender with optional notes; updates notes if already saved."""
+    now = datetime.now().isoformat()
+    clean_notes = notes.strip() if notes is not None else None
+
+    def _execute():
+        with get_db_connection(db_path) as conn:
+            # Verify tender exists
+            exists = conn.execute("SELECT id FROM tenders WHERE id = ?", (tender_id,)).fetchone()
+            if not exists:
+                return None
+
+            if clean_notes is not None:
+                conn.execute(
+                    """INSERT INTO saved_tenders (tender_id, saved_at, notes)
+                       VALUES (?, ?, ?)
+                       ON CONFLICT(tender_id) DO UPDATE SET
+                           notes = excluded.notes""",
+                    (tender_id, now, clean_notes)
+                )
+            else:
+                conn.execute(
+                    """INSERT INTO saved_tenders (tender_id, saved_at, notes)
+                       VALUES (?, ?, '')
+                       ON CONFLICT(tender_id) DO NOTHING""",
+                    (tender_id, now)
+                )
+            conn.commit()
+            row = conn.execute("SELECT * FROM saved_tenders WHERE tender_id = ?", (tender_id,)).fetchone()
+            return dict(row) if row else None
+
+    try:
+        return _execute()
+    except sqlite3.OperationalError:
+        init_db(db_path)
+        return _execute()
+
+
+def unsave_tender(db_path: str, tender_id: int) -> bool:
+    """Removes bookmark for a tender."""
+    try:
+        with get_db_connection(db_path) as conn:
+            # Check if tender exists
+            exists = conn.execute("SELECT id FROM tenders WHERE id = ?", (tender_id,)).fetchone()
+            if not exists:
+                return False
+            cursor = conn.execute("DELETE FROM saved_tenders WHERE tender_id = ?", (tender_id,))
+            conn.commit()
+            return cursor.rowcount > 0
+    except sqlite3.OperationalError:
+        init_db(db_path)
+        return False
+
+
+def is_tender_saved(db_path: str, tender_id: int) -> bool:
+    """Checks whether a tender is bookmarked."""
+    try:
+        with get_db_connection(db_path) as conn:
+            row = conn.execute("SELECT 1 FROM saved_tenders WHERE tender_id = ?", (tender_id,)).fetchone()
+            return row is not None
+    except sqlite3.OperationalError:
+        init_db(db_path)
+        return False
+
+
+def update_saved_tender_notes(db_path: str, tender_id: int, notes: str) -> bool:
+    """Updates user notes for a saved tender."""
+    try:
+        with get_db_connection(db_path) as conn:
+            cursor = conn.execute(
+                "UPDATE saved_tenders SET notes = ? WHERE tender_id = ?",
+                (notes.strip(), tender_id)
+            )
+            conn.commit()
+            return cursor.rowcount > 0
+    except sqlite3.OperationalError:
+        init_db(db_path)
+        return False
+
+
+def get_saved_tenders(db_path: str, profile_hash: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Retrieves all bookmarked tenders, newest-first by saved_at."""
+    if profile_hash:
+        query = """
+            SELECT st.id AS saved_id, st.saved_at, st.notes AS saved_notes,
+                   1 AS is_saved,
+                   t.*, w.keyword AS watchlist_keyword, w.category AS watchlist_category,
+                   tv.verdict, tv.match_score, tv.key_details_json, tv.reasons_json, tv.flags_json,
+                   tv.tender_updated_at AS verdict_tender_updated_at
+            FROM saved_tenders st
+            JOIN tenders t ON st.tender_id = t.id
+            LEFT JOIN watchlists w ON t.watchlist_id = w.id
+            LEFT JOIN tender_verdicts tv ON t.id = tv.tender_id AND tv.profile_hash = ?
+            ORDER BY st.saved_at DESC, st.id DESC
+        """
+        params: List[Any] = [profile_hash]
+    else:
+        query = """
+            SELECT st.id AS saved_id, st.saved_at, st.notes AS saved_notes,
+                   1 AS is_saved,
+                   t.*, w.keyword AS watchlist_keyword, w.category AS watchlist_category
+            FROM saved_tenders st
+            JOIN tenders t ON st.tender_id = t.id
+            LEFT JOIN watchlists w ON t.watchlist_id = w.id
+            ORDER BY st.saved_at DESC, st.id DESC
+        """
+        params = []
+
+    try:
+        with get_db_connection(db_path) as conn:
+            rows = conn.execute(query, params).fetchall()
+    except sqlite3.OperationalError:
+        init_db(db_path)
+        with get_db_connection(db_path) as conn:
+            rows = conn.execute(query, params).fetchall()
+
+    results = []
+    for r in rows:
+        d = dict(r)
+        d["urgency_status"] = compute_urgency(d.get("deadline_date")).value
+        d["portal_url"] = select_portal_url(d.get("original_url"), d.get("canonical_url"))
+        d["is_saved"] = True
+        d["saved_notes"] = d.get("saved_notes") or ""
+        if profile_hash and d.get("verdict"):
+            try:
+                d["advisor_verdict"] = {
+                    "verdict": d["verdict"],
+                    "match_score": d["match_score"],
+                    "key_details": json.loads(d.get("key_details_json") or "{}"),
+                    "reasons": json.loads(d.get("reasons_json") or "[]"),
+                    "flags": json.loads(d.get("flags_json") or "[]")
+                }
+            except Exception:
+                d["advisor_verdict"] = None
+        results.append(d)
+    return results
+
 
