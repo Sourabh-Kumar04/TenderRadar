@@ -27,7 +27,8 @@ class Settings:
         # Fireworks AI / LLM Credentials & Configuration
         self.FIREWORKS_API_KEY: str = os.getenv("FIREWORKS_API_KEY", "").strip() or os.getenv("LLM_API_KEY", "").strip()
         self.LLM_API_KEY: str = self.FIREWORKS_API_KEY
-        self.LLM_BASE_URL: str = os.getenv("LLM_BASE_URL", "https://api.fireworks.ai/inference/v1").strip().rstrip("/")
+        self.FIREWORKS_BASE_URL: str = os.getenv("FIREWORKS_BASE_URL", "").strip().rstrip("/") or os.getenv("LLM_BASE_URL", "https://api.fireworks.ai/inference/v1").strip().rstrip("/")
+        self.LLM_BASE_URL: str = self.FIREWORKS_BASE_URL
         self.LLM_MODEL: str = os.getenv("LLM_MODEL", "accounts/fireworks/models/deepseek-v4p1-flash").strip()
         
         # Explicit mock mode flags or auto-fallback

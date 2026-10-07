@@ -125,3 +125,59 @@ def test_summarizer_config_override():
     assert summarizer.model == custom_model
     assert summarizer.base_url == custom_url
 
+
+def test_summarizer_env_overrides(monkeypatch):
+    monkeypatch.setenv("FIREWORKS_BASE_URL", "https://api.fireworks.ai/custom/v1")
+    monkeypatch.setenv("FIREWORKS_API_KEY", "fw_test_key_12345")
+    monkeypatch.setenv("LLM_MODEL", "accounts/fireworks/models/deepseek-v4p1-flash")
+    monkeypatch.setenv("MOCK_LLM", "1")
+
+    summarizer = TenderSummarizer()
+    assert summarizer.base_url == "https://api.fireworks.ai/custom/v1"
+    assert summarizer.api_key == "fw_test_key_12345"
+    assert summarizer.model == "accounts/fireworks/models/deepseek-v4p1-flash"
+    assert summarizer.mock_mode is True
+
+
+def test_summarizer_fireworks_base_url_precedence(monkeypatch):
+    monkeypatch.setenv("FIREWORKS_BASE_URL", "https://api.fireworks.ai/primary/v1")
+    monkeypatch.setenv("LLM_BASE_URL", "https://api.fireworks.ai/secondary/v1")
+    monkeypatch.setenv("MOCK_LLM", "1")
+
+    summarizer = TenderSummarizer()
+    assert summarizer.base_url == "https://api.fireworks.ai/primary/v1"
+
+
+def test_summarizer_parsing_list_takeaways(monkeypatch):
+    import json
+    from unittest.mock import MagicMock
+
+    mock_client = MagicMock()
+    mock_choice = MagicMock()
+    mock_choice.message.content = json.dumps({
+        "scope_summary": "Supply of Solar Inverters",
+        "eligibility": "Class 1 contractor",
+        "emd_amount": "₹ 50,000",
+        "tender_fee": "Nil",
+        "deadline_date": "2026-11-15",
+        "key_takeaways": [
+            "Point 1: Ensure OEM authorization.",
+            "Point 2: Submit EMD exemption if MSME."
+        ]
+    })
+    mock_client.chat.completions.create.return_value.choices = [mock_choice]
+    monkeypatch.setattr("app.summarizer.OpenAI", lambda **kwargs: mock_client)
+
+    summarizer = TenderSummarizer(api_key="valid_key", mock_mode=False)
+    res = summarizer.summarize(
+        title="Solar Inverter Supply",
+        snippet="Deadline: 2026-11-15. EMD ₹ 50,000",
+        portal_name="GeM"
+    )
+
+    assert res.scope_summary == "Supply of Solar Inverters"
+    assert "Point 1: Ensure OEM authorization." in res.key_takeaways
+    assert "Point 2: Submit EMD exemption if MSME." in res.key_takeaways
+    assert res.deadline_date == "2026-11-15"
+
+

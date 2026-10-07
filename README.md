@@ -7,7 +7,7 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Powered by SerpApi](https://img.shields.io/badge/Powered%20by-SerpApi%20Google%20Search-orange.svg)](https://serpapi.com)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
-[![Tests](https://img.shields.io/badge/Tests-37%20Passed-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-50%20Passed-brightgreen.svg)]()
 
 ---
 
@@ -83,11 +83,12 @@ TenderRadar implements a resilient multi-provider search architecture engineered
 ## 🤖 LLM Summarizer: Fireworks AI & DeepSeek V4P1 Flash
 
 TenderRadar leverages **Fireworks AI** running **DeepSeek V4P1 Flash** (`accounts/fireworks/models/deepseek-v4p1-flash`) via an OpenAI-compatible endpoint:
-* **Endpoint:** `https://api.fireworks.ai/inference/v1`
-* **Model Selection:** Verified against Fireworks `/models` catalog for low-latency, reasoning-capable procurement parsing.
+* **Endpoint / Base URL:** `https://api.fireworks.ai/inference/v1` (configured via `FIREWORKS_BASE_URL` or `LLM_BASE_URL`)
+* **Model Selection:** Verified against Fireworks AI `/models` catalog (`accounts/fireworks/models/deepseek-v4p1-flash`) for ultra-low latency, reasoning-capable procurement parsing.
+* **Authentication:** Uses `FIREWORKS_API_KEY` (or legacy `LLM_API_KEY`).
 * **Structured Extraction:** Directly extracts scope of work, technical eligibility, EMD amounts, tender document fees, normalized ISO submission deadlines (`YYYY-MM-DD`), and strategic bid takeaways.
-* **Configurability:** Fully overridable via `FIREWORKS_API_KEY`, `LLM_BASE_URL`, and `LLM_MODEL` environment variables.
-* **Offline Mode:** Seamless fallback to rule-based heuristic extraction when `MOCK_LLM=1` or keys are absent.
+* **Configurability:** Fully overridable via `FIREWORKS_API_KEY`, `FIREWORKS_BASE_URL`, and `LLM_MODEL` environment variables.
+* **Offline Mock Mode:** Seamless fallback to rule-based heuristic extraction when `MOCK_LLM=1` or keys are absent.
 
 ---
 
@@ -187,7 +188,7 @@ RESERP_BASE_URL=https://api.reserp.ai
 
 # Fireworks AI (DeepSeek V4P1 Flash)
 FIREWORKS_API_KEY=your_fireworks_key_here
-LLM_BASE_URL=https://api.fireworks.ai/inference/v1
+FIREWORKS_BASE_URL=https://api.fireworks.ai/inference/v1
 LLM_MODEL=accounts/fireworks/models/deepseek-v4p1-flash
 ```
 
@@ -209,14 +210,15 @@ pytest
 
 Expected output:
 ```text
-tests/test_db.py .....                                                   [ 13%]
-tests/test_normalizer.py .......                                         [ 32%]
-tests/test_routes.py ............                                        [ 64%]
-tests/test_scheduler.py ..                                               [ 70%]
-tests/test_serpapi.py ....                                               [ 81%]
-tests/test_summarizer.py .......                                         [100%]
+tests/test_db.py .....                                                   [ 10%]
+tests/test_normalizer.py .......                                         [ 24%]
+tests/test_reserp.py ......                                              [ 36%]
+tests/test_routes.py ............                                        [ 60%]
+tests/test_scheduler.py ....                                             [ 68%]
+tests/test_serpapi.py ....                                               [ 76%]
+tests/test_summarizer.py ............                                    [100%]
 
-============================== 37 passed in 5.81s ==============================
+============================== 50 passed in 7.97s ==============================
 ```
 
 ---

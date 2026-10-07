@@ -10,6 +10,7 @@ Summarizes raw tender snippets and metadata into clean, structured bid intellige
 Includes a rule-based mock engine to run 100% offline without API keys.
 """
 
+import os
 import re
 import json
 import logging
@@ -143,11 +144,17 @@ def rule_based_mock_summary(title: str, snippet: str, portal_name: str) -> Tende
     )
 
 
-def query_fireworks_models(api_key: str, base_url: str = "https://api.fireworks.ai/inference/v1") -> List[str]:
+def query_fireworks_models(
+    api_key: Optional[str] = None,
+    base_url: Optional[str] = None
+) -> List[str]:
     """Queries GET /models from Fireworks AI to list available models."""
-    clean_base = base_url.rstrip("/")
+    settings = get_settings()
+    key = api_key or os.getenv("FIREWORKS_API_KEY", "").strip() or os.getenv("LLM_API_KEY", "").strip() or getattr(settings, "FIREWORKS_API_KEY", "") or getattr(settings, "LLM_API_KEY", "")
+    burl = base_url or os.getenv("FIREWORKS_BASE_URL", "").strip() or os.getenv("LLM_BASE_URL", "").strip() or getattr(settings, "FIREWORKS_BASE_URL", None) or getattr(settings, "LLM_BASE_URL", None) or "https://api.fireworks.ai/inference/v1"
+    clean_base = burl.rstrip("/")
     endpoint = f"{clean_base}/models"
-    headers = {"Authorization": f"Bearer {api_key}"}
+    headers = {"Authorization": f"Bearer {key}"}
     try:
         resp = requests.get(endpoint, headers=headers, timeout=15.0)
         if resp.status_code == 200:
@@ -160,15 +167,19 @@ def query_fireworks_models(api_key: str, base_url: str = "https://api.fireworks.
 
 
 def verify_deepseek_model(
-    api_key: str,
+    api_key: Optional[str] = None,
     target_name: str = "deepseek-v4p1-flash",
-    base_url: str = "https://api.fireworks.ai/inference/v1"
+    base_url: Optional[str] = None
 ) -> str:
     """Verifies and returns the exact Fireworks model ID matching target_name.
     
     If the exact ID is not found, selects the closest flash-tier DeepSeek model.
     """
-    model_ids = query_fireworks_models(api_key, base_url)
+    settings = get_settings()
+    key = api_key or os.getenv("FIREWORKS_API_KEY", "").strip() or os.getenv("LLM_API_KEY", "").strip() or getattr(settings, "FIREWORKS_API_KEY", "") or getattr(settings, "LLM_API_KEY", "")
+    burl = base_url or os.getenv("FIREWORKS_BASE_URL", "").strip() or os.getenv("LLM_BASE_URL", "").strip() or getattr(settings, "FIREWORKS_BASE_URL", None) or getattr(settings, "LLM_BASE_URL", None) or "https://api.fireworks.ai/inference/v1"
+
+    model_ids = query_fireworks_models(api_key=key, base_url=burl)
     
     # 1. Exact match or suffix match
     for m in model_ids:
@@ -204,10 +215,26 @@ class TenderSummarizer:
         mock_mode: Optional[bool] = None
     ):
         settings = get_settings()
-        self.api_key = api_key if api_key is not None else (settings.FIREWORKS_API_KEY or settings.LLM_API_KEY)
-        self.base_url = (base_url if base_url is not None else settings.LLM_BASE_URL).rstrip("/")
-        self.model = model if model is not None else settings.LLM_MODEL
-        self.mock_mode = mock_mode if mock_mode is not None else settings.MOCK_LLM
+        env_key = os.getenv("FIREWORKS_API_KEY", "").strip() or os.getenv("LLM_API_KEY", "").strip()
+        self.api_key = api_key if api_key is not None else (env_key or getattr(settings, "FIREWORKS_API_KEY", "") or getattr(settings, "LLM_API_KEY", ""))
+        
+        env_base = os.getenv("FIREWORKS_BASE_URL", "").strip().rstrip("/") or os.getenv("LLM_BASE_URL", "").strip().rstrip("/")
+        settings_base = getattr(settings, "FIREWORKS_BASE_URL", None) or getattr(settings, "LLM_BASE_URL", None)
+        self.base_url = (base_url if base_url is not None else (env_base or settings_base or "https://api.fireworks.ai/inference/v1")).rstrip("/")
+        
+        env_model = os.getenv("LLM_MODEL", "").strip()
+        self.model = model if model is not None else (env_model or getattr(settings, "LLM_MODEL", "") or "accounts/fireworks/models/deepseek-v4p1-flash")
+
+        if mock_mode is not None:
+            self.mock_mode = mock_mode
+        else:
+            mock_env = os.getenv("MOCK_LLM", "").strip().lower()
+            if mock_env in ("1", "true", "yes"):
+                self.mock_mode = True
+            elif mock_env in ("0", "false", "no"):
+                self.mock_mode = False
+            else:
+                self.mock_mode = getattr(settings, "MOCK_LLM", True) or not bool(self.api_key)
 
     def summarize(self, title: str, snippet: str, portal_name: str) -> TenderSummary:
         """Processes raw tender data and returns structured TenderSummary."""
@@ -226,7 +253,7 @@ Title: {title}
 Portal / Issuing Authority: {portal_name}
 Snippet: {snippet}
 
-Respond with valid JSON containing the following keys:
+Respond strictly with valid JSON containing the following keys:
 - "scope_summary": Concise 1-2 sentence description of work/supply requested.
 - "eligibility": Technical/turnover/contractor requirements.
 - "emd_amount": EMD required (e.g. ₹ 5,00,000, 2% of bid value, or Exempted for MSME).
@@ -257,15 +284,44 @@ Respond with valid JSON containing the following keys:
             parsed = json.loads(raw_content.strip())
 
             deadline_val = parsed.get("deadline_date")
+            if deadline_val and isinstance(deadline_val, str):
+                normalized_deadline = extract_regex_deadline(deadline_val)
+                if normalized_deadline:
+                    deadline_val = normalized_deadline
+            elif not deadline_val:
+                deadline_val = extract_regex_deadline(f"{title}. {snippet}")
+
             urgency = compute_urgency(deadline_val)
 
+            raw_takeaways = parsed.get("key_takeaways")
+            if isinstance(raw_takeaways, list):
+                takeaways = " ".join(str(item) for item in raw_takeaways)
+            elif isinstance(raw_takeaways, dict):
+                takeaways = json.dumps(raw_takeaways)
+            elif raw_takeaways is not None:
+                takeaways = str(raw_takeaways)
+            else:
+                takeaways = f"Submit documents on {portal_name} prior to cutoff."
+
+            raw_scope = parsed.get("scope_summary")
+            scope_summary = str(raw_scope) if raw_scope else f"Works/Supply for {title}"
+
+            raw_elig = parsed.get("eligibility")
+            eligibility = str(raw_elig) if raw_elig else "Refer to detailed tender document on portal."
+
+            raw_emd = parsed.get("emd_amount")
+            emd_amount = str(raw_emd) if raw_emd else "Not Specified"
+
+            raw_fee = parsed.get("tender_fee")
+            tender_fee = str(raw_fee) if raw_fee else "Nil"
+
             return TenderSummary(
-                scope_summary=parsed.get("scope_summary", f"Works/Supply for {title}"),
-                eligibility=parsed.get("eligibility", "Refer to detailed tender document on portal."),
-                emd_amount=parsed.get("emd_amount", "Not Specified"),
-                tender_fee=parsed.get("tender_fee", "Nil"),
+                scope_summary=scope_summary,
+                eligibility=eligibility,
+                emd_amount=emd_amount,
+                tender_fee=tender_fee,
                 deadline_date=deadline_val,
-                key_takeaways=parsed.get("key_takeaways", f"Submit documents on {portal_name} prior to cutoff."),
+                key_takeaways=takeaways,
                 urgency_status=urgency
             )
 
