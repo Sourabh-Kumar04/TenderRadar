@@ -56,9 +56,9 @@ A SerpApi free tier account includes 250 credits/month. TenderRadar is engineere
 
 ---
 
-## 🔍 Dual Search Providers: SerpApi (Primary) & Reserp v2 (Fallback)
+## 🔍 Search Provider: SerpApi
 
-TenderRadar implements a resilient multi-provider search architecture engineered for production continuity:
+TenderRadar searches tender portals through SerpApi’s Google Search API:
 
 ### 1. SerpApi (Primary Provider — Built for Hackathon Evaluation)
 * **Role:** Primary search provider exercising SerpApi's Google Search API.
@@ -66,15 +66,10 @@ TenderRadar implements a resilient multi-provider search architecture engineered
 * **Localization:** Strict India geotargeting (`gl=in`, `hl=en`, `location=India`).
 * **Credit Optimization:** 250 credits/month free tier conserved with SHA-256 SQLite caching (24h TTL) and bounded batches (`num=10`).
 
-### 2. Reserp v2 API (Secondary Fallback Provider)
-* **Role:** Secondary fallback provider implementing the Reserp v2 API ([https://reserp.ai/docs](https://reserp.ai/docs)).
-* **Endpoints:**
-  * `POST /v2/serp/search`: Dispatches full Google search URLs (`https://www.google.com/search?q=...&hl=en&gl=in`) with India geotargeting, mapping response results (`{ok, results: [{url, text}]}`) into the unified tender-result schema.
-  * `POST /v2/serp/structured`: Returns raw block data for diagnostics and inspection.
-* **Generous Free Tier:** 5,000 free requests/month, providing extensive headroom if SerpApi credits are depleted.
-* **Configurable:** Controlled via `SEARCH_PROVIDER=serpapi|reserp` (default: `serpapi`) in `app/config.py`.
+### 2. Resilience
+* If the SerpApi call raises an exception or fails, TenderRadar falls back to simulated continuity fixtures so scans never crash. Zero human intervention is required.
+* The offline mock engine pattern (`MOCK_SERPAPI=1` or unset keys) allows complete offline testing.
 
-### 3. Automatic Provider Fallback
 * If the primary provider raises an exception or fails, TenderRadar automatically tries the other provider once before falling back to simulated continuity fixtures. Zero human intervention is required.
 * Both providers share the offline mock engine pattern (`MOCK_SERPAPI=1` or unset keys), allowing complete offline testing.
 
@@ -97,13 +92,8 @@ TenderRadar leverages **Fireworks AI** running **DeepSeek V4P1 Flash** (`account
 ```mermaid
 flowchart TD
     A["User Watchlists\n(Keywords: Solar EPC, Highway, CCTV)"] --> B["Scheduler (APScheduler)\nDaily Cron + On-Demand Scan"]
-    B --> C{"Search Provider Selection\n(SEARCH_PROVIDER=serpapi|reserp)"}
-    C -- "Primary: serpapi" --> D["SerpApi Client\n(gl=in, location=India)"]
-    C -- "Primary: reserp" --> E["Reserp v2 Client\n(gl=in, hl=en, 5000 req/mo)"]
-    D -. "Auto-Fallback on Failure" .-> E
-    E -. "Auto-Fallback on Failure" .-> D
+    B --> D["SerpApi Client\n(gl=in, location=India)"]
     D --> F{"Search Cache\n(SQLite 24h TTL)"}
-    E --> F
     F -- "Cache Hit" --> G["Cached Organic Results"]
     F -- "Cache Miss" --> H["API Results Normalizer"]
     H --> F
@@ -180,117 +170,6 @@ cp .env.example .env
 ```
 Edit `.env` (optional — TenderRadar runs out-of-the-box with built-in mock engines if no keys are provided):
 ```ini
-# Search Providers (SerpApi primary, Reserp fallback)
+# Search (SerpApi)
 SEARCH_PROVIDER=serpapi
 SERPAPI_API_KEY=your_serpapi_key_here
-RESERP_API_KEY=your_reserp_key_here
-RESERP_BASE_URL=https://api.reserp.ai
-
-# Fireworks AI (DeepSeek V4P1 Flash)
-FIREWORKS_API_KEY=your_fireworks_key_here
-FIREWORKS_BASE_URL=https://api.fireworks.ai/inference/v1
-LLM_MODEL=accounts/fireworks/models/deepseek-v4p1-flash
-```
-
-### 6. Run the Application
-```bash
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
-Open your browser at **`http://localhost:8000`**.
-
----
-
-## 🧪 Running Tests (Zero API Keys Required)
-
-All tests run completely offline using built-in mock clients. Real external APIs are never hit in tests:
-
-```bash
-pytest
-```
-
-Expected output:
-```text
-tests/test_db.py .....                                                   [ 10%]
-tests/test_normalizer.py .......                                         [ 24%]
-tests/test_reserp.py ......                                              [ 36%]
-tests/test_routes.py ............                                        [ 60%]
-tests/test_scheduler.py ....                                             [ 68%]
-tests/test_serpapi.py ....                                               [ 76%]
-tests/test_summarizer.py ............                                    [100%]
-
-============================== 50 passed in 7.97s ==============================
-```
-
----
-
-## 📂 Project Structure
-
-```text
-tenderradar/
-├── LICENSE                 # Apache-2.0 License
-├── README.md               # Architecture, SerpApi usage, and setup guide
-├── DEMO_SCRIPT.md          # Timed demo video shot list (<3 min)
-├── requirements.txt        # Python package dependencies
-├── .env.example            # Environment variable template
-├── .gitignore              # Git ignore rules (.env, *.db, pycache)
-├── app/
-│   ├── __init__.py         # Package root
-│   ├── config.py           # Settings and environment configuration
-│   ├── db.py               # SQLite store, WAL mode, CRUD, search cache
-│   ├── models.py           # Pydantic schemas, validation, UrgencyStatus
-│   ├── normalizer.py       # Canonical URL deduplication & portal detection
-│   ├── serpapi_client.py   # SerpApi search client, query builder, mock engine
-│   ├── summarizer.py       # LLM pipeline (OpenAI-compatible + heuristic fallback)
-│   ├── scheduler.py        # APScheduler daily cron and scan manager
-│   ├── main.py             # FastAPI app, Jinja2 UI routes, CSV export, REST API
-│   ├── static/
-│   │   ├── css/style.css   # Responsive contractor dashboard stylesheet
-│   │   └── js/app.js       # Client-side UX helpers & scan indicators
-│   └── templates/
-│       ├── base.html       # Base layout with navbar, alerts, footer
-│       ├── dashboard.html  # Deadline-sorted tender cards & urgency badges
-│       ├── watchlists.html # Watchlist keyword management UI
-│       ├── tender_detail.html # Comprehensive tender breakdown & portal links
-│       └── scans.html      # Scan audit log and scheduler monitor
-└── tests/
-    ├── __init__.py
-    ├── test_normalizer.py  # Canonical URL normalization & deduplication tests
-    ├── test_serpapi.py     # SerpApi query builder, caching, mock engine tests
-    ├── test_summarizer.py  # LLM summarizer & regex entity extraction tests
-    ├── test_db.py          # SQLite database CRUD & dedupe constraint tests
-    ├── test_scheduler.py   # Scan manager orchestration & dedupe tests
-    └── test_routes.py      # FastAPI UI, CSV export, and REST API tests
-```
-
----
-
-## 📋 REST API Reference
-
-For headless integrations, TenderRadar exposes standard REST endpoints:
-
-| Endpoint | Method | Description |
-|---|---|---|
-| `/api/tenders` | `GET` | List discovered tenders (supports `portal`, `urgency`, `search`, `sort_by`, `sort_order`). |
-| `/api/tenders/{id}` | `GET` | Retrieve single tender with full AI extraction. |
-| `/api/watchlists` | `GET` | List all configured watchlists. |
-| `/api/watchlists` | `POST` | Create a new watchlist keyword. |
-| `/api/watchlists/{id}` | `PUT` | Update watchlist category, threshold, or active status. |
-| `/api/watchlists/{id}` | `DELETE` | Delete watchlist. |
-| `/api/scan` | `POST` | Trigger full scan or single watchlist scan (`{"watchlist_id": 1}`). |
-| `/api/scan/status` | `GET` | View current scan manager state. |
-| `/api/stats` | `GET` | Retrieve high-level dashboard metrics. |
-| `/export/csv` | `GET` | Download tender view as a CSV spreadsheet. |
-
----
-
-## 🤖 Disclosure of AI Tools Used
-
-In accordance with hackathon rules and transparency guidelines:
-* **Google Antigravity / Gemini 3.8 Flash** was utilized as an AI pair programming assistant for initial boilerplate generation, test scaffolding, and regex refinement.
-* The application design, domain-specific Indian procurement logic (GeM/CPPP/IREPS portal footprints, EMD/Tender fee parsing), SerpApi caching architecture, and codebase implementation were built and verified by the author.
-
----
-
-## 📄 License
-
-This project is licensed under the **Apache License 2.0** — see the [LICENSE](LICENSE) file for details.

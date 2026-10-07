@@ -13,16 +13,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 class Settings:
     def __init__(self):
-        # Search Provider Configuration (SerpApi primary, Reserp secondary)
-        provider = os.getenv("SEARCH_PROVIDER", "serpapi").strip().lower()
-        self.SEARCH_PROVIDER: str = provider if provider in ("serpapi", "reserp") else "serpapi"
-
+        # SerpApi Credentials (sponsor search provider)
         # SerpApi Credentials
         self.SERPAPI_API_KEY: str = os.getenv("SERPAPI_API_KEY", "").strip()
 
-        # Reserp Credentials & Configuration (Secondary search provider)
-        self.RESERP_API_KEY: str = os.getenv("RESERP_API_KEY", "").strip()
-        self.RESERP_BASE_URL: str = os.getenv("RESERP_BASE_URL", "https://api.reserp.ai").strip().rstrip("/")
         
         # Fireworks AI / LLM Credentials & Configuration
         self.FIREWORKS_API_KEY: str = os.getenv("FIREWORKS_API_KEY", "").strip() or os.getenv("LLM_API_KEY", "").strip()
