@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}TenderRadar - Indian Government Tender Intelligence Agent{% endblock %}
+
+{% block content %}
+<!-- Top Header & Subtitle -->
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Indian Tender Discovery Hub</h1>
+    <p class="page-subtitle">Watching GeM, CPPP, IREPS & State portals via SerpApi Google Search.</p>
+  </div>
+  <div>
+    <a href="/export/csv?portal={{ selected_portal or '' }}&urgency={{ selected_urgency or '' }}&search={{ search_query or '' }}&watchlist_id={{ selected_watchlist or '' }}" class="btn btn-secondary">
+      📥 Export View to CSV
+    </a>
+  </div>
+</div>
+
+<!-- Key Performance Metrics -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon primary">📋</div>
+    <div>
+      <div class="stat-val">{{ stats.total_tenders }}</div>
+      <div class="stat-lbl">Tenders Discovered</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon danger">⏰</div>
+    <div>
+      <div class="stat-val">{{ stats.urgent_closing_soon }}</div>
+      <div class="stat-lbl">Closing Within 7 Days</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon success">🔍</div>
+    <div>
+      <div class="stat-val">{{ stats.active_watchlists }}</div>
+      <div class="stat-lbl">Active Watchlists</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon warning">⚡</div>
+    <div>
+      <div class="stat-val">{{ stats.total_scans }}</div>
+      <div class="stat-lbl">SerpApi Portal Scans</div>
+    </div>
+  </div>
+</div>
+
+<!-- Filters & Search Toolbar -->
+<div class="toolbar-card">
+  <form action="/" method="GET" class="filter-form">
+    <input 
+      type="text" 
+      name="search" 
+      class="form-input" 
+      placeholder="Search tender title, scope, authority..." 
+      value="{{ search_query or '' }}"
+    >
+
+    <select name="portal" class="form-select">
+      <option value="">All Portals</option>
+      <option value="GeM" {% if selected_portal == 'GeM' %}selected{% endif %}>GeM (Gov e-Marketplace)</option>
+      <option value="CPPP" {% if selected_portal == 'CPPP' %}selected{% endif %}>CPPP (Central eProcure)</option>
+      <option value="eTenders" {% if selected_portal == 'eTenders' %}selected{% endif %}>Central eTenders</option>
+      <option value="IREPS" {% if selected_portal == 'IREPS' %}selected{% endif %}>IREPS (Indian Railways)</option>
+      <option value="MahaTenders" {% if selected_portal == 'MahaTenders' %}selected{% endif %}>MahaTenders (Maharashtra)</option>
+      <option value="KPPP" {% if selected_portal == 'KPPP' %}selected{% endif %}>KPPP (Karnataka)</option>
+      <option value="Odisha" {% if selected_portal == 'Odisha' %}selected{% endif %}>Odisha eTenders</option>
+    </select>
+
+    <select name="urgency" class="form-select">
+      <option value="">All Urgencies</option>
+      <option value="Urgent (<3d)" {% if selected_urgency == 'Urgent (<3d)' %}selected{% endif %}>🔴 Urgent (&lt;3 Days)</option>
+      <option value="Closing Soon (<7d)" {% if selected_urgency == 'Closing Soon (<7d)' %}selected{% endif %}>🟡 Closing Soon (&lt;7 Days)</option>
+      <option value="Active (>7d)" {% if selected_urgency == 'Active (>7d)' %}selected{% endif %}>🟢 Active (&gt;7 Days)</option>
+      <option value="Flexible / Open" {% if selected_urgency == 'Flexible / Open' %}selected{% endif %}>🔵 Flexible / Open</option>
+      <option value="Expired" {% if selected_urgency == 'Expired' %}selected{% endif %}>⚪ Expired</option>
+    </select>
+
+    <select name="watchlist_id" class="form-select">
+      <option value="">All Watchlists</option>
+      {% for wl in watchlists %}
+        <option value="{{ wl.id }}" {% if selected_watchlist == wl.id %}selected{% endif %}>
+          {{ wl.keyword }} ({{ wl.category }})
+        </option>
+      {% endfor %}
+    </select>
+
+    <select name="sort_order" class="form-select">
+      <option value="asc" {% if sort_order == 'asc' %}selected{% endif %}>⏳ Deadline: Earliest First</option>
+      <option value="desc" {% if sort_order == 'desc' %}selected{% endif %}>⌛ Deadline: Furthest First</option>
+      <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>✨ Recently Discovered</option>
+    </select>
+
+    <button type="submit" class="btn btn-primary">Filter</button>
+    {% if search_query or selected_portal or selected_urgency or selected_watchlist %}
+      <a href="/" class="btn btn-secondary">Reset</a>
+    {% endif %}
+  </form>
+</div>
+
+<!-- Tenders Feed -->
+{% if tenders %}
+  <div class="tenders-list">
+    {% for tender in tenders %}
+      <div class="tender-card">
+        <div class="tender-header">
+          <a href="/tenders/{{ tender.id }}" class="tender-title-link">
+            {{ tender.title }}
+          </a>
+          <div>
+            {% if tender.urgency_status == 'Urgent (<3d)' %}
+              <span class="badge badge-urgent">🔴 Urgent (&lt;3 Days Left)</span>
+            {% elif tender.urgency_status == 'Closing Soon (<7d)' %}
+              <span class="badge badge-closing">🟡 Closing Soon (&lt;7 Days Left)</span>
+            {% elif tender.urgency_status == 'Active (>7d)' %}
+              <span class="badge badge-active">🟢 Active (&gt;7 Days Left)</span>
+            {% elif tender.urgency_status == 'Expired' %}
+              <span class="badge badge-expired">⚪ Expired</span>
+            {% else %}
+              <span class="badge badge-flexible">🔵 {{ tender.urgency_status }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="tender-meta-tags">
+          <span class="badge badge-portal">🏛️ {{ tender.portal_name }}</span>
+          {% if tender.watchlist_keyword %}
+            <span class="badge badge-keyword">🏷️ Watchlist: {{ tender.watchlist_keyword }}</span>
+          {% endif %}
+          {% if tender.published_date %}
+            <span class="text-muted" style="font-size:0.75rem;">Published: {{ tender.published_date }}</span>
+          {% endif %}
+        </div>
+
+        <!-- Key Financial & Deadline Metrics -->
+        <div class="metrics-row">
+          <div class="metric-item">
+            <span class="metric-label">📅 Bid Submission Deadline</span>
+            <span class="metric-value" style="color:{% if 'Urgent' in tender.urgency_status %}var(--danger){% elif 'Closing' in tender.urgency_status %}var(--warning){% else %}var(--text-main){% endif %};">
+              {{ tender.deadline_date or 'Refer to Portal Document' }}
+            </span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">💰 EMD (Deposit)</span>
+            <span class="metric-value">{{ tender.emd_amount or 'Not Specified' }}</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">🏷️ Tender Document Fee</span>
+            <span class="metric-value">{{ tender.tender_fee or 'Nil / Online' }}</span>
+          </div>
+        </div>
+
+        <!-- AI Executive Summary -->
+        <div class="ai-summary-box">
+          <div class="ai-section-title">
+            <span>🤖 AI Scope Analysis</span>
+          </div>
+          <p class="ai-text">{{ tender.scope_summary or tender.snippet }}</p>
+          
+          {% if tender.eligibility %}
+            <div style="margin-bottom:0.4rem;">
+              <strong>Eligibility:</strong> <span class="text-sub">{{ tender.eligibility }}</span>
+            </div>
+          {% endif %}
+
+          {% if tender.key_takeaways %}
+            <div class="ai-takeaway">
+              <strong>💡 Bid Strategy:</strong> {{ tender.key_takeaways }}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Card Footer Actions -->
+        <div class="card-footer">
+          <span class="portal-source-link">
+            Canonical URL: <code>{{ tender.canonical_url | truncate(65, True, '...') }}</code>
+          </span>
+          <div class="card-actions">
+            <a href="/tenders/{{ tender.id }}" class="btn btn-secondary btn-sm">
+              📄 View Full Details
+            </a>
+            <a href="{{ tender.original_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">
+              🔗 Open Portal RFP ↗
+            </a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+{% else %}
+  <!-- Empty State -->
+  <div class="empty-state">
+    <div class="empty-icon">🛰️</div>
+    <h3 class="empty-title">No Tenders Found</h3>
+    <p class="empty-desc">
+      {% if search_query or selected_portal or selected_urgency or selected_watchlist %}
+        No tenders matched your filter criteria. Try resetting filters or searching a different term.
+      {% else %}
+        No tenders discovered yet. Run a scan to discover live government bids via SerpApi across GeM and CPPP portals!
+      {% endif %}
+    </p>
+    <div>
+      {% if search_query or selected_portal or selected_urgency or selected_watchlist %}
+        <a href="/" class="btn btn-secondary">Clear Filters</a>
+      {% else %}
+        <form action="/scan" method="POST" style="display:inline;">
+          <button type="submit" class="btn btn-primary scan-btn">⚡ Run SerpApi Portal Scan Now</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

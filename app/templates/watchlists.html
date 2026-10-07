@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Watchlists - TenderRadar{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Tender Watchlists</h1>
+    <p class="page-subtitle">Configure keywords and sector filters tracked daily across Indian procurement portals.</p>
+  </div>
+</div>
+
+<!-- Add New Watchlist Form -->
+<div class="toolbar-card" style="margin-bottom: 2rem;">
+  <h3 style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--primary-dark);">➕ Add New Watchlist Keyword</h3>
+  
+  <form action="/watchlists" method="POST" style="display: flex; flex-direction: column; gap: 1rem;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+      <div>
+        <label style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-sub); margin-bottom: 0.25rem;">
+          Tender Keyword / Domain *
+        </label>
+        <input 
+          type="text" 
+          name="keyword" 
+          class="form-input" 
+          placeholder="e.g. Solar Rooftop EPC, CCTV Surveillance, Medical ICU" 
+          required 
+          maxlength="100"
+          style="width: 100%;"
+        >
+      </div>
+
+      <div>
+        <label style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-sub); margin-bottom: 0.25rem;">
+          Industry / Category
+        </label>
+        <input 
+          type="text" 
+          name="category" 
+          class="form-input" 
+          placeholder="e.g. Renewable Energy, Civil Works, IT" 
+          value="Infrastructure & EPC"
+          style="width: 100%;"
+        >
+      </div>
+
+      <div>
+        <label style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-sub); margin-bottom: 0.25rem;">
+          Minimum Contract Value
+        </label>
+        <input 
+          type="text" 
+          name="min_value" 
+          class="form-input" 
+          placeholder="e.g. ₹50 Lakh+, ₹2 Crore+, Any" 
+          value="Any"
+          style="width: 100%;"
+        >
+      </div>
+
+      <div>
+        <label style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-sub); margin-bottom: 0.25rem;">
+          State / Geotarget Filter
+        </label>
+        <input 
+          type="text" 
+          name="state_filter" 
+          class="form-input" 
+          placeholder="e.g. All India, Maharashtra, Karnataka" 
+          value="All India"
+          style="width: 100%;"
+        >
+      </div>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end;">
+      <button type="submit" class="btn btn-primary">
+        💾 Save Watchlist
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- Watchlists List -->
+<div class="data-table-card">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Keyword</th>
+        <th>Category</th>
+        <th>Min Value</th>
+        <th>Geotarget</th>
+        <th>Status</th>
+        <th>Tenders Found</th>
+        <th>Last Scanned</th>
+        <th style="text-align: right;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for wl in watchlists %}
+        <tr>
+          <td>
+            <strong>{{ wl.keyword }}</strong>
+          </td>
+          <td>{{ wl.category }}</td>
+          <td>{{ wl.min_value }}</td>
+          <td>{{ wl.state_filter }}</td>
+          <td>
+            {% if wl.is_active %}
+              <span class="badge badge-active">🟢 Active</span>
+            {% else %}
+              <span class="badge badge-expired">⏸️ Paused</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="/?watchlist_id={{ wl.id }}">
+              <strong>{{ wl.tender_count }}</strong> bids
+            </a>
+          </td>
+          <td style="font-size: 0.8rem; color: var(--text-muted);">
+            {{ wl.last_scanned_at or 'Never' }}
+          </td>
+          <td style="text-align: right;">
+            <div style="display: inline-flex; gap: 0.4rem;">
+              <form action="/watchlists/{{ wl.id }}/scan" method="POST" style="display: inline;">
+                <button type="submit" class="btn btn-secondary btn-sm scan-btn" title="Scan SerpApi immediately for this keyword">
+                  ⚡ Scan
+                </button>
+              </form>
+
+              <form action="/watchlists/{{ wl.id }}/toggle" method="POST" style="display: inline;">
+                <button type="submit" class="btn btn-secondary btn-sm" title="Toggle active status">
+                  {% if wl.is_active %}Pause{% else %}Resume{% endif %}
+                </button>
+              </form>
+
+              <form action="/watchlists/{{ wl.id }}/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete watchlist \'{{ wl.keyword }}\'?');">
+                <button type="submit" class="btn btn-danger btn-sm" title="Delete watchlist">
+                  🗑️
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+      {% else %}
+        <tr>
+          <td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+            No watchlists configured yet. Add your first keyword above!
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

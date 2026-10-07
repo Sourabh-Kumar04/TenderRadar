@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}TenderRadar - Indian Government Tender Intelligence Agent{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+</head>
+<body>
+  <!-- Navigation Header -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="/" class="nav-brand">
+        <div class="brand-logo">🎯</div>
+        <div>
+          <span class="brand-name">TenderRadar</span>
+          <span class="brand-badge">India Gov · SerpApi</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="/" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}">📊 Dashboard</a>
+        <a href="/watchlists" class="nav-link {% if active_page == 'watchlists' %}active{% endif %}">🔍 Watchlists</a>
+        <a href="/scans" class="nav-link {% if active_page == 'scans' %}active{% endif %}">⏱️ Scan Monitor</a>
+        <a href="/export/csv" class="btn btn-secondary btn-sm" title="Export tenders to CSV">📥 Export CSV</a>
+        <form action="/scan" method="POST" style="display:inline;">
+          <button type="submit" class="btn btn-primary btn-sm scan-btn" title="Run instant scan across portals">
+            ⚡ Scan Portals Now
+          </button>
+        </form>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Flash / Session Messages -->
+  <main class="container">
+    {% if message %}
+      <div class="alert alert-info alert-dismissible">
+        <span>ℹ️ {{ message }}</span>
+      </div>
+    {% endif %}
+    {% if error %}
+      <div class="alert alert-danger alert-dismissible">
+        <span>⚠️ {{ error }}</span>
+      </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div>
+        <strong>TenderRadar</strong> — Built for <em>SerpApi India Hackathon 2026</em>.
+        Automated Indian government tender tracking across GeM, CPPP, IREPS & State Portals.
+      </div>
+      <div>
+        <span>Powered by <strong>SerpApi</strong> Google Search API</span> · 
+        <a href="https://github.com" target="_blank" rel="noopener">GitHub</a> · Apache-2.0 License
+      </div>
+    </div>
+  </footer>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

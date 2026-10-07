@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Scan Monitor & Audit Log - TenderRadar{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Scan Monitor & Audit Logs</h1>
+    <p class="page-subtitle">Track SerpApi automated discovery runs, portal queries, and deduplication statistics.</p>
+  </div>
+  <div>
+    <form action="/scan" method="POST" style="display:inline;">
+      <button type="submit" class="btn btn-primary scan-btn">
+        ⚡ Run Full Portal Scan Now
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Active Scan Status Card -->
+<div class="stat-card" style="margin-bottom: 2rem;">
+  <div class="stat-icon {% if scan_status.status == 'Running' %}warning{% else %}primary{% endif %}">
+    {% if scan_status.status == 'Running' %}🔄{% else %}🛰️{% endif %}
+  </div>
+  <div style="flex: 1;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+      <span style="font-weight: 700; font-size: 1.1rem; color: var(--primary-dark);">
+        Scheduler Status: {{ scan_status.status }}
+      </span>
+      <span class="text-muted" style="font-size: 0.8rem;">
+        Last Run: {{ scan_status.last_run or 'Never' }}
+      </span>
+    </div>
+    <div class="text-sub" style="font-size: 0.9rem;">
+      {{ scan_status.message }}
+    </div>
+  </div>
+</div>
+
+<!-- Logs History Table -->
+<div class="data-table-card">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Timestamp</th>
+        <th>Target Scope</th>
+        <th>Status</th>
+        <th>Found</th>
+        <th>New (Deduped)</th>
+        <th>Details</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for log in logs %}
+        <tr>
+          <td style="font-size: 0.8rem; white-space: nowrap;">{{ log.created_at }}</td>
+          <td>
+            {% if log.watchlist_keyword %}
+              <strong>{{ log.watchlist_keyword }}</strong>
+            {% else %}
+              <em>All Active Watchlists</em>
+            {% endif %}
+          </td>
+          <td>
+            {% if log.status == 'Success' %}
+              <span class="badge badge-active">✔️ {{ log.status }}</span>
+            {% elif log.status == 'Failed' %}
+              <span class="badge badge-urgent">❌ {{ log.status }}</span>
+            {% else %}
+              <span class="badge badge-closing">{{ log.status }}</span>
+            {% endif %}
+          </td>
+          <td>{{ log.items_found }}</td>
+          <td>
+            <strong>{{ log.items_new }}</strong>
+          </td>
+          <td style="font-size: 0.825rem; color: var(--text-muted); max-width: 450px;">
+            {{ log.message }}
+          </td>
+        </tr>
+      {% else %}
+        <tr>
+          <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+            No scans recorded yet. Trigger a scan above!
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
