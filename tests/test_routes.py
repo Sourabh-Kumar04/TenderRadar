@@ -139,7 +139,7 @@ def test_export_csv(client_with_temp_db):
     assert "text/csv" in res.headers["content-type"]
     assert "attachment; filename=tenderradar_bids_export.csv" in res.headers["content-disposition"]
     csv_text = res.text
-    assert "Tender ID,Title,Portal,Watchlist Keyword" in csv_text
+    assert "Tender ID,Title,Portal,Watchlist Keyword,Advisor Verdict,Match Score (%)" in csv_text
     lines = csv_text.strip().split("\n")
     assert len(lines) >= 2  # Header + at least one tender row
 
@@ -192,3 +192,26 @@ def test_api_tenders_and_stats(client_with_temp_db):
 
     status_res = client_with_temp_db.get("/api/scan/status")
     assert status_res.status_code == 200
+
+
+def test_api_profile_post_and_put(client_with_temp_db):
+    prof_payload = {
+        "company_name": "Bharat Solar Solutions Ltd",
+        "categories": ["Solar EPC", "Renewable Energy"],
+        "min_contract_value": 1000000.0,
+        "max_contract_value": 20000000.0,
+        "annual_turnover": 15000000.0,
+        "max_emd_capacity": 500000.0,
+        "msme_registered": True
+    }
+    # Test POST
+    post_res = client_with_temp_db.post("/api/profile", json=prof_payload)
+    assert post_res.status_code == 200
+    assert post_res.json()["company_name"] == "Bharat Solar Solutions Ltd"
+
+    # Test PUT
+    prof_payload["company_name"] = "Bharat Solar & Infra Ltd"
+    put_res = client_with_temp_db.put("/api/profile", json=prof_payload)
+    assert put_res.status_code == 200
+    assert put_res.json()["company_name"] == "Bharat Solar & Infra Ltd"
+

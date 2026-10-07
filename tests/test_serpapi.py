@@ -57,3 +57,29 @@ def test_serpapi_client_caching_and_mock():
     finally:
         if os.path.exists(db_path):
             os.remove(db_path)
+
+
+def test_serpapi_error_response_raises_or_fallbacks(monkeypatch):
+    from unittest.mock import MagicMock
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as tmp:
+        db_path = tmp.name
+    try:
+        init_db(db_path)
+        client = SerpApiClient(api_key="TEST_KEY", mock_mode=False, db_path=db_path)
+        
+        # Mock GoogleSearch to return SerpApi error dict
+        mock_search = MagicMock()
+        mock_search.get_dict.return_value = {"error": "Invalid API key provided"}
+        monkeypatch.setattr("serpapi.GoogleSearch", MagicMock(return_value=mock_search))
+
+        # With raise_on_error=True, should raise RuntimeError
+        with pytest.raises(RuntimeError, match="SerpApi returned error"):
+            client.search_tenders("solar", raise_on_error=True)
+
+        # With raise_on_error=False, should fallback to mock results instead of returning empty list
+        res = client.search_tenders("solar", raise_on_error=False)
+        assert len(res) > 0
+    finally:
+        if os.path.exists(db_path):
+            os.remove(db_path)
+

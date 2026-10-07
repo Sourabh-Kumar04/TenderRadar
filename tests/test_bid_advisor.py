@@ -419,3 +419,27 @@ def test_api_tender_verdict_and_recommended_filter(temp_db, sample_profile, monk
     rec_tenders = rec_resp.json()
     for t in rec_tenders:
         assert t["verdict"] == "BID"
+
+
+def test_advisor_short_circuits_prefilter_failure(sample_profile, monkeypatch):
+    from unittest.mock import MagicMock
+    # Create summarizer with mock_mode=False and api_key set
+    mock_summ = TenderSummarizer(api_key="real_looking_key", mock_mode=False)
+    # If LLM was called, this mock would be invoked
+    mock_openai_call = MagicMock()
+    monkeypatch.setattr("openai.OpenAI", mock_openai_call)
+
+    advisor = BidAdvisor(summarizer=mock_summ)
+
+    # Tender completely mismatched (Catering vs Solar EPC)
+    mismatched_tender = {
+        "title": "Supply of Cooked Meals and Dietary Food to Hospital",
+        "snippet": "Catering services for inpatient wards.",
+        "portal_name": "GeM"
+    }
+
+    verdict = advisor.evaluate(mismatched_tender, sample_profile)
+    assert verdict["verdict"] == "NO_BID"
+    # OpenAI client should NOT have been instantiated or called because prefilter failed!
+    assert not mock_openai_call.called
+

@@ -408,6 +408,11 @@ async def export_csv(
     sort_by = "newest" if sort_order == "newest" else "deadline"
     order = "desc" if sort_order == "desc" else "asc"
 
+    # Load active bidder profile to join personalized verdicts
+    profile_dict = get_bidder_profile(settings.DATABASE_PATH)
+    profile = BidderProfile(**profile_dict) if profile_dict else get_default_profile()
+    profile_hash = compute_profile_hash(profile)
+
     tenders = get_tenders(
         db_path=settings.DATABASE_PATH,
         watchlist_id=watchlist_id,
@@ -416,7 +421,8 @@ async def export_csv(
         search=search,
         sort_by=sort_by,
         sort_order=order,
-        limit=1000
+        limit=1000,
+        profile_hash=profile_hash
     )
 
     output = io.StringIO()
@@ -428,6 +434,8 @@ async def export_csv(
         "Title",
         "Portal",
         "Watchlist Keyword",
+        "Advisor Verdict",
+        "Match Score (%)",
         "Submission Deadline",
         "Urgency Status",
         "EMD Amount",
@@ -446,6 +454,8 @@ async def export_csv(
             t.get("title"),
             t.get("portal_name"),
             t.get("watchlist_keyword") or "General",
+            t.get("verdict") or "REVIEW",
+            t.get("match_score") if t.get("match_score") is not None else "N/A",
             t.get("deadline_date") or "N/A",
             t.get("urgency_status"),
             t.get("emd_amount") or "N/A",
@@ -481,6 +491,7 @@ async def api_get_profile():
     return default_p
 
 
+@app.post("/api/profile")
 @app.put("/api/profile")
 async def api_update_profile(profile: BidderProfile):
     settings = get_settings()

@@ -484,7 +484,7 @@ class BidAdvisor:
         prefilter = run_prefilter(tender, profile)
 
         # In mock mode or if prefilter failed completely, use deterministic engine
-        if self.summarizer.mock_mode or not self.summarizer.api_key:
+        if self.summarizer.mock_mode or not self.summarizer.api_key or not prefilter["passed"]:
             return evaluate_mock(tender, profile, prefilter, ref_date=ref_date)
 
         # Real LLM Call via existing Fireworks summarizer client

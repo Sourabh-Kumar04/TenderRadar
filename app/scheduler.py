@@ -152,7 +152,7 @@ class ScanManager:
         logger.info(f"Searching tenders via SerpApi for '{keyword}'")
         try:
             results = self.serp_client.search_tenders(keyword, state_filter, raise_on_error=True)
-            if results:
+            if results is not None:
                 return results
         except Exception as e:
             logger.warning(f"SerpApi search failed ({e}); using mock results fallback.")

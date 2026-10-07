@@ -62,4 +62,14 @@ def test_scan_manager_full_scan(temp_db):
     assert any("Completed full scan" in l["message"] for l in logs)
 
 
+def test_scan_manager_zero_results_handling(temp_db, monkeypatch):
+    from unittest.mock import MagicMock
+    manager = ScanManager(db_path=temp_db)
+    # When SerpApi returns an empty list (0 genuine results)
+    monkeypatch.setattr(manager.serp_client, "search_tenders", MagicMock(return_value=[]))
+    results = manager.search_tenders("ZeroResultKeyword123")
+    assert results == []  # Must return [] and NOT fall back to generating fake mock items!
+
+
+
 

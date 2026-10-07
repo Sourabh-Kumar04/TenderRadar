@@ -223,6 +223,8 @@ class SerpApiClient:
                 }
                 search = GoogleSearch(params)
                 data = search.get_dict()
+                if "error" in data:
+                    raise RuntimeError(f"SerpApi returned error: {data['error']}")
                 raw_items = data.get("organic_results", [])
             except Exception as e:
                 logger.error(f"SerpApi request failed ({e})")
