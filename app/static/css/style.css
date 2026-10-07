@@ -555,3 +555,68 @@ a:hover {
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================
+   Bid / No-Bid Advisor Component Styles
+   ========================================== */
+.badge-bid {
+  background: #ecfdf5 !important;
+  color: #047857 !important;
+  border: 1px solid #a7f3d0 !important;
+  font-weight: 700;
+}
+.badge-review {
+  background: #fffbeb !important;
+  color: #b45309 !important;
+  border: 1px solid #fde68a !important;
+  font-weight: 700;
+}
+.badge-nobid {
+  background: #fef2f2 !important;
+  color: #b91c1c !important;
+  border: 1px solid #fecaca !important;
+  font-weight: 700;
+}
+
+.flag-badge {
+  font-size: 0.825rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius);
+  line-height: 1.4;
+}
+.flag-critical {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+.flag-warning {
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  color: #92400e;
+}
+.flag-info {
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  color: #0369a1;
+}
+
+.advisor-summary-panel {
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+.score-bar-bg {
+  width: 100%;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 0.35rem;
+}
+.score-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}

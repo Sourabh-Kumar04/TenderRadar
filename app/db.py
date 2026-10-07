@@ -79,11 +79,41 @@ def init_db(db_path: str) -> None:
                 created_at TEXT NOT NULL
             );
 
+            CREATE TABLE IF NOT EXISTS bidder_profile (
+                id INTEGER PRIMARY KEY CHECK (id = 1),
+                company_name TEXT NOT NULL,
+                categories_json TEXT NOT NULL,
+                min_contract_value REAL NOT NULL,
+                max_contract_value REAL NOT NULL,
+                annual_turnover REAL NOT NULL,
+                max_emd_capacity REAL NOT NULL,
+                msme_registered INTEGER NOT NULL DEFAULT 0,
+                startup_registered INTEGER NOT NULL DEFAULT 0,
+                certifications_json TEXT NOT NULL,
+                preferred_states_json TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS tender_verdicts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tender_id INTEGER NOT NULL REFERENCES tenders(id) ON DELETE CASCADE,
+                profile_hash TEXT NOT NULL,
+                verdict TEXT NOT NULL,
+                match_score INTEGER NOT NULL,
+                key_details_json TEXT NOT NULL,
+                reasons_json TEXT NOT NULL,
+                flags_json TEXT NOT NULL,
+                tender_updated_at TEXT,
+                created_at TEXT NOT NULL,
+                UNIQUE(tender_id, profile_hash)
+            );
+
             CREATE INDEX IF NOT EXISTS idx_tenders_canonical ON tenders(canonical_url);
             CREATE INDEX IF NOT EXISTS idx_tenders_deadline ON tenders(deadline_date);
             CREATE INDEX IF NOT EXISTS idx_tenders_watchlist ON tenders(watchlist_id);
             CREATE INDEX IF NOT EXISTS idx_watchlists_active ON watchlists(is_active);
             CREATE INDEX IF NOT EXISTS idx_scan_logs_created ON scan_logs(created_at);
+            CREATE INDEX IF NOT EXISTS idx_verdicts_lookup ON tender_verdicts(tender_id, profile_hash);
         """)
         conn.commit()
 
@@ -258,16 +288,43 @@ def insert_tender(db_path: str, tender_data: Dict[str, Any]) -> Optional[int]:
             return None
 
 
-def get_tender(db_path: str, tender_id: int) -> Optional[Dict[str, Any]]:
+def get_tender(db_path: str, tender_id: int, profile_hash: Optional[str] = None) -> Optional[Dict[str, Any]]:
     with get_db_connection(db_path) as conn:
-        row = conn.execute(
-            """SELECT t.*, w.keyword AS watchlist_keyword, w.category AS watchlist_category
-               FROM tenders t
-               LEFT JOIN watchlists w ON t.watchlist_id = w.id
-               WHERE t.id = ?""",
-            (tender_id,)
-        ).fetchone()
-        return dict(row) if row else None
+        if profile_hash:
+            query = """
+                SELECT t.*, w.keyword AS watchlist_keyword, w.category AS watchlist_category,
+                       tv.verdict, tv.match_score, tv.key_details_json, tv.reasons_json, tv.flags_json,
+                       tv.tender_updated_at AS verdict_tender_updated_at
+                FROM tenders t
+                LEFT JOIN watchlists w ON t.watchlist_id = w.id
+                LEFT JOIN tender_verdicts tv ON t.id = tv.tender_id AND tv.profile_hash = ?
+                WHERE t.id = ?
+            """
+            row = conn.execute(query, (profile_hash, tender_id)).fetchone()
+        else:
+            query = """
+                SELECT t.*, w.keyword AS watchlist_keyword, w.category AS watchlist_category
+                FROM tenders t
+                LEFT JOIN watchlists w ON t.watchlist_id = w.id
+                WHERE t.id = ?
+            """
+            row = conn.execute(query, (tender_id,)).fetchone()
+
+        if not row:
+            return None
+        d = dict(row)
+        if profile_hash and d.get("verdict"):
+            try:
+                d["advisor_verdict"] = {
+                    "verdict": d["verdict"],
+                    "match_score": d["match_score"],
+                    "key_details": json.loads(d.get("key_details_json") or "{}"),
+                    "reasons": json.loads(d.get("reasons_json") or "[]"),
+                    "flags": json.loads(d.get("flags_json") or "[]")
+                }
+            except Exception:
+                d["advisor_verdict"] = None
+        return d
 
 
 def get_tenders(
@@ -279,11 +336,16 @@ def get_tenders(
     sort_by: str = "deadline",
     sort_order: str = "asc",
     limit: int = 100,
-    offset: int = 0
+    offset: int = 0,
+    profile_hash: Optional[str] = None,
+    recommended_only: bool = False
 ) -> List[Dict[str, Any]]:
-    """Fetches tenders with flexible filtering and deadline sorting."""
+    """Fetches tenders with flexible filtering, deadline sorting, and optional advisor verdicts."""
     conditions = []
     params: List[Any] = []
+
+    if profile_hash:
+        params.append(profile_hash)
 
     if watchlist_id is not None:
         conditions.append("t.watchlist_id = ?")
@@ -302,6 +364,9 @@ def get_tenders(
         term = f"%{search}%"
         params.extend([term, term, term, term])
 
+    if recommended_only and profile_hash:
+        conditions.append("tv.verdict = 'BID'")
+
     where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
 
     # Sort order
@@ -314,6 +379,8 @@ def get_tenders(
             order_clause = "ORDER BY CASE WHEN t.deadline_date IS NULL OR t.deadline_date = '' THEN 1 ELSE 0 END, t.deadline_date ASC, t.id DESC"
     elif sort_by == "newest":
         order_clause = "ORDER BY t.created_at DESC"
+    elif sort_by == "match_score" and profile_hash:
+        order_clause = "ORDER BY CASE WHEN tv.match_score IS NULL THEN 1 ELSE 0 END, tv.match_score DESC, t.id DESC"
     elif sort_by == "urgency":
         order_clause = """ORDER BY CASE t.urgency_status
             WHEN 'Urgent (<3d)' THEN 1
@@ -325,10 +392,24 @@ def get_tenders(
     else:
         order_clause = "ORDER BY t.id DESC"
 
+    if profile_hash:
+        select_fields = """
+            t.*, w.keyword AS watchlist_keyword, w.category AS watchlist_category,
+            tv.verdict, tv.match_score, tv.key_details_json, tv.reasons_json, tv.flags_json,
+            tv.tender_updated_at AS verdict_tender_updated_at
+        """
+        join_clause = """
+            LEFT JOIN watchlists w ON t.watchlist_id = w.id
+            LEFT JOIN tender_verdicts tv ON t.id = tv.tender_id AND tv.profile_hash = ?
+        """
+    else:
+        select_fields = "t.*, w.keyword AS watchlist_keyword, w.category AS watchlist_category"
+        join_clause = "LEFT JOIN watchlists w ON t.watchlist_id = w.id"
+
     query = f"""
-        SELECT t.*, w.keyword AS watchlist_keyword, w.category AS watchlist_category
+        SELECT {select_fields}
         FROM tenders t
-        LEFT JOIN watchlists w ON t.watchlist_id = w.id
+        {join_clause}
         {where_clause}
         {order_clause}
         LIMIT ? OFFSET ?
@@ -342,6 +423,17 @@ def get_tenders(
             d = dict(r)
             # Recompute urgency in real-time in case time progressed
             d["urgency_status"] = compute_urgency(d.get("deadline_date")).value
+            if profile_hash and d.get("verdict"):
+                try:
+                    d["advisor_verdict"] = {
+                        "verdict": d["verdict"],
+                        "match_score": d["match_score"],
+                        "key_details": json.loads(d.get("key_details_json") or "{}"),
+                        "reasons": json.loads(d.get("reasons_json") or "[]"),
+                        "flags": json.loads(d.get("flags_json") or "[]")
+                    }
+                except Exception:
+                    d["advisor_verdict"] = None
             results.append(d)
         return results
 
@@ -438,3 +530,192 @@ def get_scan_logs(db_path: str, limit: int = 50) -> List[Dict[str, Any]]:
             (limit,)
         ).fetchall()
         return [dict(r) for r in rows]
+
+
+# ==========================================
+# Bidder Profile & Tender Verdicts Storage
+# ==========================================
+
+def get_bidder_profile(db_path: str) -> Optional[Dict[str, Any]]:
+    """Retrieves the single active bidder profile."""
+    try:
+        with get_db_connection(db_path) as conn:
+            row = conn.execute("SELECT * FROM bidder_profile WHERE id = 1").fetchone()
+    except sqlite3.OperationalError:
+        init_db(db_path)
+        with get_db_connection(db_path) as conn:
+            row = conn.execute("SELECT * FROM bidder_profile WHERE id = 1").fetchone()
+
+    if not row:
+        return None
+    d = dict(row)
+    try:
+        d["categories"] = json.loads(d.pop("categories_json", "[]"))
+    except Exception:
+        d["categories"] = []
+    try:
+        d["certifications"] = json.loads(d.pop("certifications_json", "[]"))
+    except Exception:
+        d["certifications"] = []
+    try:
+        d["preferred_states"] = json.loads(d.pop("preferred_states_json", "[]"))
+    except Exception:
+        d["preferred_states"] = []
+    d["msme_registered"] = bool(d["msme_registered"])
+    d["startup_registered"] = bool(d["startup_registered"])
+    return d
+
+
+def save_bidder_profile(db_path: str, profile_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Upserts the single active bidder profile."""
+    now = datetime.now().isoformat()
+    cats = profile_data.get("categories", [])
+    if isinstance(cats, str):
+        cats = [c.strip() for c in cats.split(",") if c.strip()]
+    certs = profile_data.get("certifications", [])
+    if isinstance(certs, str):
+        certs = [c.strip() for c in certs.split(",") if c.strip()]
+    states = profile_data.get("preferred_states", [])
+    if isinstance(states, str):
+        states = [s.strip() for s in states.split(",") if s.strip()]
+
+    categories_json = json.dumps(cats)
+    certifications_json = json.dumps(certs)
+    preferred_states_json = json.dumps(states)
+    msme = 1 if profile_data.get("msme_registered") else 0
+    startup = 1 if profile_data.get("startup_registered") else 0
+
+    def _execute_save():
+        with get_db_connection(db_path) as conn:
+            conn.execute(
+                """INSERT INTO bidder_profile (
+                    id, company_name, categories_json, min_contract_value, max_contract_value,
+                    annual_turnover, max_emd_capacity, msme_registered, startup_registered,
+                    certifications_json, preferred_states_json, updated_at
+                ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(id) DO UPDATE SET
+                    company_name = excluded.company_name,
+                    categories_json = excluded.categories_json,
+                    min_contract_value = excluded.min_contract_value,
+                    max_contract_value = excluded.max_contract_value,
+                    annual_turnover = excluded.annual_turnover,
+                    max_emd_capacity = excluded.max_emd_capacity,
+                    msme_registered = excluded.msme_registered,
+                    startup_registered = excluded.startup_registered,
+                    certifications_json = excluded.certifications_json,
+                    preferred_states_json = excluded.preferred_states_json,
+                    updated_at = excluded.updated_at""",
+                (
+                    str(profile_data.get("company_name", "")).strip(),
+                    categories_json,
+                    float(profile_data.get("min_contract_value", 0.0)),
+                    float(profile_data.get("max_contract_value", 0.0)),
+                    float(profile_data.get("annual_turnover", 0.0)),
+                    float(profile_data.get("max_emd_capacity", 0.0)),
+                    msme,
+                    startup,
+                    certifications_json,
+                    preferred_states_json,
+                    now
+                )
+            )
+            conn.commit()
+
+    try:
+        _execute_save()
+    except sqlite3.OperationalError:
+        init_db(db_path)
+        _execute_save()
+
+    return get_bidder_profile(db_path) or {}
+
+
+def get_tender_verdict(db_path: str, tender_id: int, profile_hash: str) -> Optional[Dict[str, Any]]:
+    """Fetches cached verdict for a specific tender and profile hash."""
+    try:
+        with get_db_connection(db_path) as conn:
+            row = conn.execute(
+                """SELECT * FROM tender_verdicts
+                   WHERE tender_id = ? AND profile_hash = ?""",
+                (tender_id, profile_hash)
+            ).fetchone()
+    except sqlite3.OperationalError:
+        init_db(db_path)
+        with get_db_connection(db_path) as conn:
+            row = conn.execute(
+                """SELECT * FROM tender_verdicts
+                   WHERE tender_id = ? AND profile_hash = ?""",
+                (tender_id, profile_hash)
+            ).fetchone()
+
+    if not row:
+        return None
+    d = dict(row)
+    try:
+        d["key_details"] = json.loads(d.get("key_details_json") or "{}")
+    except Exception:
+        d["key_details"] = {}
+    try:
+        d["reasons"] = json.loads(d.get("reasons_json") or "[]")
+    except Exception:
+        d["reasons"] = []
+    try:
+        d["flags"] = json.loads(d.get("flags_json") or "[]")
+    except Exception:
+        d["flags"] = []
+    return d
+
+
+def save_tender_verdict(
+    db_path: str,
+    tender_id: int,
+    profile_hash: str,
+    verdict_data: Dict[str, Any],
+    tender_updated_at: Optional[str] = None
+) -> None:
+    """Caches or updates a tender verdict for a given profile hash."""
+    now = datetime.now().isoformat()
+    key_details_json = json.dumps(verdict_data.get("key_details", {}))
+    reasons_json = json.dumps(verdict_data.get("reasons", []))
+    flags_json = json.dumps(verdict_data.get("flags", []))
+
+    with get_db_connection(db_path) as conn:
+        conn.execute(
+            """INSERT INTO tender_verdicts (
+                tender_id, profile_hash, verdict, match_score,
+                key_details_json, reasons_json, flags_json,
+                tender_updated_at, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(tender_id, profile_hash) DO UPDATE SET
+                verdict = excluded.verdict,
+                match_score = excluded.match_score,
+                key_details_json = excluded.key_details_json,
+                reasons_json = excluded.reasons_json,
+                flags_json = excluded.flags_json,
+                tender_updated_at = excluded.tender_updated_at,
+                created_at = excluded.created_at""",
+            (
+                tender_id,
+                profile_hash,
+                verdict_data.get("verdict", "REVIEW"),
+                int(verdict_data.get("match_score", 50)),
+                key_details_json,
+                reasons_json,
+                flags_json,
+                tender_updated_at,
+                now
+            )
+        )
+        conn.commit()
+
+
+def delete_tender_verdicts(db_path: str, profile_hash: Optional[str] = None) -> int:
+    """Clears cached verdicts, optionally restricted to a specific profile hash."""
+    with get_db_connection(db_path) as conn:
+        if profile_hash:
+            cursor = conn.execute("DELETE FROM tender_verdicts WHERE profile_hash = ?", (profile_hash,))
+        else:
+            cursor = conn.execute("DELETE FROM tender_verdicts")
+        conn.commit()
+        return cursor.rowcount
+

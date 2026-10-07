@@ -59,6 +59,93 @@
     </div>
   </div>
 
+  <!-- Bid / No-Bid Advisor Verdict Card -->
+  {% if tender.advisor_verdict %}
+    <div style="background: #ffffff; border: 2px solid {% if tender.verdict == 'BID' %}#10b981{% elif tender.verdict == 'REVIEW' %}#f59e0b{% else %}#ef4444{% endif %}; border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 2rem; box-shadow: var(--shadow);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <span style="font-size: 1.5rem;">🎯</span>
+          <div>
+            <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0; color: var(--primary-dark);">
+              Bid Advisor Recommendation: 
+              {% if tender.verdict == 'BID' %}
+                <span style="color: #059669;">BID (Recommended)</span>
+              {% elif tender.verdict == 'REVIEW' %}
+                <span style="color: #d97706;">REVIEW (Proceed with Caution)</span>
+              {% else %}
+                <span style="color: #dc2626;">NO-BID (High Risk / Mismatch)</span>
+              {% endif %}
+            </h2>
+            <span class="text-muted" style="font-size: 0.85rem;">Evaluated against profile for <strong>{{ profile.company_name if profile else 'Active Bidder' }}</strong></span>
+          </div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 1.5rem; font-weight: 800; color: {% if tender.verdict == 'BID' %}#059669{% elif tender.verdict == 'REVIEW' %}#d97706{% else %}#dc2626{% endif %};">
+            {{ tender.match_score }}% Match
+          </div>
+          <span class="text-muted" style="font-size: 0.75rem;">Capability Alignment Score</span>
+        </div>
+      </div>
+
+      <!-- Key Details Extracted -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem; margin-bottom: 1.25rem;">
+        <div style="background: #f8fafc; padding: 0.6rem 0.8rem; border: 1px solid var(--border); border-radius: var(--radius);">
+          <span style="color: var(--text-muted); font-size: 0.75rem; display: block;">Est. Contract Value</span>
+          <strong style="font-size: 0.95rem;">{{ tender.advisor_verdict.key_details.est_value }}</strong>
+        </div>
+        <div style="background: #f8fafc; padding: 0.6rem 0.8rem; border: 1px solid var(--border); border-radius: var(--radius);">
+          <span style="color: var(--text-muted); font-size: 0.75rem; display: block;">EMD Deposit</span>
+          <strong style="font-size: 0.95rem;">{{ tender.advisor_verdict.key_details.emd }}</strong>
+        </div>
+        <div style="background: #f8fafc; padding: 0.6rem 0.8rem; border: 1px solid var(--border); border-radius: var(--radius);">
+          <span style="color: var(--text-muted); font-size: 0.75rem; display: block;">Submission Deadline</span>
+          <strong style="font-size: 0.95rem;">{{ tender.advisor_verdict.key_details.deadline }}</strong>
+        </div>
+        <div style="background: #f8fafc; padding: 0.6rem 0.8rem; border: 1px solid var(--border); border-radius: var(--radius);">
+          <span style="color: var(--text-muted); font-size: 0.75rem; display: block;">Eligibility Summary</span>
+          <span style="font-size: 0.85rem;">{{ tender.advisor_verdict.key_details.eligibility_summary }}</span>
+        </div>
+      </div>
+
+      <!-- Strategic Reasoning -->
+      {% if tender.advisor_verdict.reasons %}
+        <div style="margin-bottom: 1rem;">
+          <h4 style="font-size: 0.95rem; font-weight: 600; color: var(--primary-dark); margin-bottom: 0.4rem;">
+            💡 Strategic Decision Rationale
+          </h4>
+          <ul style="padding-left: 1.25rem; font-size: 0.9rem; line-height: 1.6; color: var(--text-sub);">
+            {% for reason in tender.advisor_verdict.reasons %}
+              <li>{{ reason }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+
+      <!-- Risk & Opportunity Flags -->
+      {% if tender.advisor_verdict.flags %}
+        <div>
+          <h4 style="font-size: 0.95rem; font-weight: 600; color: var(--primary-dark); margin-bottom: 0.4rem;">
+            🚩 Risk & Opportunity Flags
+          </h4>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            {% for flag in tender.advisor_verdict.flags %}
+              <div class="flag-badge flag-{{ flag.severity }}">
+                {% if flag.severity == 'critical' %}
+                  <strong style="color: #b91c1c;">⛔ CRITICAL:</strong>
+                {% elif flag.severity == 'warning' %}
+                  <strong style="color: #b45309;">⚠️ WARNING:</strong>
+                {% else %}
+                  <strong style="color: #0369a1;">ℹ️ INFO:</strong>
+                {% endif %}
+                <span>{{ flag.text }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+
   <!-- Detailed AI Breakdown -->
   <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 2rem;">
     <div>

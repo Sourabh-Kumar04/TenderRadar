@@ -167,9 +167,115 @@ pip install -r requirements.txt
 Copy `.env.example` to `.env`:
 ```bash
 cp .env.example .env
-```
-Edit `.env` (optional — TenderRadar runs out-of-the-box with built-in mock engines if no keys are provided):
 ```ini
-# Search (SerpApi)
-SEARCH_PROVIDER=serpapi
+# Search (SerpApi - Primary Sponsor Provider)
 SERPAPI_API_KEY=your_serpapi_key_here
+
+# Fireworks AI / DeepSeek V4P1 Flash
+FIREWORKS_API_KEY=your_fireworks_api_key_here
+LLM_MODEL=accounts/fireworks/models/deepseek-v4p1-flash
+
+# Optional offline mock flags (default auto-detected when keys are absent)
+MOCK_SERPAPI=0
+MOCK_LLM=0
+```
+
+### 6. Run Application
+```bash
+python3 -m app.main
+# Or run with uvicorn directly:
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+Open **http://localhost:8000** in your browser to access the dashboard.
+
+---
+
+## 🎯 Headline Differentiator: Bid/No-Bid Advisor Engine
+
+The headline differentiator of TenderRadar is the **Autonomous Bid/No-Bid Advisor**.
+
+Contractors and SMEs in India typically spend hours reading 50-page RFPs only to realize in week 2 that they do not meet the minimum annual turnover requirement or cannot arrange the required ₹25 Lakh EMD liquidity.
+
+The **Bid Advisor** solves this end-to-end:
+The contractor configures their organizational capabilities once (or uses pre-filled defaults), and TenderRadar **automatically picks matching tenders, computes match scores (0-100), flags risks, and recommends BID, REVIEW, or NO-BID with transparent reasoning**.
+
+```mermaid
+flowchart TD
+    A["Bidder Profile\n(Categories, Value Bracket, Turnover, Max EMD, MSME, Certs)"] --> B["Tender Notice Ingestion\n(Title, Snippet, Scope, EMD, Deadline)"]
+    B --> C{"Deterministic Pre-Filter"}
+    C -- "Mismatch (Wrong Category / Value > Max / EMD > Capacity)" --> D["Instant NO_BID Verdict\n(Match Score 10-35%, Zero LLM Cost)"]
+    C -- "Pre-Filter Passed" --> E{"MOCK_LLM Mode?"}
+    E -- "Yes (MOCK_LLM=1)" --> F["Deterministic Mock Engine\n(Heuristic Scoring & Flags)"]
+    E -- "No (Live Mode)" --> G["Fireworks AI Summarizer Client\n(DeepSeek V4P1 Flash)"]
+    G --> H["Strict JSON Parsing\n{verdict, match_score, key_details, reasons, flags}"]
+    F --> H
+    H --> I["Mandatory Risk Flag Enforcer\n- Tight Deadline (<7d, <3d)\n- EMD Liquidity Pressure\n- Turnover vs Requirement\n- Restrictive Class/Certs\n- Missing Critical Details\n- MSME Exemption Benefit"]
+    I --> J[("Cache in tender_verdicts\n(Keyed by tender_id + profile_hash)")]
+    J --> K["Dashboard & Tender Feed\n- BID (Green Badge) / REVIEW (Amber) / NO_BID (Red)\n- Match Score Indicator\n- Expandable Advisor Analysis\n- 'Recommended for me' Filter"]
+```
+
+### 1. Bidder Profile (`/profile`, SQLite table `bidder_profile`)
+Single active, fully editable organizational profile stored in SQLite:
+* `company_name`: Contractor or firm legal entity.
+* `categories`: Target domain competencies (e.g. `["Solar EPC", "Electrical Infrastructure", "Civil Construction", "CCTV Surveillance"]`).
+* `min_contract_value` & `max_contract_value`: Target contract size bracket in INR (e.g. ₹25 Lakhs to ₹5 Crores).
+* `annual_turnover`: Audited annual turnover in INR for qualification benchmarking.
+* `max_emd_capacity`: Maximum liquid capital available for Earnest Money Deposits.
+* `msme_registered`: Flags eligibility for statutory EMD and tender fee exemptions under the Indian Public Procurement Policy.
+* `startup_registered`: DPIIT startup recognition for prior experience & turnover waivers.
+* `certifications`: Technical licenses and contractor classifications (e.g. `ISO 9001:2015`, `Class A Electrical`).
+* `preferred_states`: Primary operational regions (e.g. `Maharashtra`, `Gujarat`, `Delhi`, `All India`).
+
+### 2. Multi-Stage Advisory Pipeline
+1. **Deterministic Pre-Filter (`app/bid_advisor.py`):**
+   * **Category Keyword Matching:** Checks whether any bidder category matches the tender title, snippet, scope, or watchlist.
+   * **Estimated Contract Value:** Parses Indian currency notation (Crores, Lakhs, commas) from the notice. If present, verifies `min <= value <= max`. If unstated in the notice, marks as `"Unknown"` and passes.
+   * **EMD Liquidity & MSME Exemption:** Extracts EMD requirement. If contractor is MSME-registered and tender notes MSME exemption or is published on GeM, EMD is waived. Otherwise, verifies `EMD <= max_emd_capacity`.
+2. **DeepSeek V4P1 Flash LLM Decision (`app/summarizer.py`):**
+   * Reuses the single Fireworks AI client.
+   * DeepSeek is prompted with the tender details + bidder profile and responds strictly in structured JSON.
+   * Evaluates technical qualifications, site conditions, feasibility, and contractor fit.
+3. **Mandatory Risk & Opportunity Flags:**
+   * ⏰ **Tight Deadline (<7 days / <3 days):** Flags critical preparation risk for imminent bid deadlines.
+   * 💰 **EMD Near / Over Capacity:** Flags significant working capital lockup (>80% capacity) or disqualification.
+   * 📊 **Turnover Requirements:** Compares tender minimum turnover thresholds against contractor's audited turnover.
+   * 📜 **Restrictive Eligibility:** Detects requirements such as Class 1 contractor only, proprietary OEM certificates, or joint venture restrictions.
+   * 🔍 **Missing Critical Info:** Highlights unstated contract values, missing submission deadlines, or unspecified EMD fees.
+   * 🏛️ **MSME Exemption Benefit:** Identifies applicability of EMD / document fee waivers under Indian procurement rules.
+4. **Deterministic Profile Hashing & Cache Invalidation:**
+   * Verdicts are saved in `tender_verdicts` keyed by `(tender_id, profile_hash)`.
+   * When a contractor updates their profile in the UI or API, `profile_hash` changes immediately: subsequent views recalculate recommendations seamlessly without manual cache clearing.
+5. **Offline Mock Mode (`MOCK_LLM=1`):**
+   * 100% deterministic rule-based evaluation engine running offline with zero API calls.
+
+### 3. REST API & UI Integration
+* `GET /api/profile`: Retrieves current active bidder profile.
+* `PUT /api/profile`: Validates (`min <= max`, non-negative) and updates bidder profile.
+* `GET /api/tenders?recommended=true`: Filters the tender feed to return only `BID`-recommended tenders.
+* `GET /api/tenders/{id}/verdict`: Returns structured advisory assessment JSON.
+* **UI Features:**
+  * **Profile Setup Page (`/profile`):** Pre-filled form with sensible Indian contractor defaults and validation guards.
+  * **Interactive Tender Feed (`/`):** Color-coded verdict badges (🟢 `BID`, 🟡 `REVIEW`, 🔴 `NO_BID`) + match score pill + one-click expandable advisor detail panel.
+  * **"Recommended for me" Filter Toggle:** Instantly filters the dashboard to tenders recommended for the active profile.
+  * **Tender Detail Page (`/tenders/{id}`):** Full-page advisory card displaying key details, decision rationale, and severity-colored risk flags.
+
+---
+
+## 🧪 Testing & Quality Gates
+
+Run the comprehensive pytest suite in offline mock mode (no API keys required):
+
+```bash
+MOCK_SERPAPI=1 MOCK_LLM=1 pytest -v
+```
+
+The test suite covers:
+* ✅ Watchlist CRUD and input validation.
+* ✅ URL normalization and canonical deduplication.
+* ✅ Search cache TTL and SerpApi credit conservation.
+* ✅ Bidder profile CRUD, range validation (`min <= max`, non-negative), and stable hashing.
+* ✅ Deterministic pre-filter (category match, value bracket, EMD capacity).
+* ✅ Strict JSON schema validation for BidVerdict models.
+* ✅ Mock-mode verdict determinism (identical results across runs).
+* ✅ Cache invalidation on profile change.
+* ✅ "Recommended for me" filtering across Web UI and REST API.

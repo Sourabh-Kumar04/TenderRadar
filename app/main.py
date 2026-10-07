@@ -29,14 +29,23 @@ from app.db import (
     get_tenders,
     get_tender,
     get_tenders_stats,
-    get_scan_logs
+    get_scan_logs,
+    get_bidder_profile,
+    save_bidder_profile
 )
 from app.models import (
     WatchlistCreate,
     WatchlistUpdate,
     Tender,
-    StatsOverview
+    StatsOverview,
+    BidVerdict
 )
+from app.bidder_profile import (
+    BidderProfile,
+    get_default_profile,
+    compute_profile_hash
+)
+from app.bid_advisor import get_or_compute_verdict
 from app.scheduler import scan_manager
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
@@ -54,7 +63,14 @@ async def lifespan(app: FastAPI):
     logger.info("Initializing database...")
     init_db(settings.DATABASE_PATH)
     seed_default_watchlists_if_empty(settings.DATABASE_PATH)
-    
+
+    # Initialize default bidder profile if empty
+    existing_profile = get_bidder_profile(settings.DATABASE_PATH)
+    if not existing_profile:
+        default_prof = get_default_profile()
+        save_bidder_profile(settings.DATABASE_PATH, default_prof.model_dump())
+        logger.info(f"Initialized default bidder profile: '{default_prof.company_name}'")
+
     # Pre-populate on empty database so dashboard is immediately ready
     stats = get_tenders_stats(settings.DATABASE_PATH)
     if stats["total_tenders"] == 0:
@@ -63,7 +79,7 @@ async def lifespan(app: FastAPI):
 
     logger.info("Starting APScheduler...")
     scan_manager.start_scheduler()
-    
+
     yield
     
     logger.info("Shutting down APScheduler...")
@@ -94,12 +110,24 @@ async def dashboard_view(
     urgency: Optional[str] = Query(None),
     watchlist_id: Optional[int] = Query(None),
     sort_order: str = Query("asc"),
+    recommended: Optional[str] = Query(None),
     message: Optional[str] = Query(None),
     error: Optional[str] = Query(None)
 ):
     settings = get_settings()
     sort_by = "newest" if sort_order == "newest" else "deadline"
     order = "desc" if sort_order == "desc" else "asc"
+
+    # Load active bidder profile
+    profile_dict = get_bidder_profile(settings.DATABASE_PATH)
+    if profile_dict:
+        profile = BidderProfile(**profile_dict)
+    else:
+        profile = get_default_profile()
+        save_bidder_profile(settings.DATABASE_PATH, profile.model_dump())
+    profile_hash = compute_profile_hash(profile)
+
+    is_recommended = recommended in ("1", "true", "yes")
 
     tenders = get_tenders(
         db_path=settings.DATABASE_PATH,
@@ -109,8 +137,22 @@ async def dashboard_view(
         search=search,
         sort_by=sort_by,
         sort_order=order,
-        limit=100
+        limit=100,
+        profile_hash=profile_hash,
+        recommended_only=is_recommended
     )
+
+    # Ensure all displayed tenders have verdicts computed & cached
+    for t in tenders:
+        if not t.get("advisor_verdict"):
+            verd = get_or_compute_verdict(t, profile, settings.DATABASE_PATH)
+            t["verdict"] = verd.get("verdict")
+            t["match_score"] = verd.get("match_score")
+            t["advisor_verdict"] = verd
+
+    if is_recommended:
+        tenders = [t for t in tenders if t.get("verdict") == "BID"]
+
     stats = get_tenders_stats(settings.DATABASE_PATH)
     watchlists = get_watchlists(settings.DATABASE_PATH)
 
@@ -122,6 +164,8 @@ async def dashboard_view(
             "tenders": tenders,
             "stats": stats,
             "watchlists": watchlists,
+            "profile": profile,
+            "recommended": is_recommended,
             "search_query": search,
             "selected_portal": portal,
             "selected_urgency": urgency,
@@ -132,6 +176,72 @@ async def dashboard_view(
             "error": error
         }
     )
+
+
+@app.get("/profile", response_class=HTMLResponse)
+async def profile_view(
+    request: Request,
+    message: Optional[str] = Query(None),
+    error: Optional[str] = Query(None)
+):
+    settings = get_settings()
+    profile_dict = get_bidder_profile(settings.DATABASE_PATH)
+    if profile_dict:
+        profile = BidderProfile(**profile_dict)
+    else:
+        profile = get_default_profile()
+        save_bidder_profile(settings.DATABASE_PATH, profile.model_dump())
+
+    return templates.TemplateResponse(
+        request=request,
+        name="profile.html",
+        context={
+            "active_page": "profile",
+            "profile": profile,
+            "message": message,
+            "error": error
+        }
+    )
+
+
+@app.post("/profile")
+async def update_profile_form(
+    company_name: str = Form(...),
+    categories: str = Form(""),
+    min_contract_value: float = Form(0.0),
+    max_contract_value: float = Form(100000000.0),
+    annual_turnover: float = Form(0.0),
+    max_emd_capacity: float = Form(0.0),
+    msme_registered: Optional[bool] = Form(False),
+    startup_registered: Optional[bool] = Form(False),
+    certifications: str = Form(""),
+    preferred_states: str = Form("")
+):
+    settings = get_settings()
+    try:
+        profile = BidderProfile(
+            company_name=company_name,
+            categories=categories,
+            min_contract_value=min_contract_value,
+            max_contract_value=max_contract_value,
+            annual_turnover=annual_turnover,
+            max_emd_capacity=max_emd_capacity,
+            msme_registered=bool(msme_registered),
+            startup_registered=bool(startup_registered),
+            certifications=certifications,
+            preferred_states=preferred_states
+        )
+        save_bidder_profile(settings.DATABASE_PATH, profile.model_dump())
+        return RedirectResponse(
+            url="/profile?message=Bidder+profile+saved+successfully.+Advisor+recommendations+updated.",
+            status_code=status.HTTP_303_SEE_OTHER
+        )
+    except Exception as e:
+        err_msg = str(e).replace("\n", " ").replace(" ", "+")
+        return RedirectResponse(
+            url=f"/profile?error={err_msg}",
+            status_code=status.HTTP_303_SEE_OTHER
+        )
 
 
 @app.get("/watchlists", response_class=HTMLResponse)
@@ -256,16 +366,27 @@ async def scans_view(request: Request):
 @app.get("/tenders/{tender_id}", response_class=HTMLResponse)
 async def tender_detail_view(request: Request, tender_id: int):
     settings = get_settings()
-    tender = get_tender(settings.DATABASE_PATH, tender_id)
+    profile_dict = get_bidder_profile(settings.DATABASE_PATH)
+    profile = BidderProfile(**profile_dict) if profile_dict else get_default_profile()
+    profile_hash = compute_profile_hash(profile)
+
+    tender = get_tender(settings.DATABASE_PATH, tender_id, profile_hash=profile_hash)
     if not tender:
         raise HTTPException(status_code=404, detail="Tender not found")
+
+    if not tender.get("advisor_verdict"):
+        verd = get_or_compute_verdict(tender, profile, settings.DATABASE_PATH)
+        tender["verdict"] = verd.get("verdict")
+        tender["match_score"] = verd.get("match_score")
+        tender["advisor_verdict"] = verd
 
     return templates.TemplateResponse(
         request=request,
         name="tender_detail.html",
         context={
             "active_page": "dashboard",
-            "tender": tender
+            "tender": tender,
+            "profile": profile
         }
     )
 
@@ -349,6 +470,24 @@ async def export_csv(
 # REST API Endpoints (JSON)
 # ==========================================
 
+@app.get("/api/profile")
+async def api_get_profile():
+    settings = get_settings()
+    profile_dict = get_bidder_profile(settings.DATABASE_PATH)
+    if profile_dict:
+        return BidderProfile(**profile_dict)
+    default_p = get_default_profile()
+    save_bidder_profile(settings.DATABASE_PATH, default_p.model_dump())
+    return default_p
+
+
+@app.put("/api/profile")
+async def api_update_profile(profile: BidderProfile):
+    settings = get_settings()
+    saved = save_bidder_profile(settings.DATABASE_PATH, profile.model_dump())
+    return BidderProfile(**saved)
+
+
 @app.get("/api/watchlists")
 async def api_list_watchlists():
     settings = get_settings()
@@ -412,11 +551,16 @@ async def api_list_tenders(
     search: Optional[str] = None,
     sort_by: str = "deadline",
     sort_order: str = "asc",
+    recommended: bool = Query(False),
     limit: int = 100,
     offset: int = 0
 ):
     settings = get_settings()
-    return get_tenders(
+    profile_dict = get_bidder_profile(settings.DATABASE_PATH)
+    profile = BidderProfile(**profile_dict) if profile_dict else get_default_profile()
+    p_hash = compute_profile_hash(profile)
+
+    tenders = get_tenders(
         db_path=settings.DATABASE_PATH,
         watchlist_id=watchlist_id,
         portal=portal,
@@ -425,17 +569,48 @@ async def api_list_tenders(
         sort_by=sort_by,
         sort_order=sort_order,
         limit=limit,
-        offset=offset
+        offset=offset,
+        profile_hash=p_hash,
+        recommended_only=recommended
     )
+    for t in tenders:
+        if not t.get("advisor_verdict"):
+            verd = get_or_compute_verdict(t, profile, settings.DATABASE_PATH)
+            t["verdict"] = verd.get("verdict")
+            t["match_score"] = verd.get("match_score")
+            t["advisor_verdict"] = verd
+
+    if recommended:
+        tenders = [t for t in tenders if t.get("verdict") == "BID"]
+    return tenders
 
 
 @app.get("/api/tenders/{tender_id}")
 async def api_get_tender(tender_id: int):
     settings = get_settings()
-    t = get_tender(settings.DATABASE_PATH, tender_id)
+    profile_dict = get_bidder_profile(settings.DATABASE_PATH)
+    profile = BidderProfile(**profile_dict) if profile_dict else get_default_profile()
+    p_hash = compute_profile_hash(profile)
+    t = get_tender(settings.DATABASE_PATH, tender_id, profile_hash=p_hash)
     if not t:
         raise HTTPException(status_code=404, detail="Tender not found")
+    if not t.get("advisor_verdict"):
+        verd = get_or_compute_verdict(t, profile, settings.DATABASE_PATH)
+        t["verdict"] = verd.get("verdict")
+        t["match_score"] = verd.get("match_score")
+        t["advisor_verdict"] = verd
     return t
+
+
+@app.get("/api/tenders/{tender_id}/verdict")
+async def api_get_tender_verdict_route(tender_id: int):
+    settings = get_settings()
+    profile_dict = get_bidder_profile(settings.DATABASE_PATH)
+    profile = BidderProfile(**profile_dict) if profile_dict else get_default_profile()
+    tender = get_tender(settings.DATABASE_PATH, tender_id)
+    if not tender:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    return get_or_compute_verdict(tender, profile, settings.DATABASE_PATH)
 
 
 @app.post("/api/scan")

@@ -110,6 +110,9 @@ class Tender(BaseModel):
     urgency_status: UrgencyStatus = UrgencyStatus.FLEXIBLE
     created_at: str
     updated_at: str
+    verdict: Optional[str] = None
+    match_score: Optional[int] = None
+    advisor_verdict: Optional[Dict[str, Any]] = None
 
 
 class ScanLog(BaseModel):
@@ -129,3 +132,35 @@ class StatsOverview(BaseModel):
     urgent_closing_soon: int = 0
     total_scans: int = 0
     top_portals: Dict[str, int] = {}
+
+
+class FlagSeverity(str, Enum):
+    INFO = "info"
+    WARNING = "warning"
+    CRITICAL = "critical"
+
+
+class VerdictStatus(str, Enum):
+    BID = "BID"
+    NO_BID = "NO_BID"
+    REVIEW = "REVIEW"
+
+
+class BidFlag(BaseModel):
+    severity: FlagSeverity
+    text: str
+
+
+class KeyDetails(BaseModel):
+    est_value: str = "Unknown"
+    emd: str = "Not Specified"
+    deadline: str = "Unknown"
+    eligibility_summary: str = "Refer to RFP"
+
+
+class BidVerdict(BaseModel):
+    verdict: VerdictStatus
+    match_score: int = Field(..., ge=0, le=100)
+    key_details: KeyDetails
+    reasons: List[str] = Field(default_factory=list)
+    flags: List[BidFlag] = Field(default_factory=list)
