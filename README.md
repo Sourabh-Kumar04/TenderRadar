@@ -56,25 +56,65 @@ A SerpApi free tier account includes 250 credits/month. TenderRadar is engineere
 
 ---
 
+## 🔍 Dual Search Providers: SerpApi (Primary) & Reserp v2 (Fallback)
+
+TenderRadar implements a resilient multi-provider search architecture engineered for production continuity:
+
+### 1. SerpApi (Primary Provider — Built for Hackathon Evaluation)
+* **Role:** Primary search provider exercising SerpApi's Google Search API.
+* **Authoritative Footprint:** Searches GeM, CPPP, eTenders, IREPS, and state portals.
+* **Localization:** Strict India geotargeting (`gl=in`, `hl=en`, `location=India`).
+* **Credit Optimization:** 250 credits/month free tier conserved with SHA-256 SQLite caching (24h TTL) and bounded batches (`num=10`).
+
+### 2. Reserp v2 API (Secondary Fallback Provider)
+* **Role:** Secondary fallback provider implementing the Reserp v2 API ([https://reserp.ai/docs](https://reserp.ai/docs)).
+* **Endpoints:**
+  * `POST /v2/serp/search`: Dispatches full Google search URLs (`https://www.google.com/search?q=...&hl=en&gl=in`) with India geotargeting, mapping response results (`{ok, results: [{url, text}]}`) into the unified tender-result schema.
+  * `POST /v2/serp/structured`: Returns raw block data for diagnostics and inspection.
+* **Generous Free Tier:** 5,000 free requests/month, providing extensive headroom if SerpApi credits are depleted.
+* **Configurable:** Controlled via `SEARCH_PROVIDER=serpapi|reserp` (default: `serpapi`) in `app/config.py`.
+
+### 3. Automatic Provider Fallback
+* If the primary provider raises an exception or fails, TenderRadar automatically tries the other provider once before falling back to simulated continuity fixtures. Zero human intervention is required.
+* Both providers share the offline mock engine pattern (`MOCK_SERPAPI=1` or unset keys), allowing complete offline testing.
+
+---
+
+## 🤖 LLM Summarizer: Fireworks AI & DeepSeek V4P1 Flash
+
+TenderRadar leverages **Fireworks AI** running **DeepSeek V4P1 Flash** (`accounts/fireworks/models/deepseek-v4p1-flash`) via an OpenAI-compatible endpoint:
+* **Endpoint:** `https://api.fireworks.ai/inference/v1`
+* **Model Selection:** Verified against Fireworks `/models` catalog for low-latency, reasoning-capable procurement parsing.
+* **Structured Extraction:** Directly extracts scope of work, technical eligibility, EMD amounts, tender document fees, normalized ISO submission deadlines (`YYYY-MM-DD`), and strategic bid takeaways.
+* **Configurability:** Fully overridable via `FIREWORKS_API_KEY`, `LLM_BASE_URL`, and `LLM_MODEL` environment variables.
+* **Offline Mode:** Seamless fallback to rule-based heuristic extraction when `MOCK_LLM=1` or keys are absent.
+
+---
+
 ## 🏗️ Architecture & Pipeline
 
 ```mermaid
 flowchart TD
     A["User Watchlists\n(Keywords: Solar EPC, Highway, CCTV)"] --> B["Scheduler (APScheduler)\nDaily Cron + On-Demand Scan"]
-    B --> C["SerpApi Client\n(gl=in, location=India)"]
-    C --> D{"Search Cache\n(SQLite 24h TTL)"}
-    D -- "Cache Hit" --> E["Cached Organic Results"]
-    D -- "Cache Miss" --> F["SerpApi Google Search API"]
-    F --> D
-    F --> E
-    E --> G["URL Normalization &\nDeduplication Engine"]
-    G --> H{"Already in DB?\n(Canonical URL check)"}
-    H -- "Duplicate" --> I["Skip (Conserve LLM/DB)"]
-    H -- "New Bid" --> J["LLM Summarizer Pipeline\n(OpenAI / Groq / Fallback)"]
-    J --> K["Structured Tender Record\n- EMD & Fees\n- Submission Deadline\n- Eligibility & Scope\n- Bidder Strategy"]
-    K --> L[("SQLite Database\ntenders.db")]
-    L --> M["FastAPI + Jinja2 Web UI\n(Deadline-Sorted Cards & Urgency Badges)"]
-    L --> N["CSV Export & REST API"]
+    B --> C{"Search Provider Selection\n(SEARCH_PROVIDER=serpapi|reserp)"}
+    C -- "Primary: serpapi" --> D["SerpApi Client\n(gl=in, location=India)"]
+    C -- "Primary: reserp" --> E["Reserp v2 Client\n(gl=in, hl=en, 5000 req/mo)"]
+    D -. "Auto-Fallback on Failure" .-> E
+    E -. "Auto-Fallback on Failure" .-> D
+    D --> F{"Search Cache\n(SQLite 24h TTL)"}
+    E --> F
+    F -- "Cache Hit" --> G["Cached Organic Results"]
+    F -- "Cache Miss" --> H["API Results Normalizer"]
+    H --> F
+    H --> G
+    G --> I["URL Normalization &\nDeduplication Engine"]
+    I --> J{"Already in DB?\n(Canonical URL check)"}
+    J -- "Duplicate" --> K["Skip (Conserve LLM/DB)"]
+    J -- "New Bid" --> L["Fireworks AI Summarizer\n(DeepSeek V4P1 Flash / Fallback)"]
+    L --> M["Structured Tender Record\n- EMD & Fees\n- Submission Deadline\n- Eligibility & Scope\n- Bidder Strategy"]
+    M --> N[("SQLite Database\ntenders.db")]
+    N --> O["FastAPI + Jinja2 Web UI\n(Deadline-Sorted Cards & Urgency Badges)"]
+    N --> P["CSV Export & REST API"]
 ```
 
 ---
@@ -139,10 +179,16 @@ cp .env.example .env
 ```
 Edit `.env` (optional — TenderRadar runs out-of-the-box with built-in mock engines if no keys are provided):
 ```ini
+# Search Providers (SerpApi primary, Reserp fallback)
+SEARCH_PROVIDER=serpapi
 SERPAPI_API_KEY=your_serpapi_key_here
-LLM_API_KEY=your_openai_or_groq_key_here
-LLM_BASE_URL=https://api.openai.com/v1
-LLM_MODEL=gpt-4o-mini
+RESERP_API_KEY=your_reserp_key_here
+RESERP_BASE_URL=https://api.reserp.ai
+
+# Fireworks AI (DeepSeek V4P1 Flash)
+FIREWORKS_API_KEY=your_fireworks_key_here
+LLM_BASE_URL=https://api.fireworks.ai/inference/v1
+LLM_MODEL=accounts/fireworks/models/deepseek-v4p1-flash
 ```
 
 ### 6. Run the Application

@@ -60,3 +60,30 @@ def test_scan_manager_full_scan(temp_db):
     logs = get_scan_logs(temp_db)
     assert len(logs) > 0
     assert any("Completed full scan" in l["message"] for l in logs)
+
+
+def test_scan_manager_fallback_behavior(temp_db, monkeypatch):
+    manager = ScanManager(db_path=temp_db)
+
+    # Simulate primary failure on serp_client
+    def failing_search(*args, **kwargs):
+        raise ConnectionError("Simulated primary SerpApi network failure")
+
+    monkeypatch.setattr(manager.serp_client, "search_tenders", failing_search)
+
+    # Search should automatically fallback to reserp_client and succeed
+    results = manager.search_tenders("Solar Rooftop")
+    assert len(results) > 0
+    assert any("solar" in r["title"].lower() for r in results)
+
+
+def test_scan_manager_provider_selection_reserp(temp_db, monkeypatch):
+    from app.config import get_settings
+    monkeypatch.setenv("SEARCH_PROVIDER", "reserp")
+    get_settings.cache_clear()
+
+    manager = ScanManager(db_path=temp_db)
+    results = manager.search_tenders("Hospital ICU")
+    assert len(results) > 0
+    get_settings.cache_clear()
+

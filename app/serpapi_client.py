@@ -188,7 +188,7 @@ class SerpApiClient:
         self.db_path = db_path if db_path is not None else settings.DATABASE_PATH
         self.cache_ttl_hours = settings.CACHE_TTL_HOURS
 
-    def search_tenders(self, keyword: str, state_filter: Optional[str] = None) -> List[Dict[str, Any]]:
+    def search_tenders(self, keyword: str, state_filter: Optional[str] = None, raise_on_error: bool = False) -> List[Dict[str, Any]]:
         """Executes a SerpApi Google Search for tenders, checking cache first.
         
         Returns parsed list of organic results with title, link, snippet, and portal name.
@@ -225,7 +225,10 @@ class SerpApiClient:
                 data = search.get_dict()
                 raw_items = data.get("organic_results", [])
             except Exception as e:
-                logger.error(f"SerpApi request failed ({e}); falling back to simulated data for continuity.")
+                logger.error(f"SerpApi request failed ({e})")
+                if raise_on_error:
+                    raise
+                logger.warning("Falling back to simulated data for continuity.")
                 raw_items = generate_mock_results(keyword, state_filter)
 
         # 4. Standardize results

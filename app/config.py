@@ -13,20 +13,29 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 class Settings:
     def __init__(self):
+        # Search Provider Configuration (SerpApi primary, Reserp secondary)
+        provider = os.getenv("SEARCH_PROVIDER", "serpapi").strip().lower()
+        self.SEARCH_PROVIDER: str = provider if provider in ("serpapi", "reserp") else "serpapi"
+
         # SerpApi Credentials
         self.SERPAPI_API_KEY: str = os.getenv("SERPAPI_API_KEY", "").strip()
+
+        # Reserp Credentials & Configuration (Secondary search provider)
+        self.RESERP_API_KEY: str = os.getenv("RESERP_API_KEY", "").strip()
+        self.RESERP_BASE_URL: str = os.getenv("RESERP_BASE_URL", "https://api.reserp.ai").strip().rstrip("/")
         
-        # LLM Credentials & Configuration
-        self.LLM_API_KEY: str = os.getenv("LLM_API_KEY", "").strip()
-        self.LLM_BASE_URL: str = os.getenv("LLM_BASE_URL", "https://api.openai.com/v1").strip()
-        self.LLM_MODEL: str = os.getenv("LLM_MODEL", "gpt-4o-mini").strip()
+        # Fireworks AI / LLM Credentials & Configuration
+        self.FIREWORKS_API_KEY: str = os.getenv("FIREWORKS_API_KEY", "").strip() or os.getenv("LLM_API_KEY", "").strip()
+        self.LLM_API_KEY: str = self.FIREWORKS_API_KEY
+        self.LLM_BASE_URL: str = os.getenv("LLM_BASE_URL", "https://api.fireworks.ai/inference/v1").strip().rstrip("/")
+        self.LLM_MODEL: str = os.getenv("LLM_MODEL", "accounts/fireworks/models/deepseek-v4p1-flash").strip()
         
         # Explicit mock mode flags or auto-fallback
         mock_serp = os.getenv("MOCK_SERPAPI", "").lower()
         self.MOCK_SERPAPI: bool = mock_serp in ("1", "true", "yes") or not bool(self.SERPAPI_API_KEY)
         
         mock_llm = os.getenv("MOCK_LLM", "").lower()
-        self.MOCK_LLM: bool = mock_llm in ("1", "true", "yes") or not bool(self.LLM_API_KEY)
+        self.MOCK_LLM: bool = mock_llm in ("1", "true", "yes") or not bool(self.FIREWORKS_API_KEY)
         
         # Database
         default_db_path = str(BASE_DIR / "data" / "tenders.db")

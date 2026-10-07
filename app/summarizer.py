@@ -14,7 +14,8 @@ import re
 import json
 import logging
 from datetime import datetime, date, timedelta
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
+import requests
 from openai import OpenAI
 
 from app.config import get_settings
@@ -142,13 +143,69 @@ def rule_based_mock_summary(title: str, snippet: str, portal_name: str) -> Tende
     )
 
 
-class TenderSummarizer:
-    """Summarizes tender notices using an OpenAI-compatible endpoint or rule-based fallback."""
+def query_fireworks_models(api_key: str, base_url: str = "https://api.fireworks.ai/inference/v1") -> List[str]:
+    """Queries GET /models from Fireworks AI to list available models."""
+    clean_base = base_url.rstrip("/")
+    endpoint = f"{clean_base}/models"
+    headers = {"Authorization": f"Bearer {api_key}"}
+    try:
+        resp = requests.get(endpoint, headers=headers, timeout=15.0)
+        if resp.status_code == 200:
+            data = resp.json()
+            return [m["id"] for m in data.get("data", [])]
+        logger.warning(f"Fireworks /models returned HTTP {resp.status_code}: {resp.text}")
+    except Exception as e:
+        logger.warning(f"Failed to query Fireworks models list: {e}")
+    return []
+
+
+def verify_deepseek_model(
+    api_key: str,
+    target_name: str = "deepseek-v4p1-flash",
+    base_url: str = "https://api.fireworks.ai/inference/v1"
+) -> str:
+    """Verifies and returns the exact Fireworks model ID matching target_name.
     
-    def __init__(self, api_key: Optional[str] = None, base_url: Optional[str] = None, model: Optional[str] = None, mock_mode: Optional[bool] = None):
+    If the exact ID is not found, selects the closest flash-tier DeepSeek model.
+    """
+    model_ids = query_fireworks_models(api_key, base_url)
+    
+    # 1. Exact match or suffix match
+    for m in model_ids:
+        if m == target_name or m.endswith(f"/{target_name}"):
+            return m
+            
+    # 2. Flash-tier DeepSeek search
+    flash_candidates = [m for m in model_ids if "deepseek" in m.lower() and "flash" in m.lower()]
+    if flash_candidates:
+        chosen = flash_candidates[0]
+        logger.info(f"Target '{target_name}' mapped to available flash model: '{chosen}'")
+        return chosen
+
+    # 3. Any DeepSeek model
+    ds_candidates = [m for m in model_ids if "deepseek" in m.lower()]
+    if ds_candidates:
+        chosen = ds_candidates[0]
+        logger.info(f"Target '{target_name}' mapped to available DeepSeek model: '{chosen}'")
+        return chosen
+
+    # Default canonical Fireworks model path
+    return f"accounts/fireworks/models/{target_name}"
+
+
+class TenderSummarizer:
+    """Summarizes tender notices using Fireworks AI (DeepSeek V4P1 Flash) or rule-based fallback."""
+    
+    def __init__(
+        self,
+        api_key: Optional[str] = None,
+        base_url: Optional[str] = None,
+        model: Optional[str] = None,
+        mock_mode: Optional[bool] = None
+    ):
         settings = get_settings()
-        self.api_key = api_key if api_key is not None else settings.LLM_API_KEY
-        self.base_url = base_url if base_url is not None else settings.LLM_BASE_URL
+        self.api_key = api_key if api_key is not None else (settings.FIREWORKS_API_KEY or settings.LLM_API_KEY)
+        self.base_url = (base_url if base_url is not None else settings.LLM_BASE_URL).rstrip("/")
         self.model = model if model is not None else settings.LLM_MODEL
         self.mock_mode = mock_mode if mock_mode is not None else settings.MOCK_LLM
 
@@ -158,9 +215,9 @@ class TenderSummarizer:
         if self.mock_mode or not self.api_key:
             return rule_based_mock_summary(title, snippet, portal_name)
 
-        # Real LLM Call using OpenAI-compatible client
+        # Real LLM Call using Fireworks OpenAI-compatible endpoint
         try:
-            client = OpenAI(api_key=self.api_key, base_url=self.base_url, timeout=15.0)
+            client = OpenAI(api_key=self.api_key, base_url=self.base_url, timeout=30.0)
             
             prompt = f"""
 You are an expert Indian Government procurement analyst. Analyze this tender search result and extract structured bid intelligence.
@@ -185,10 +242,19 @@ Respond with valid JSON containing the following keys:
                 ],
                 response_format={"type": "json_object"},
                 temperature=0.2,
-                max_tokens=400
+                max_tokens=4096
             )
             raw_content = response.choices[0].message.content or "{}"
-            parsed = json.loads(raw_content)
+            raw_content = raw_content.strip()
+            # Strip markdown code fences if model enclosed JSON
+            if raw_content.startswith("```json"):
+                raw_content = raw_content[7:]
+            elif raw_content.startswith("```"):
+                raw_content = raw_content[3:]
+            if raw_content.endswith("```"):
+                raw_content = raw_content[:-3]
+
+            parsed = json.loads(raw_content.strip())
 
             deadline_val = parsed.get("deadline_date")
             urgency = compute_urgency(deadline_val)

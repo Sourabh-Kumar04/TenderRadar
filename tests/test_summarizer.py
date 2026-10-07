@@ -83,3 +83,45 @@ def test_summarizer_mock_mode_no_keys_required():
     assert "1,50,000" in summary.emd_amount
     assert summary.deadline_date == "2026-10-28"
     assert summary.urgency_status is not None
+
+
+def test_verify_deepseek_model_fallback(monkeypatch):
+    from app.summarizer import verify_deepseek_model
+    
+    # 1. Exact match in catalog
+    monkeypatch.setattr(
+        "app.summarizer.query_fireworks_models",
+        lambda *args, **kwargs: ["accounts/fireworks/models/deepseek-v4p1-flash", "accounts/fireworks/models/llama-3"]
+    )
+    m1 = verify_deepseek_model("dummy_key", "deepseek-v4p1-flash")
+    assert m1 == "accounts/fireworks/models/deepseek-v4p1-flash"
+
+    # 2. Closest flash-tier DeepSeek model if exact is absent
+    monkeypatch.setattr(
+        "app.summarizer.query_fireworks_models",
+        lambda *args, **kwargs: ["accounts/fireworks/models/deepseek-v3-flash", "accounts/fireworks/models/qwen"]
+    )
+    m2 = verify_deepseek_model("dummy_key", "deepseek-v4p1-flash")
+    assert m2 == "accounts/fireworks/models/deepseek-v3-flash"
+
+    # 3. Default path when catalog is unreachable
+    monkeypatch.setattr(
+        "app.summarizer.query_fireworks_models",
+        lambda *args, **kwargs: []
+    )
+    m3 = verify_deepseek_model("dummy_key", "deepseek-v4p1-flash")
+    assert m3 == "accounts/fireworks/models/deepseek-v4p1-flash"
+
+
+def test_summarizer_config_override():
+    custom_model = "accounts/fireworks/models/custom-model"
+    custom_url = "https://custom.endpoint/v1"
+    summarizer = TenderSummarizer(
+        api_key="test_key",
+        base_url=custom_url,
+        model=custom_model,
+        mock_mode=True
+    )
+    assert summarizer.model == custom_model
+    assert summarizer.base_url == custom_url
+
