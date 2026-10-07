@@ -70,8 +70,6 @@ TenderRadar searches tender portals through SerpApi’s Google Search API:
 * If the SerpApi call raises an exception or fails, TenderRadar falls back to simulated continuity fixtures so scans never crash. Zero human intervention is required.
 * The offline mock engine pattern (`MOCK_SERPAPI=1` or unset keys) allows complete offline testing.
 
-* If the primary provider raises an exception or fails, TenderRadar automatically tries the other provider once before falling back to simulated continuity fixtures. Zero human intervention is required.
-* Both providers share the offline mock engine pattern (`MOCK_SERPAPI=1` or unset keys), allowing complete offline testing.
 
 ---
 
@@ -182,8 +180,6 @@ MOCK_LLM=0
 
 ### 6. Run Application
 ```bash
-python3 -m app.main
-# Or run with uvicorn directly:
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 Open **http://localhost:8000** in your browser to access the dashboard.
