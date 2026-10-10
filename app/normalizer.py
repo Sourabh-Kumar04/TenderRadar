@@ -263,7 +263,10 @@ def select_portal_url(original_url: Optional[str], canonical_url: Optional[str] 
 def display_title(title, portal_name, snippet=""):
     """Return a human-readable title, never a raw URL."""
     t = (title or "").strip()
-    if t and not t.startswith("http"):
+    # Reject raw URLs and bare filenames (e.g. "abc123TenderDocument.pdf")
+    is_url = t.startswith("http")
+    is_filename = bool(re.match(r'^[\w\-.]+\.(pdf|doc|docx|xls|xlsx)$', t, re.I)) and " " not in t
+    if t and not is_url and not is_filename:
         return t
     # Title is a URL or empty — derive from portal
     portal = (portal_name or "").strip()
