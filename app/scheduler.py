@@ -24,6 +24,7 @@ from app.db import (
 from app.serpapi_client import SerpApiClient
 from app.summarizer import TenderSummarizer
 from app.quality_gate import quality_gate
+from app.multi_doc import _extract_from_article
 
 logger = logging.getLogger(__name__)
 
@@ -206,10 +207,26 @@ class ScanManager:
                 logger.info(f"Quality gate rejected: {item['title'][:50]} - {gate.get('reason', '')}")
                 continue
 
+            # If news article: extract full text, find official URLs, enrich
+            enriched_snippet = item["snippet"]
+            enriched_url = item["original_url"]
+            if gate.get("is_news_article"):
+                try:
+                    article_data = _extract_from_article(item["original_url"], item["title"])
+                    if article_data.get("found"):
+                        enriched_snippet = article_data["text"][:2000]
+                        # Prefer official links found in article
+                        official = article_data.get("official_links", [])
+                        if official:
+                            enriched_url = official[0]
+                            logger.info(f"News article -> official URL: {enriched_url[:60]}")
+                except Exception as e:
+                    logger.warning(f"Article extraction failed: {e}")
+
             # Run LLM Summarizer Pipeline
             summary = self.summarizer.summarize(
                 title=item["title"],
-                snippet=item["snippet"],
+                snippet=enriched_snippet,
                 portal_name=item["portal_name"]
             )
 

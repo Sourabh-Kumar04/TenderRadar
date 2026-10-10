@@ -47,15 +47,14 @@ Portal: {portal_name}
 Snippet: {snippet[:500]}
 
 REJECT if:
-- It's a news article ABOUT tenders (not a tender itself)
-- It's a portal homepage (not a specific tender)
+- It's a portal homepage with no specific tender info
 - It's a help/training/MoU page
-- It's an aggregator listing page ("X tenders in India")
 - It's clearly not a procurement opportunity
 
 KEEP if:
 - It's a specific tender notice with scope/work described
 - It's a bid invitation, RFP, EOI, or auction notice
+- It's a NEWS ARTICLE about a specific tender (we'll extract details + follow to official URL)
 
 Return JSON: {{"keep": true/false, "reason": "one-line reason", "tender_type": "works|goods|services|unknown"}}"""
 
@@ -71,10 +70,12 @@ Return JSON: {{"keep": true/false, "reason": "one-line reason", "tender_type": "
         )
         raw = (resp.choices[0].message.content or "{}").strip()
         data = json.loads(raw)
+        is_news = any(d in url.lower() for d in ['news', 'blog', 'article', 'energetica', 'mercom', 'saurenergy', 'economic-times', 'business-standard'])
         return {
             "keep": bool(data.get("keep", True)),
             "reason": str(data.get("reason", ""))[:100],
             "tender_type": str(data.get("tender_type", "unknown")),
+            "is_news_article": is_news,
         }
     except Exception as e:
         logger.warning(f"Quality gate failed: {e}")
