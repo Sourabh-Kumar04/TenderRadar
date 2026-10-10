@@ -1875,3 +1875,30 @@ body { background: #fafafa; }
   margin: 0 0 0.25rem; color: var(--text-main);
 }
 .queue-sub { font-size: 0.9rem; color: var(--text-muted); margin: 0; }
+
+/* Hero side panel */
+.cmd-hero { display: grid; grid-template-columns: 1fr 320px; gap: 2rem; align-items: center; }
+.cmd-side {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px; padding: 1.25rem; position: relative; z-index: 1;
+}
+.cmd-side-label {
+  font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; color: #71717a; margin-bottom: 0.75rem;
+}
+.cmd-signal {
+  display: flex; align-items: flex-start; gap: 0.6rem;
+  padding: 0.6rem 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.cmd-signal:last-of-type { border-bottom: none; }
+.cmd-signal .vr-pill { flex-shrink: 0; font-size: 0.62rem; }
+.cmd-signal-title {
+  font-size: 0.8rem; color: #d4d4d8; line-height: 1.4;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.cmd-side-note { font-size: 0.7rem; color: #52525b; margin-top: 0.75rem; }
+@media (max-width: 860px) {
+  .cmd-hero { grid-template-columns: 1fr; }
+  .cmd-side { display: none; }
+}

@@ -20,23 +20,19 @@
       <a href="/scan" class="cmd-btn-ghost">Scan portals &rarr;</a>
     </div>
   </div>
+  <div class="cmd-side">
+    <div class="cmd-side-label">Top signals</div>
+    {% for t in tenders[:3] %}
+    <div class="cmd-signal">
+      <span class="vr-pill vr-{{ t.verdict|lower }}">{{ t.verdict }} {{ t.match_score }}%</span>
+      <span class="cmd-signal-title">{{ display_title(t.title, t.portal_name, t.snippet) }}</span>
+    </div>
+    {% endfor %}
+    <div class="cmd-side-note">Scored against your bidder profile</div>
+  </div>
   <div class="cmd-tricolor"></div>
 </div>
 
-  <!-- Primary Hero Actions Row (Instant Clarity for First-Time Visitors) -->
-  <div class="hero-actions-row">
-    <a href="#tenders-feed" class="btn btn-primary btn-lg" title="Explore live discovered tenders">
-      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-      Explore Recommended Bids ({{ stats.bid_count }})
-    </a>
-    <form action="/scan" method="POST" style="display:inline;">
-      <button type="submit" class="btn btn-secondary btn-lg scan-btn" title="Run discovery scan across official portals via SerpApi">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-        Scan Portals via SerpApi
-      </button>
-    </form>
-  </div>
-</div>
 
 <!-- Key Performance Metrics / High-Density Stitch KPI Strip -->
 
