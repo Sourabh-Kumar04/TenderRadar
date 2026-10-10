@@ -70,7 +70,10 @@ STATIC_DIR = BASE_DIR / "static"
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan: database initialization, default seeding, and scheduler startup."""
+    import os
     settings = get_settings()
+    is_vercel = os.getenv("VERCEL") == "1" or os.getenv("VERCEL_ENV") is not None or os.getenv("NOW_REGION") is not None
+
     logger.info("Initializing database...")
     init_db(settings.DATABASE_PATH)
     seed_default_watchlists_if_empty(settings.DATABASE_PATH)
@@ -81,6 +84,11 @@ async def lifespan(app: FastAPI):
         default_prof = get_default_profile()
         save_bidder_profile(settings.DATABASE_PATH, default_prof.model_dump())
         logger.info(f"Initialized default bidder profile: '{default_prof.company_name}'")
+
+    if is_vercel:
+        logger.info("Vercel serverless environment detected: skipping initial discovery scan and background APScheduler.")
+        yield
+        return
 
     # Pre-populate on empty database so dashboard is immediately ready
     stats = get_tenders_stats(settings.DATABASE_PATH)

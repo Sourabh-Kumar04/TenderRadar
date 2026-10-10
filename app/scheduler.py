@@ -53,6 +53,11 @@ class ScanManager:
 
     def start_scheduler(self) -> None:
         """Starts APScheduler background cron job."""
+        import os
+        if os.getenv("VERCEL") == "1" or os.getenv("VERCEL_ENV") is not None or os.getenv("NOW_REGION") is not None:
+            logger.info("Vercel serverless environment detected: skipping APScheduler startup.")
+            return
+
         settings = get_settings()
         if not self.scheduler.running:
             trigger = CronTrigger(
