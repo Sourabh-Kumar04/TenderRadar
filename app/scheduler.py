@@ -23,6 +23,7 @@ from app.db import (
 )
 from app.serpapi_client import SerpApiClient
 from app.summarizer import TenderSummarizer
+from app.quality_gate import quality_gate
 
 logger = logging.getLogger(__name__)
 
@@ -192,6 +193,17 @@ class ScanManager:
             # Deduplicate by normalized URL (Critical hackathon criterion!)
             if tender_exists(self.db_path, canonical_url):
                 logger.debug(f"Duplicate detected; skipping canonical URL: {canonical_url}")
+                continue
+
+            # AI Quality Gate: decide if this is a real tender worth showing
+            gate = quality_gate(
+                title=item["title"],
+                snippet=item["snippet"],
+                url=item["original_url"],
+                portal_name=item["portal_name"],
+            )
+            if not gate.get("keep", True):
+                logger.info(f"Quality gate rejected: {item['title'][:50]} - {gate.get('reason', '')}")
                 continue
 
             # Run LLM Summarizer Pipeline
