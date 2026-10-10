@@ -1,6 +1,114 @@
 {% extends "base.html" %}
 
-{% block title %}TenderRadar - Indian Government Tender Intelligence Agent<!-- Tender Chat Modal -->
+{% block title %}TenderRadar - Indian Government Tender Intelligence Agent
+{% endblock %}
+
+{% block content %}
+<!-- Winner-Level Hero & Clarity Section --><div class="cmd-hero"><div class="cmd-hero-bg"></div><div class="cmd-hero-content"><div class="cmd-eyebrow"><span class="cmd-live-dot"></span> LIVE &mdash; {{ stats.total_tenders }} TENDERS SCORED</div><h1 class="cmd-headline">Know which tenders<br>to <span class="cmd-bid">bid</span>, which to <span class="cmd-skip">skip</span>.</h1><p class="cmd-sub">TenderRadar reads every Indian government tender against your bidder profile and gives you a verdict &mdash; with the reasoning visible.</p><div class="cmd-stats"><div class="cmd-stat"><span class="cmd-num tnum">{{ stats.bid_count }}</span><span class="cmd-lbl">Bid</span></div><div class="cmd-stat"><span class="cmd-num tnum">{{ stats.review_count }}</span><span class="cmd-lbl">Review</span></div><div class="cmd-stat"><span class="cmd-num tnum">{{ stats.nobid_count }}</span><span class="cmd-lbl">No-bid</span></div></div><div class="cmd-actions"><a href="#tenders-feed" class="cmd-btn-primary">View verdicts</a><a href="/scan" class="cmd-btn-ghost">Scan portals &rarr;</a></div></div><div class="cmd-side"><div class="cmd-side-label">Top signals</div>
+ {% for t in tenders[:3] %}
+ <div class="cmd-signal"><span class="vr-pill vr-{{ t.verdict|lower }}">{{ t.verdict }} {{ t.match_score }}%</span><span class="cmd-signal-title">{{ display_title(t.title, t.portal_name, t.snippet) }}</span></div>
+ {% endfor %}
+ <div class="cmd-side-note">Scored against your bidder profile</div></div><div class="cmd-tricolor"></div></div><!-- Key Performance Metrics / High-Density Stitch KPI Strip --><!-- Quick Verdict Filter Tabs (Stitch Compliant Pills) --><a href="/auto-bid" class="autobid-banner">
+  <span class="autobid-icon-sm">
+    <svg viewBox="0 0 64 64" fill="none" width="28" height="28">
+      <rect x="8" y="16" width="48" height="36" rx="10" fill="#1a1a2e" stroke="#f26625" stroke-width="3"/>
+      <circle cx="24" cy="32" r="5" fill="#4ade80"/>
+      <circle cx="40" cy="32" r="5" fill="#4ade80"/>
+      <line x1="32" y1="16" x2="32" y2="8" stroke="#f26625" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="32" cy="6" r="3.5" fill="#f26625"/>
+    </svg>
+  </span>
+  <span class="autobid-badge">Coming Soon</span>
+  <span class="autobid-text"><strong>Auto-Bid Agent</strong> &mdash; AI prepares and submits bids automatically, only for tenders you explicitly approve.</span>
+  <span class="autobid-arrow">&rarr;</span>
+</a>
+<div class="queue-header"><div><h2 class="queue-title">Verdict Queue</h2><p class="queue-sub">Every tender scored against your bidder profile. Expand any row for the reasoning.</p></div></div><div class="verdict-pills-bar">{% if stats.bid_count > 0 %}<a href="/?search={{ search_query or '' }}&portal={{ selected_portal or '' }}&urgency={{ selected_urgency or '' }}&watchlist_id={{ selected_watchlist or '' }}&sort_order={{ sort_order or '' }}" 
+ class="verdict-pill {% if not selected_verdict and not selected_urgency %}active{% endif %}">
+ All Tenders <span class="pill-count">{{ stats.total_tenders }}</span></a><a href="/?verdict=BID&search={{ search_query or '' }}&portal={{ selected_portal or '' }}&watchlist_id={{ selected_watchlist or '' }}&sort_order=match_score" 
+ class="verdict-pill bid-pill {% if selected_verdict == 'BID' %}active{% endif %}"><span class="badge-dot" style="background:var(--success);"></span>
+ Recommended (BID) <span class="pill-count">{{ stats.bid_count }}</span></a>{% endif %}<a href="/?verdict=REVIEW&search={{ search_query or '' }}&portal={{ selected_portal or '' }}&watchlist_id={{ selected_watchlist or '' }}&sort_order=match_score" 
+ class="verdict-pill review-pill {% if selected_verdict == 'REVIEW' %}active{% endif %}"><span class="badge-dot" style="background:var(--warning);"></span>
+ Manual Review <span class="pill-count">{{ stats.review_count }}</span></a><a href="/?verdict=NO_BID&search={{ search_query or '' }}&portal={{ selected_portal or '' }}&watchlist_id={{ selected_watchlist or '' }}" 
+ class="verdict-pill nobid-pill {% if selected_verdict == 'NO_BID' %}active{% endif %}"><span class="badge-dot" style="background:var(--text-muted);"></span>
+ Filtered (NO-BID) <span class="pill-count">{{ stats.nobid_count }}</span></a><a href="/?urgency=Closing+Soon+(%3C7d)&search={{ search_query or '' }}&portal={{ selected_portal or '' }}&watchlist_id={{ selected_watchlist or '' }}" 
+ class="verdict-pill urgent-pill {% if selected_urgency == 'Closing Soon (<7d)' %}active{% endif %}"><span class="badge-dot" style="background:var(--danger);"></span>
+ Closing &lt;7 Days <span class="pill-count">{{ stats.urgent_closing_soon }}</span></a></div><!-- Filters & Search Toolbar --><div class="toolbar-card"><form action="/" method="GET" class="filter-form">
+ {% if selected_verdict %}
+ <input type="hidden" name="verdict" value="{{ selected_verdict }}">
+ {% endif %}
+
+ <input 
+ type="text" 
+ name="search" 
+ class="form-input" 
+ placeholder="Search indexed tenders by title, scope, authority..." 
+ value="{{ search_query or '' }}"
+ ><select name="portal" class="form-select"><option value="">All Portals (7+ Tracked)</option><option value="GeM" {% if selected_portal == 'GeM' %}selected{% endif %}>GeM (Gov e-Marketplace)</option><option value="CPPP" {% if selected_portal == 'CPPP' %}selected{% endif %}>CPPP (Central eProcure)</option><option value="eTenders" {% if selected_portal == 'eTenders' %}selected{% endif %}>Central eTenders</option><option value="IREPS" {% if selected_portal == 'IREPS' %}selected{% endif %}>IREPS (Indian Railways)</option><option value="MahaTenders" {% if selected_portal == 'MahaTenders' %}selected{% endif %}>MahaTenders (Maharashtra)</option><option value="KPPP" {% if selected_portal == 'KPPP' %}selected{% endif %}>KPPP (Karnataka)</option><option value="Odisha" {% if selected_portal == 'Odisha' %}selected{% endif %}>Odisha eTenders</option></select><select name="urgency" class="form-select"><option value="">All Urgencies</option><option value="Urgent (<3d)" {% if selected_urgency == 'Urgent (<3d)' %}selected{% endif %}>Urgent (&lt;3 Days)</option><option value="Closing Soon (<7d)" {% if selected_urgency == 'Closing Soon (<7d)' %}selected{% endif %}>Closing Soon (&lt;7 Days)</option><option value="Active (>7d)" {% if selected_urgency == 'Active (>7d)' %}selected{% endif %}>Active (&gt;7 Days)</option><option value="Flexible / Open" {% if selected_urgency == 'Flexible / Open' %}selected{% endif %}>Flexible / Open</option><option value="Expired" {% if selected_urgency == 'Expired' %}selected{% endif %}>Expired</option></select><select name="watchlist_id" class="form-select"><option value="">All Watchlists</option>
+ {% for wl in watchlists %}
+ <option value="{{ wl.id }}" {% if selected_watchlist == wl.id %}selected{% endif %}>
+ {{ wl.keyword }} ({{ wl.category }})
+ </option>
+ {% endfor %}
+ </select><select name="sort_order" class="form-select" onchange="this.form.submit()" title="Sort tenders"><option value="match_score" {% if sort_order == 'match_score' %}selected{% endif %}>Match Score: Highest First</option><option value="asc" {% if sort_order == 'asc' %}selected{% endif %}>Deadline: Earliest First</option><option value="desc" {% if sort_order == 'desc' %}selected{% endif %}>Deadline: Furthest First</option><option value="newest" {% if sort_order == 'newest' %}selected{% endif %}>Recently Discovered</option></select><button type="submit" class="btn btn-primary">Filter</button>
+ {% if search_query or selected_portal or selected_urgency or selected_watchlist or selected_verdict or (sort_order and sort_order != 'match_score') %}
+ <a href="/" class="btn btn-secondary">Reset</a>
+ {% endif %}
+ <a href="/export/csv" class="btn btn-secondary" title="Export filtered view to CSV"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+ Export CSV
+ </a></form><!-- Sector Quick Filters Strip --><div style="display: flex; gap: 0.4rem; align-items: center; margin-top: 0.75rem; flex-wrap: wrap;"><span class="text-muted" style="font-size: 0.75rem; font-weight: 600;">Sector Quick Filters:</span><a href="/?search=Solar" class="badge badge-portal">Solar EPC</a><a href="/?search=CCTV" class="badge badge-portal"> CCTV & Telecom</a><a href="/?search=Road" class="badge badge-portal"> Highway & Civil</a><a href="/?search=Hospital" class="badge badge-portal"> Healthcare</a><a href="/?search=Cloud" class="badge badge-portal"> Cloud & IT</a></div></div><!-- Tenders Feed -->
+{% if tenders %}
+ <div class="tenders-list" id="tenders-feed">
+ {% for tender in tenders %}
+ <div class="tender-row"><div class="tender-row-main"><div class="tender-row-head">
+ {% if tender.verdict == 'BID' %}
+ <span class="vr-pill vr-bid">BID {{ tender.match_score }}%</span>
+ {% elif tender.verdict == 'REVIEW' %}
+ <span class="vr-pill vr-review">REVIEW {{ tender.match_score }}%</span>
+ {% elif tender.verdict == 'NO_BID' %}
+ <span class="vr-pill vr-nobid">NO-BID {{ tender.match_score }}%</span>
+ {% endif %}
+ <a href="/tenders/{{ tender.id }}" class="tender-row-title">{{ display_title(tender.title, tender.portal_name, tender.snippet) }}</a></div><div class="tender-row-meta"><span>{{ tender.portal_name }}</span><span class="meta-sep">&middot;</span>{% if tender.deadline_date %}<span class="tnum">{{ tender.deadline_date }}</span>{% else %}<a href="{{ select_portal_url(tender.original_url, tender.canonical_url, tender.portal_name) }}" target="_blank" rel="noopener" class="deadline-check-link" title="Check deadline on official portal">No deadline listed &nearr;</a>{% endif %}<span class="meta-sep">&middot;</span><span class="tnum">#TR-{{ "%04d" % tender.id }}</span>{% if tender.advisor_verdict and tender.advisor_verdict.key_details.est_value and tender.advisor_verdict.key_details.est_value != 'Not specified' %}<span class="meta-sep">&middot;</span><span class="tnum">{{ tender.advisor_verdict.key_details.est_value }}</span>{% endif %}
+ </div></div><div class="tender-row-side">
+ {% if tender.urgency_status == 'Urgent (<3d)' %}
+ <span class="dl-badge dl-urgent">Urgent</span>
+ {% elif tender.urgency_status == 'Closing Soon (<7d)' %}
+ <span class="dl-badge dl-soon">&lt;7d left</span>
+ {% elif tender.urgency_status == 'Expired' %}
+ <span class="dl-badge dl-expired">Expired</span>
+ {% endif %}
+ <div class="tender-row-actions"><button type="button" class="row-btn {% if tender.is_saved %}is-saved{% endif %}" data-tender-id="{{ tender.id }}" onclick="toggleSaveTender(this, {{ tender.id }})" title="{% if tender.is_saved %}Remove from Saved{% else %}Bookmark{% endif %}">{% if tender.is_saved %}&starf;{% else %}&star;{% endif %}</button><a href="{{ select_portal_url(tender.original_url, tender.canonical_url, tender.portal_name) }}" target="_blank" rel="noopener noreferrer" class="row-btn row-btn-primary">Portal &nearr;</a><button type="button" class="row-btn chat-btn" onclick="openTenderChat({{ tender.id }}, this)" data-title="{{ display_title(tender.title, tender.portal_name, tender.snippet) | e }}">Chat</button></div></div><details class="tender-row-details"><summary>Verdict reasoning &amp; scope</summary><div class="tender-row-detail-body">
+ {% if tender.advisor_verdict and tender.advisor_verdict.reasons %}
+ <div class="rd-section"><div class="rd-label">Why this verdict</div><ul class="rd-reasons">{% for reason in tender.advisor_verdict.reasons %}<li>{{ reason }}</li>{% endfor %}</ul></div>
+ {% endif %}
+ {% if tender.advisor_verdict and tender.advisor_verdict.flags %}
+ <div class="rd-section"><div class="rd-label">Risk flags</div>
+ {% for flag in tender.advisor_verdict.flags %}<div class="rd-flag rd-{{ flag.severity }}">{{ flag.text }}</div>{% endfor %}
+ </div>
+ {% endif %}
+ <div class="rd-section"><div class="rd-label">Scope</div><p class="rd-scope">{{ tender.scope_summary or tender.snippet }}</p>
+ {% if tender.eligibility %}<p class="rd-elig"><strong>Eligibility:</strong> {{ tender.eligibility }}</p>{% endif %}
+ </div><div class="rd-section rd-facts"><span><strong>EMD:</strong> {{ tender.emd_amount or 'Not specified' }}</span><span><strong>Fee:</strong> {{ tender.tender_fee or 'Nil' }}</span>
+ {% if tender.published_date %}<span><strong>Published:</strong> {{ tender.published_date }}</span>{% endif %}
+ </div></div></details></div>
+ {% endfor %}
+ </div>
+
+{% else %}
+ <!-- Empty State --><div class="empty-state"><div class="empty-icon"><svg class="icon-lg" style="width:40px;height:40px;stroke:#94a3b8;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></div><h3 class="empty-title">No Tenders Found</h3><p class="empty-desc">
+ {% if search_query or selected_portal or selected_urgency or selected_watchlist or selected_verdict %}
+ No tenders match your active filter criteria. Try resetting filters to view all discovered tenders.
+ {% else %}
+ No tenders discovered yet. Configure sector keywords in Watchlists, then run a multi-portal discovery scan via SerpApi.
+ {% endif %}
+ </p><div>
+ {% if search_query or selected_portal or selected_urgency or selected_watchlist or selected_verdict %}
+ <a href="/" class="btn btn-secondary">Clear Filters</a>
+ {% else %}
+ <form action="/scan" method="POST" style="display:inline;"><button type="submit" class="btn btn-primary scan-btn">Scan Portals Now via SerpApi</button></form>
+ {% endif %}
+ </div></div>
+{% endif %}
+<!-- Tender Chat Modal -->
 <div id="tenderChatModal" class="dd-modal" style="display:none;">
   <div class="dd-modal-content chat-modal">
     <div class="dd-modal-header">
@@ -59,113 +167,6 @@ async function sendChatMsg() {
   }
 }
 </script>
-{% endblock %}
-
-{% block content %}
-<!-- Winner-Level Hero & Clarity Section --><div class="cmd-hero"><div class="cmd-hero-bg"></div><div class="cmd-hero-content"><div class="cmd-eyebrow"><span class="cmd-live-dot"></span> LIVE &mdash; {{ stats.total_tenders }} TENDERS SCORED</div><h1 class="cmd-headline">Know which tenders<br>to <span class="cmd-bid">bid</span>, which to <span class="cmd-skip">skip</span>.</h1><p class="cmd-sub">TenderRadar reads every Indian government tender against your bidder profile and gives you a verdict &mdash; with the reasoning visible.</p><div class="cmd-stats"><div class="cmd-stat"><span class="cmd-num tnum">{{ stats.bid_count }}</span><span class="cmd-lbl">Bid</span></div><div class="cmd-stat"><span class="cmd-num tnum">{{ stats.review_count }}</span><span class="cmd-lbl">Review</span></div><div class="cmd-stat"><span class="cmd-num tnum">{{ stats.nobid_count }}</span><span class="cmd-lbl">No-bid</span></div></div><div class="cmd-actions"><a href="#tenders-feed" class="cmd-btn-primary">View verdicts</a><a href="/scan" class="cmd-btn-ghost">Scan portals &rarr;</a></div></div><div class="cmd-side"><div class="cmd-side-label">Top signals</div>
- {% for t in tenders[:3] %}
- <div class="cmd-signal"><span class="vr-pill vr-{{ t.verdict|lower }}">{{ t.verdict }} {{ t.match_score }}%</span><span class="cmd-signal-title">{{ display_title(t.title, t.portal_name, t.snippet) }}</span></div>
- {% endfor %}
- <div class="cmd-side-note">Scored against your bidder profile</div></div><div class="cmd-tricolor"></div></div><!-- Key Performance Metrics / High-Density Stitch KPI Strip --><!-- Quick Verdict Filter Tabs (Stitch Compliant Pills) --><a href="/auto-bid" class="autobid-banner">
-  <span class="autobid-icon-sm">
-    <svg viewBox="0 0 64 64" fill="none" width="28" height="28">
-      <rect x="8" y="16" width="48" height="36" rx="10" fill="#1a1a2e" stroke="#f26625" stroke-width="3"/>
-      <circle cx="24" cy="32" r="5" fill="#4ade80"/>
-      <circle cx="40" cy="32" r="5" fill="#4ade80"/>
-      <line x1="32" y1="16" x2="32" y2="8" stroke="#f26625" stroke-width="3" stroke-linecap="round"/>
-      <circle cx="32" cy="6" r="3.5" fill="#f26625"/>
-    </svg>
-  </span>
-  <span class="autobid-badge">Coming Soon</span>
-  <span class="autobid-text"><strong>Auto-Bid Agent</strong> &mdash; AI prepares and submits bids automatically, only for tenders you explicitly approve.</span>
-  <span class="autobid-arrow">&rarr;</span>
-</a>
-<div class="queue-header"><div><h2 class="queue-title">Verdict Queue</h2><p class="queue-sub">Every tender scored against your bidder profile. Expand any row for the reasoning.</p></div></div><div class="verdict-pills-bar"><a href="/?search={{ search_query or '' }}&portal={{ selected_portal or '' }}&urgency={{ selected_urgency or '' }}&watchlist_id={{ selected_watchlist or '' }}&sort_order={{ sort_order or '' }}" 
- class="verdict-pill {% if not selected_verdict and not selected_urgency %}active{% endif %}">
- All Tenders <span class="pill-count">{{ stats.total_tenders }}</span></a><a href="/?verdict=BID&search={{ search_query or '' }}&portal={{ selected_portal or '' }}&watchlist_id={{ selected_watchlist or '' }}&sort_order=match_score" 
- class="verdict-pill bid-pill {% if selected_verdict == 'BID' %}active{% endif %}"><span class="badge-dot" style="background:var(--success);"></span>
- Recommended (BID) <span class="pill-count">{{ stats.bid_count }}</span></a><a href="/?verdict=REVIEW&search={{ search_query or '' }}&portal={{ selected_portal or '' }}&watchlist_id={{ selected_watchlist or '' }}&sort_order=match_score" 
- class="verdict-pill review-pill {% if selected_verdict == 'REVIEW' %}active{% endif %}"><span class="badge-dot" style="background:var(--warning);"></span>
- Manual Review <span class="pill-count">{{ stats.review_count }}</span></a><a href="/?verdict=NO_BID&search={{ search_query or '' }}&portal={{ selected_portal or '' }}&watchlist_id={{ selected_watchlist or '' }}" 
- class="verdict-pill nobid-pill {% if selected_verdict == 'NO_BID' %}active{% endif %}"><span class="badge-dot" style="background:var(--text-muted);"></span>
- Filtered (NO-BID) <span class="pill-count">{{ stats.nobid_count }}</span></a><a href="/?urgency=Closing+Soon+(%3C7d)&search={{ search_query or '' }}&portal={{ selected_portal or '' }}&watchlist_id={{ selected_watchlist or '' }}" 
- class="verdict-pill urgent-pill {% if selected_urgency == 'Closing Soon (<7d)' %}active{% endif %}"><span class="badge-dot" style="background:var(--danger);"></span>
- Closing &lt;7 Days <span class="pill-count">{{ stats.urgent_closing_soon }}</span></a></div><!-- Filters & Search Toolbar --><div class="toolbar-card"><form action="/" method="GET" class="filter-form">
- {% if selected_verdict %}
- <input type="hidden" name="verdict" value="{{ selected_verdict }}">
- {% endif %}
-
- <input 
- type="text" 
- name="search" 
- class="form-input" 
- placeholder="Search indexed tenders by title, scope, authority..." 
- value="{{ search_query or '' }}"
- ><select name="portal" class="form-select"><option value="">All Portals (7+ Tracked)</option><option value="GeM" {% if selected_portal == 'GeM' %}selected{% endif %}>GeM (Gov e-Marketplace)</option><option value="CPPP" {% if selected_portal == 'CPPP' %}selected{% endif %}>CPPP (Central eProcure)</option><option value="eTenders" {% if selected_portal == 'eTenders' %}selected{% endif %}>Central eTenders</option><option value="IREPS" {% if selected_portal == 'IREPS' %}selected{% endif %}>IREPS (Indian Railways)</option><option value="MahaTenders" {% if selected_portal == 'MahaTenders' %}selected{% endif %}>MahaTenders (Maharashtra)</option><option value="KPPP" {% if selected_portal == 'KPPP' %}selected{% endif %}>KPPP (Karnataka)</option><option value="Odisha" {% if selected_portal == 'Odisha' %}selected{% endif %}>Odisha eTenders</option></select><select name="urgency" class="form-select"><option value="">All Urgencies</option><option value="Urgent (<3d)" {% if selected_urgency == 'Urgent (<3d)' %}selected{% endif %}>Urgent (&lt;3 Days)</option><option value="Closing Soon (<7d)" {% if selected_urgency == 'Closing Soon (<7d)' %}selected{% endif %}>Closing Soon (&lt;7 Days)</option><option value="Active (>7d)" {% if selected_urgency == 'Active (>7d)' %}selected{% endif %}>Active (&gt;7 Days)</option><option value="Flexible / Open" {% if selected_urgency == 'Flexible / Open' %}selected{% endif %}>Flexible / Open</option><option value="Expired" {% if selected_urgency == 'Expired' %}selected{% endif %}>Expired</option></select><select name="watchlist_id" class="form-select"><option value="">All Watchlists</option>
- {% for wl in watchlists %}
- <option value="{{ wl.id }}" {% if selected_watchlist == wl.id %}selected{% endif %}>
- {{ wl.keyword }} ({{ wl.category }})
- </option>
- {% endfor %}
- </select><select name="sort_order" class="form-select" onchange="this.form.submit()" title="Sort tenders"><option value="match_score" {% if sort_order == 'match_score' %}selected{% endif %}>Match Score: Highest First</option><option value="asc" {% if sort_order == 'asc' %}selected{% endif %}>Deadline: Earliest First</option><option value="desc" {% if sort_order == 'desc' %}selected{% endif %}>Deadline: Furthest First</option><option value="newest" {% if sort_order == 'newest' %}selected{% endif %}>Recently Discovered</option></select><button type="submit" class="btn btn-primary">Filter</button>
- {% if search_query or selected_portal or selected_urgency or selected_watchlist or selected_verdict or (sort_order and sort_order != 'match_score') %}
- <a href="/" class="btn btn-secondary">Reset</a>
- {% endif %}
- <a href="/export/csv" class="btn btn-secondary" title="Export filtered view to CSV"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
- Export CSV
- </a></form><!-- Sector Quick Filters Strip --><div style="display: flex; gap: 0.4rem; align-items: center; margin-top: 0.75rem; flex-wrap: wrap;"><span class="text-muted" style="font-size: 0.75rem; font-weight: 600;">Sector Quick Filters:</span><a href="/?search=Solar" class="badge badge-portal">Solar EPC</a><a href="/?search=CCTV" class="badge badge-portal"> CCTV & Telecom</a><a href="/?search=Road" class="badge badge-portal">️ Highway & Civil</a><a href="/?search=Hospital" class="badge badge-portal"> Healthcare</a><a href="/?search=Cloud" class="badge badge-portal">️ Cloud & IT</a></div></div><!-- Tenders Feed -->
-{% if tenders %}
- <div class="tenders-list" id="tenders-feed">
- {% for tender in tenders %}
- <div class="tender-row"><div class="tender-row-main"><div class="tender-row-head">
- {% if tender.verdict == 'BID' %}
- <span class="vr-pill vr-bid">BID {{ tender.match_score }}%</span>
- {% elif tender.verdict == 'REVIEW' %}
- <span class="vr-pill vr-review">REVIEW {{ tender.match_score }}%</span>
- {% elif tender.verdict == 'NO_BID' %}
- <span class="vr-pill vr-nobid">NO-BID {{ tender.match_score }}%</span>
- {% endif %}
- <a href="/tenders/{{ tender.id }}" class="tender-row-title">{{ display_title(tender.title, tender.portal_name, tender.snippet) }}</a></div><div class="tender-row-meta"><span>{{ tender.portal_name }}</span><span class="meta-sep">&middot;</span>{% if tender.deadline_date %}<span class="tnum">{{ tender.deadline_date }}</span>{% else %}<a href="{{ select_portal_url(tender.original_url, tender.canonical_url, tender.portal_name) }}" target="_blank" rel="noopener" class="deadline-check-link" title="Check deadline on official portal">No deadline listed &nearr;</a>{% endif %}<span class="meta-sep">&middot;</span><span class="tnum">#TR-{{ "%04d" % tender.id }}</span>{% if tender.advisor_verdict and tender.advisor_verdict.key_details.est_value and tender.advisor_verdict.key_details.est_value != 'Not specified' %}<span class="meta-sep">&middot;</span><span class="tnum">{{ tender.advisor_verdict.key_details.est_value }}</span>{% endif %}
- </div></div><div class="tender-row-side">
- {% if tender.urgency_status == 'Urgent (<3d)' %}
- <span class="dl-badge dl-urgent">Urgent</span>
- {% elif tender.urgency_status == 'Closing Soon (<7d)' %}
- <span class="dl-badge dl-soon">&lt;7d left</span>
- {% elif tender.urgency_status == 'Expired' %}
- <span class="dl-badge dl-expired">Expired</span>
- {% endif %}
- <div class="tender-row-actions"><button type="button" class="row-btn {% if tender.is_saved %}is-saved{% endif %}" data-tender-id="{{ tender.id }}" onclick="toggleSaveTender(this, {{ tender.id }})" title="{% if tender.is_saved %}Remove from Saved{% else %}Bookmark{% endif %}">{% if tender.is_saved %}&starf;{% else %}&star;{% endif %}</button><a href="{{ select_portal_url(tender.original_url, tender.canonical_url, tender.portal_name) }}" target="_blank" rel="noopener noreferrer" class="row-btn row-btn-primary">Portal &nearr;</a><button type="button" class="row-btn chat-btn" onclick="openTenderChat({{ tender.id }}, this)" data-title="{{ display_title(tender.title, tender.portal_name, tender.snippet) | e }}">Chat</button></div></div><details class="tender-row-details"><summary>Verdict reasoning &amp; scope</summary><div class="tender-row-detail-body">
- {% if tender.advisor_verdict and tender.advisor_verdict.reasons %}
- <div class="rd-section"><div class="rd-label">Why this verdict</div><ul class="rd-reasons">{% for reason in tender.advisor_verdict.reasons %}<li>{{ reason }}</li>{% endfor %}</ul></div>
- {% endif %}
- {% if tender.advisor_verdict and tender.advisor_verdict.flags %}
- <div class="rd-section"><div class="rd-label">Risk flags</div>
- {% for flag in tender.advisor_verdict.flags %}<div class="rd-flag rd-{{ flag.severity }}">{{ flag.text }}</div>{% endfor %}
- </div>
- {% endif %}
- <div class="rd-section"><div class="rd-label">Scope</div><p class="rd-scope">{{ tender.scope_summary or tender.snippet }}</p>
- {% if tender.eligibility %}<p class="rd-elig"><strong>Eligibility:</strong> {{ tender.eligibility }}</p>{% endif %}
- </div><div class="rd-section rd-facts"><span><strong>EMD:</strong> {{ tender.emd_amount or 'Not specified' }}</span><span><strong>Fee:</strong> {{ tender.tender_fee or 'Nil' }}</span>
- {% if tender.published_date %}<span><strong>Published:</strong> {{ tender.published_date }}</span>{% endif %}
- </div></div></details></div>
- {% endfor %}
- </div>
-
-{% else %}
- <!-- Empty State --><div class="empty-state"><div class="empty-icon"><svg class="icon-lg" style="width:40px;height:40px;stroke:#94a3b8;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></div><h3 class="empty-title">No Tenders Found</h3><p class="empty-desc">
- {% if search_query or selected_portal or selected_urgency or selected_watchlist or selected_verdict %}
- No tenders match your active filter criteria. Try resetting filters to view all discovered tenders.
- {% else %}
- No tenders discovered yet. Configure sector keywords in Watchlists, then run a multi-portal discovery scan via SerpApi.
- {% endif %}
- </p><div>
- {% if search_query or selected_portal or selected_urgency or selected_watchlist or selected_verdict %}
- <a href="/" class="btn btn-secondary">Clear Filters</a>
- {% else %}
- <form action="/scan" method="POST" style="display:inline;"><button type="submit" class="btn btn-primary scan-btn">Scan Portals Now via SerpApi</button></form>
- {% endif %}
- </div></div>
-{% endif %}
 {% endblock %}
 
 

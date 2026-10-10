@@ -123,13 +123,15 @@ async def dashboard_view(
     search: Optional[str] = Query(None),
     portal: Optional[str] = Query(None),
     urgency: Optional[str] = Query(None),
-    watchlist_id: Optional[int] = Query(None),
+    watchlist_id: Optional[str] = Query(None),
     sort_order: str = Query("match_score"),
     recommended: Optional[str] = Query(None),
     verdict: Optional[str] = Query(None),
     message: Optional[str] = Query(None),
     error: Optional[str] = Query(None)
 ):
+    # Handle empty watchlist_id from form
+    _wl_id = int(watchlist_id) if watchlist_id and watchlist_id.strip() else None
     settings = get_settings()
     if sort_order == "match_score":
         sort_by = "match_score"
@@ -160,7 +162,7 @@ async def dashboard_view(
 
     tenders = get_tenders(
         db_path=settings.DATABASE_PATH,
-        watchlist_id=watchlist_id,
+        watchlist_id=_wl_id,
         portal=portal,
         urgency=urgency,
         search=search,
