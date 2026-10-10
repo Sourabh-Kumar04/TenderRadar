@@ -70,6 +70,57 @@ def _duckduckgo_pdf_search(title: str) -> Optional[str]:
         pass
     return None
 
+def _extract_from_article(article_url: str, title: str) -> Dict:
+    """Fetch news/blog article, extract tender details + find official links."""
+    result = {"found": False, "text": "", "source": None, "pdf_url": None, "official_links": []}
+    html = _fetch(article_url, timeout=15)
+    if len(html) < 500:
+        return result
+
+    # Extract article text
+    text = re.sub(r'<script.*?</script>', ' ', html, flags=re.S | re.I)
+    text = re.sub(r'<style.*?</style>', ' ', text, flags=re.S | re.I)
+    text = re.sub(r'<[^>]+>', ' ', text)
+    text = re.sub(r'\s+', ' ', text)
+
+    # Find official portal/document links in the article
+    official_links = []
+    for m in re.finditer(r'href="([^"]+)"', html, re.I):
+        url = m.group(1)
+        if any(d in url.lower() for d in ['.gov.in', '.nic.in', 'eprocure', 'gem.gov']):
+            if url.startswith('/'):
+                from urllib.parse import urljoin
+                url = urljoin(article_url, url)
+            if url.startswith('http'):
+                official_links.append(url)
+
+    # Find PDF links
+    for m in re.finditer(r'href="([^"]+\.pdf[^"]*)"', html, re.I):
+        pdf_url = m.group(1)
+        if pdf_url.startswith('/'):
+            from urllib.parse import urljoin
+            pdf_url = urljoin(article_url, pdf_url)
+        pdf_text = _extract_pdf_text(pdf_url)
+        if len(pdf_text) > 500:
+            return {"found": True, "text": pdf_text, "source": "article_pdf", "pdf_url": pdf_url, "official_links": official_links}
+
+    # Try following official links
+    for link in official_links[:3]:
+        link_text = _fetch(link, timeout=12)
+        if len(link_text) > 2000:
+            clean = re.sub(r'<[^>]+>', ' ', link_text)
+            clean = re.sub(r'\s+', ' ', clean)[:12000]
+            # Check if it looks like a tender page (not just homepage)
+            if any(kw in clean.lower() for kw in ['tender', 'bid', 'emd', 'deadline', 'corrigendum']):
+                return {"found": True, "text": clean, "source": "article_official_link", "pdf_url": link, "official_links": official_links}
+
+    # Fall back to article text itself if it has tender details
+    if any(kw in text.lower() for kw in ['tender', 'bid', 'mw', 'kwp', 'emd', 'deadline']):
+        return {"found": True, "text": text[:12000], "source": "article_text", "pdf_url": None, "official_links": official_links}
+
+    return result
+
+
 def get_tender_document_multi(title: str, portal_name: str = "", page_url: str = "") -> Dict:
     """Try all sources. Returns {found, text, source, pdf_url}."""
     cache_key = f"{title[:40]}"
@@ -125,6 +176,13 @@ def get_tender_document_multi(title: str, portal_name: str = "", page_url: str =
                 result.update({"found": True, "text": clean, "source": "wayback_page", "pdf_url": None})
                 _cache[cache_key] = result
                 return result
+
+    # Layer 5: If page_url is a news/blog article, extract from it
+    if page_url and any(d in page_url.lower() for d in ['news', 'blog', 'article', 'energetica', 'mercom', 'saurenergy', 'tender247', 'bidassist', 'tendersinfo']):
+        article_result = _extract_from_article(page_url, title)
+        if article_result.get("found"):
+            _cache[cache_key] = article_result
+            return article_result
 
     _cache[cache_key] = result
     return result
