@@ -9,7 +9,16 @@
  <div class="cmd-signal"><span class="vr-pill vr-{{ t.verdict|lower }}">{{ t.verdict }} {{ t.match_score }}%</span><span class="cmd-signal-title">{{ display_title(t.title, t.portal_name, t.snippet) }}</span></div>
  {% endfor %}
  <div class="cmd-side-note">Scored against your bidder profile</div></div><div class="cmd-tricolor"></div></div><!-- Key Performance Metrics / High-Density Stitch KPI Strip --><!-- Quick Verdict Filter Tabs (Stitch Compliant Pills) -->
-<div class="queue-header"><div><h2 class="queue-title">Verdict Queue</h2><p class="queue-sub">Every tender scored against your bidder profile. Expand any row for the reasoning.</p></div></div><div class="verdict-pills-bar">{% if stats.bid_count > 0 %}<a href="/?search={{ search_query or '' }}&portal={{ selected_portal or '' }}&urgency={{ selected_urgency or '' }}&watchlist_id={{ selected_watchlist or '' }}&sort_order={{ sort_order or '' }}" 
+<div class="queue-header"><div><h2 class="queue-title">Verdict Queue</h2><p class="queue-sub">Every tender scored against your bidder profile. Expand any row for the reasoning.</p></div></div>
+
+  <form action="/scan" method="POST" style="display:inline;">
+    <button type="submit" class="btn btn-primary btn-sm scan-btn" title="Run live discovery scan">
+      <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+      Scan Portals
+    </button>
+  </form>
+</div>
+<div class="verdict-pills-bar">{% if stats.bid_count > 0 %}<a href="/?search={{ search_query or '' }}&portal={{ selected_portal or '' }}&urgency={{ selected_urgency or '' }}&watchlist_id={{ selected_watchlist or '' }}&sort_order={{ sort_order or '' }}" 
  class="verdict-pill {% if not selected_verdict and not selected_urgency %}active{% endif %}">
  All Tenders <span class="pill-count">{{ stats.total_tenders }}</span></a><a href="/?verdict=BID&search={{ search_query or '' }}&portal={{ selected_portal or '' }}&watchlist_id={{ selected_watchlist or '' }}&sort_order=match_score" 
  class="verdict-pill bid-pill {% if selected_verdict == 'BID' %}active{% endif %}"><span class="badge-dot" style="background:var(--success);"></span>
@@ -37,6 +46,10 @@
  </option>
  {% endfor %}
  </select><select name="sort_order" class="form-select" onchange="this.form.submit()" title="Sort tenders"><option value="match_score" {% if sort_order == 'match_score' %}selected{% endif %}>Match Score: Highest First</option><option value="asc" {% if sort_order == 'asc' %}selected{% endif %}>Deadline: Earliest First</option><option value="desc" {% if sort_order == 'desc' %}selected{% endif %}>Deadline: Furthest First</option><option value="newest" {% if sort_order == 'newest' %}selected{% endif %}>Recently Discovered</option></select><button type="submit" class="btn btn-primary">Filter</button>
+        <a href="/export/csv" class="btn btn-secondary btn-sm" title="Export to CSV">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          CSV
+        </a>
  {% if search_query or selected_portal or selected_urgency or selected_watchlist or selected_verdict or (sort_order and sort_order != 'match_score') %}
  <a href="/" class="btn btn-secondary">Reset</a>
  {% endif %}
