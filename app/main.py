@@ -54,6 +54,7 @@ from app.bidder_profile import (
     compute_profile_hash
 )
 from app.bid_advisor import get_or_compute_verdict
+from app.deep_dive import deep_dive_analysis
 from app.scheduler import scan_manager
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
@@ -738,6 +739,23 @@ async def api_get_tender(tender_id: int):
         t["match_score"] = verd.get("match_score")
         t["advisor_verdict"] = verd
     return t
+
+
+@app.post("/api/tenders/{tender_id}/deep-dive")
+async def api_deep_dive(tender_id: int):
+    """AI agent: fetch tender page + deep analysis with must-care points."""
+    settings = get_settings()
+    tender = get_tender(settings.DATABASE_PATH, tender_id)
+    if not tender:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    result = deep_dive_analysis(
+        title=tender.get("title", ""),
+        snippet=tender.get("snippet", ""),
+        portal_name=tender.get("portal_name", ""),
+        page_url=tender.get("original_url") or tender.get("canonical_url") or "",
+        scope=tender.get("scope_summary", ""),
+    )
+    return {"tender_id": tender_id, "deep_dive": result}
 
 
 @app.get("/api/tenders/{tender_id}/verdict")

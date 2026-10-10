@@ -61,7 +61,7 @@
  {% elif tender.urgency_status == 'Expired' %}
  <span class="dl-badge dl-expired">Expired</span>
  {% endif %}
- <div class="tender-row-actions"><button type="button" class="row-btn {% if tender.is_saved %}is-saved{% endif %}" data-tender-id="{{ tender.id }}" onclick="toggleSaveTender(this, {{ tender.id }})" title="{% if tender.is_saved %}Remove from Saved{% else %}Bookmark{% endif %}">{% if tender.is_saved %}&starf;{% else %}&star;{% endif %}</button><a href="{{ select_portal_url(tender.original_url, tender.canonical_url, tender.portal_name) }}" target="_blank" rel="noopener noreferrer" class="row-btn row-btn-primary">Portal &nearr;</a></div></div><details class="tender-row-details"><summary>Verdict reasoning &amp; scope</summary><div class="tender-row-detail-body">
+ <div class="tender-row-actions"><button type="button" class="row-btn {% if tender.is_saved %}is-saved{% endif %}" data-tender-id="{{ tender.id }}" onclick="toggleSaveTender(this, {{ tender.id }})" title="{% if tender.is_saved %}Remove from Saved{% else %}Bookmark{% endif %}">{% if tender.is_saved %}&starf;{% else %}&star;{% endif %}</button><a href="{{ select_portal_url(tender.original_url, tender.canonical_url, tender.portal_name) }}" target="_blank" rel="noopener noreferrer" class="row-btn row-btn-primary">Portal &nearr;</a><button type="button" class="row-btn deep-dive-btn" onclick="openDeepDive({{ tender.id }})">Deep Dive</button></div></div><details class="tender-row-details"><summary>Verdict reasoning &amp; scope</summary><div class="tender-row-detail-body">
  {% if tender.advisor_verdict and tender.advisor_verdict.reasons %}
  <div class="rd-section"><div class="rd-label">Why this verdict</div><ul class="rd-reasons">{% for reason in tender.advisor_verdict.reasons %}<li>{{ reason }}</li>{% endfor %}</ul></div>
  {% endif %}
@@ -94,3 +94,53 @@
  </div></div>
 {% endif %}
 {% endblock %}
+
+<!-- Deep Dive Modal -->
+<div id="deepDiveModal" class="dd-modal" style="display:none;">
+  <div class="dd-modal-content">
+    <div class="dd-modal-header">
+      <h3>AI Deep Dive</h3>
+      <button class="dd-close" onclick="closeDeepDive()">&times;</button>
+    </div>
+    <div id="ddBody" class="dd-modal-body">
+      <div class="dd-loading">Analyzing tender...</div>
+    </div>
+  </div>
+</div>
+<script>
+async function openDeepDive(tenderId) {
+  const modal = document.getElementById('deepDiveModal');
+  const body = document.getElementById('ddBody');
+  modal.style.display = 'flex';
+  body.innerHTML = '<div class="dd-loading">AI agent analyzing tender details...</div>';
+  try {
+    const r = await fetch(`/api/tenders/${tenderId}/deep-dive`, {method: 'POST'});
+    const data = await r.json();
+    const dd = data.deep_dive;
+    let html = `<div class="dd-summary">${dd.summary || ''}</div>`;
+    if (dd.key_details) {
+      html += '<div class="dd-section"><h4>Key Details</h4><dl class="dd-details">';
+      for (const [k, v] of Object.entries(dd.key_details)) {
+        html += `<dt>${k}</dt><dd>${v}</dd>`;
+      }
+      html += '</dl></div>';
+    }
+    if (dd.must_care && dd.must_care.length) {
+      html += '<div class="dd-section"><h4>Must Take Care</h4><ul class="dd-care">';
+      dd.must_care.forEach(c => html += `<li>${c}</li>`);
+      html += '</ul></div>';
+    }
+    if (dd.risks && dd.risks.length) {
+      html += '<div class="dd-section"><h4>Risks</h4><ul class="dd-risks">';
+      dd.risks.forEach(r => html += `<li>${r}</li>`);
+      html += '</ul></div>';
+    }
+    body.innerHTML = html;
+  } catch (e) {
+    body.innerHTML = '<div class="dd-error">Analysis failed. Try again.</div>';
+  }
+}
+function closeDeepDive() {
+  document.getElementById('deepDiveModal').style.display = 'none';
+}
+</script>

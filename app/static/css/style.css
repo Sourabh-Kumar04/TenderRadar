@@ -1932,3 +1932,52 @@ body { background: #fafafa; }
   background: #fafafa; color: var(--text-sub); text-decoration: none;
 }
 .sector-filters .badge:hover { border-color: var(--primary); color: var(--primary); }
+
+/* Deep Dive Modal */
+.dd-modal {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000;
+  display: flex; align-items: center; justify-content: center; padding: 1rem;
+}
+.dd-modal-content {
+  background: #fff; border-radius: 16px; max-width: 640px; width: 100%;
+  max-height: 85vh; overflow-y: auto; box-shadow: 0 24px 64px rgba(0,0,0,0.3);
+}
+.dd-modal-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; background: #fff; border-radius: 16px 16px 0 0;
+}
+.dd-modal-header h3 { margin: 0; font-size: 1.1rem; font-weight: 700; }
+.dd-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted); }
+.dd-modal-body { padding: 1.5rem; }
+.dd-loading { text-align: center; padding: 2rem; color: var(--text-muted); }
+.dd-summary { font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.25rem; color: var(--text-main); }
+.dd-section { margin-bottom: 1.25rem; }
+.dd-section h4 { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin: 0 0 0.6rem; }
+.dd-details { display: grid; grid-template-columns: auto 1fr; gap: 0.4rem 1rem; margin: 0; font-size: 0.88rem; }
+.dd-details dt { font-weight: 600; color: var(--text-muted); text-transform: capitalize; }
+.dd-details dd { margin: 0; color: var(--text-main); }
+.dd-care, .dd-risks { margin: 0; padding-left: 1.25rem; font-size: 0.88rem; line-height: 1.6; }
+.dd-care li { margin-bottom: 0.4rem; }
+.dd-risks li { margin-bottom: 0.4rem; color: #b45309; }
+.dd-error { text-align: center; padding: 2rem; color: #dc2626; }
+.deep-dive-btn {
+  background: #0f0f0f; color: #fff; border: none; font-size: 0.78rem;
+  font-weight: 600; padding: 0.45rem 0.85rem; border-radius: 8px; cursor: pointer;
+}
+.deep-dive-btn:hover { background: #2a2a2a; }
+/* Auto-Bid Banner */
+.autobid-banner {
+  display: flex; align-items: center; gap: 0.75rem;
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  border: 1px solid #2a2a4a; border-radius: 12px;
+  padding: 0.9rem 1.25rem; margin: 1rem 0;
+  color: #e0e0ff;
+}
+.autobid-badge {
+  background: #f26625; color: #fff; font-size: 0.68rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  padding: 0.3rem 0.7rem; border-radius: 999px; white-space: nowrap;
+}
+.autobid-text { font-size: 0.88rem; }
+.autobid-text strong { color: #fff; }
