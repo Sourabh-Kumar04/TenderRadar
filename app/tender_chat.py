@@ -24,6 +24,9 @@ def tender_chat(
     history: List[Dict[str, str]] = None,
     user_message: str = "",
     page_url: str = "",
+    tender_url: str = "",
+    bidder_profile: dict = None,
+    verdict: dict = None,
 ) -> str:
     """Chat with AI scoped to one tender. Returns AI reply text."""
     settings = get_settings()
@@ -67,6 +70,32 @@ def tender_chat(
         "- Label inferences as 'Typically:' not as fact.\n\n"
         f"Tender: {title}\nPortal: {portal_name}\nDetails: {snippet}\n"
     )
+    # Bidder profile context
+    if bidder_profile:
+        bp = bidder_profile
+        context += f"""
+YOUR BIDDER PROFILE (use this when asked about profile match):
+- Company: {bp.get('company_name', 'N/A')}
+- Categories: {', '.join(bp.get('categories', []))}
+- Contract bracket: INR {bp.get('min_contract_value',0):,.0f} - INR {bp.get('max_contract_value',0):,.0f}
+- Annual turnover: INR {bp.get('annual_turnover',0):,.0f}
+- Max EMD: INR {bp.get('max_emd_capacity',0):,.0f}
+- MSME: {bp.get('msme_registered', False)}, Startup: {bp.get('startup_registered', False)}
+"""
+    if verdict:
+        context += f"""
+PRE-COMPUTED VERDICT for this tender:
+- Verdict: {verdict.get('verdict', 'N/A')} ({verdict.get('match_score', 0)}% match)
+- Reasons: {'; '.join(verdict.get('reasons', [])[:3])}
+When asked "does it match my profile", use this verdict directly.
+"""
+    # Direct tender URL
+    if tender_url:
+        context += f"""
+DIRECT TENDER LINK: {tender_url}
+When asked for the link/URL, give this exact URL. Never say you don't have it.
+"""
+
     if has_doc:
         src_name = doc.get('source', 'document')
         context += f"\nOFFICIAL TENDER DOCUMENT [via {src_name}] ({doc.get('pdf_url', 'archived')}) :\n{doc['text'][:8000]}\n"

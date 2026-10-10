@@ -776,6 +776,14 @@ async def api_tender_chat(tender_id: int, payload: dict):
     tender = get_tender(settings.DATABASE_PATH, tender_id)
     if not tender:
         raise HTTPException(status_code=404, detail="Tender not found")
+    # Load bidder profile for profile-match questions
+    profile_dict = get_bidder_profile(settings.DATABASE_PATH)
+    profile = BidderProfile(**profile_dict) if profile_dict else get_default_profile()
+
+    # Get cached verdict for this tender
+    p_hash = compute_profile_hash(profile)
+    verd = get_or_compute_verdict(tender, profile, settings.DATABASE_PATH)
+
     reply = tender_chat(
         title=tender.get("title", ""),
         snippet=tender.get("snippet", ""),
@@ -784,6 +792,9 @@ async def api_tender_chat(tender_id: int, payload: dict):
         history=payload.get("history", []),
         user_message=payload.get("message", ""),
         page_url=tender.get("original_url") or tender.get("canonical_url") or "",
+        tender_url=tender.get("original_url") or tender.get("canonical_url") or "",
+        bidder_profile=profile.model_dump(),
+        verdict=verd,
     )
     return {"reply": reply}
 
