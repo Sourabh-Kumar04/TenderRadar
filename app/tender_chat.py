@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 from app.deep_dive import fetch_page_text
+from app.doc_finder import get_tender_document
 
 
 def tender_chat(
@@ -39,8 +40,12 @@ def tender_chat(
     if not api_key:
         return "AI chat is not configured (missing API key)."
 
-    # Fetch tender page for real details
-    page_text = fetch_page_text(page_url) if page_url else ""
+    # Try real tender document first (via SerpApi PDF search)
+    doc = get_tender_document(title, portal_name)
+    has_doc = doc.get("found", False)
+
+    # Fallback: fetch tender page
+    page_text = fetch_page_text(page_url) if page_url and not has_doc else ""
     has_page = bool(page_text and len(page_text) > 200)
 
     context = (
@@ -57,10 +62,13 @@ def tender_chat(
         "- Label inferences as 'Typically:' not as fact.\n\n"
         f"Tender: {title}\nPortal: {portal_name}\nDetails: {snippet}\n"
     )
-    if has_page:
+    if has_doc:
+        context += f"\nOFFICIAL TENDER DOCUMENT (extracted from {doc['pdf_url']}):\n{doc['text'][:8000]}\n"
+        context += "\nAnswer ONLY from this document. Cite specific values.\n"
+    elif has_page:
         context += f"\nFull tender page content:\n{page_text[:6000]}\n"
-    elif page_url:
-        context += "\n(Tender page could not be fetched - use snippet + domain knowledge.)\n"
+    else:
+        context += "\n(No official document found - use snippet + clearly label estimates as 'Typically:')\n"
 
     if scope:
         context += f"Scope: {scope}\n"
