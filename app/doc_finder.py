@@ -5,7 +5,11 @@ import io
 import logging
 import requests
 from typing import Optional
-from pypdf import PdfReader
+
+try:
+    from pypdf import PdfReader
+except ImportError:
+    PdfReader = None
 
 from app.config import get_settings
 from app.serpapi_client import SerpApiClient
@@ -38,6 +42,9 @@ def extract_pdf_text(pdf_url: str, max_chars: int = 12000) -> str:
         headers = {"User-Agent": "Mozilla/5.0 (compatible; TenderRadar/1.0)"}
         r = requests.get(pdf_url, headers=headers, timeout=20)
         if r.status_code != 200:
+            return ""
+        if PdfReader is None:
+            logger.warning("pypdf is not available for PDF extraction.")
             return ""
         reader = PdfReader(io.BytesIO(r.content))
         text = ""
