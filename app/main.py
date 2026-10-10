@@ -117,14 +117,25 @@ async def dashboard_view(
     portal: Optional[str] = Query(None),
     urgency: Optional[str] = Query(None),
     watchlist_id: Optional[int] = Query(None),
-    sort_order: str = Query("asc"),
+    sort_order: str = Query("match_score"),
     recommended: Optional[str] = Query(None),
+    verdict: Optional[str] = Query(None),
     message: Optional[str] = Query(None),
     error: Optional[str] = Query(None)
 ):
     settings = get_settings()
-    sort_by = "newest" if sort_order == "newest" else "deadline"
-    order = "desc" if sort_order == "desc" else "asc"
+    if sort_order == "match_score":
+        sort_by = "match_score"
+        order = "desc"
+    elif sort_order == "newest":
+        sort_by = "newest"
+        order = "desc"
+    elif sort_order == "desc":
+        sort_by = "deadline"
+        order = "desc"
+    else:
+        sort_by = "deadline"
+        order = "asc"
 
     # Load active bidder profile
     profile_dict = get_bidder_profile(settings.DATABASE_PATH)
@@ -135,7 +146,10 @@ async def dashboard_view(
         save_bidder_profile(settings.DATABASE_PATH, profile.model_dump())
     profile_hash = compute_profile_hash(profile)
 
-    is_recommended = recommended in ("1", "true", "yes")
+    selected_verdict = verdict.upper() if verdict else None
+    is_recommended = recommended in ("1", "true", "yes") or selected_verdict == "BID"
+    if is_recommended and not selected_verdict:
+        selected_verdict = "BID"
 
     tenders = get_tenders(
         db_path=settings.DATABASE_PATH,
@@ -147,21 +161,41 @@ async def dashboard_view(
         sort_order=order,
         limit=100,
         profile_hash=profile_hash,
-        recommended_only=is_recommended
+        recommended_only=False
     )
 
     # Ensure all displayed tenders have verdicts computed & cached
+    bid_count = 0
+    review_count = 0
+    nobid_count = 0
     for t in tenders:
         if not t.get("advisor_verdict"):
             verd = get_or_compute_verdict(t, profile, settings.DATABASE_PATH)
             t["verdict"] = verd.get("verdict")
             t["match_score"] = verd.get("match_score")
             t["advisor_verdict"] = verd
+        
+        v = t.get("verdict")
+        if v == "BID":
+            bid_count += 1
+        elif v == "REVIEW":
+            review_count += 1
+        elif v == "NO_BID":
+            nobid_count += 1
 
-    if is_recommended:
-        tenders = [t for t in tenders if t.get("verdict") == "BID"]
+    # Filter by verdict if requested
+    if selected_verdict:
+        tenders = [t for t in tenders if t.get("verdict") == selected_verdict]
+
+    # In-memory match score sort guarantee
+    if sort_by == "match_score":
+        tenders.sort(key=lambda x: x.get("match_score") or 0, reverse=True)
 
     stats = get_tenders_stats(settings.DATABASE_PATH)
+    stats["bid_count"] = bid_count
+    stats["review_count"] = review_count
+    stats["nobid_count"] = nobid_count
+
     watchlists = get_watchlists(settings.DATABASE_PATH)
 
     return templates.TemplateResponse(
@@ -174,12 +208,15 @@ async def dashboard_view(
             "watchlists": watchlists,
             "profile": profile,
             "recommended": is_recommended,
+            "selected_verdict": selected_verdict,
             "search_query": search,
             "selected_portal": portal,
             "selected_urgency": urgency,
             "selected_watchlist": watchlist_id,
             "sort_order": sort_order,
             "sort_by": sort_by,
+            "is_mock_serpapi": settings.MOCK_SERPAPI,
+            "is_mock_llm": settings.MOCK_LLM,
             "message": message,
             "error": error
         }

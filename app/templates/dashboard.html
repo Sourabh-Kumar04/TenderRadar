@@ -3,59 +3,127 @@
 {% block title %}TenderRadar - Indian Government Tender Intelligence Agent{% endblock %}
 
 {% block content %}
-<!-- Top Header & Subtitle -->
-<div class="page-header">
-  <div>
-    <h1 class="page-title">Indian Tender Discovery Hub</h1>
-    <p class="page-subtitle">Watching GeM, CPPP, IREPS & State portals via SerpApi Google Search.</p>
+<!-- Winner-Level Hero & Clarity Section -->
+<div class="hero-card">
+  <div class="hero-badge-row">
+    <div class="section-eyebrow">Indian Tender Discovery Hub &bull; Live Intelligence</div>
+    <span class="hero-profile-chip">
+      <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+      Evaluating for: <strong>{{ profile.company_name }}</strong>
+      <a href="/profile" class="hero-chip-edit">Customize Profile &rarr;</a>
+    </span>
   </div>
-  <div>
-    <a href="/export/csv?portal={{ selected_portal or '' }}&urgency={{ selected_urgency or '' }}&search={{ search_query or '' }}&watchlist_id={{ selected_watchlist or '' }}" class="btn btn-secondary">
-      📥 Export CSV
-    </a>
+
+  <h1 class="hero-headline">Never Miss an Indian Govt Tender You Can Win</h1>
+  <p class="hero-subtitle">
+    Autonomous intelligence scanning GeM, CPPP, IREPS &amp; State eProcurement portals via SerpApi.
+    Delivers instant AI eligibility analysis and Bid/No-Bid verdicts tailored to your business profile.
+  </p>
+
+  <!-- 3-Step How It Works Strip -->
+  <div class="how-it-works-strip">
+    <div class="how-step">
+      <div class="how-step-num">01</div>
+      <div class="how-step-content">
+        <div class="how-step-title">Watchlists &amp; Capability</div>
+        <div class="how-step-desc">Target domain keywords, turnover thresholds, and EMD capacity.</div>
+      </div>
+    </div>
+    <div class="how-arrow">&rarr;</div>
+    <div class="how-step">
+      <div class="how-step-num">02</div>
+      <div class="how-step-content">
+        <div class="how-step-title">SerpApi Multi-Portal Search</div>
+        <div class="how-step-desc">Automated boolean queries across 7+ Indian portals with CAPTCHA bypass.</div>
+      </div>
+    </div>
+    <div class="how-arrow">&rarr;</div>
+    <div class="how-step">
+      <div class="how-step-num">03</div>
+      <div class="how-step-content">
+        <div class="how-step-title">AI Bid/No-Bid Verdict</div>
+        <div class="how-step-desc">Instant match score, risk flags, EMD waiver alerts, and bid recommendation.</div>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- Key Performance Metrics -->
+<!-- Key Performance Metrics / Live Proof Strip -->
 <div class="stats-grid">
   <div class="stat-card">
-    <div class="stat-icon primary">📋</div>
+    <div class="stat-icon primary">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+    </div>
     <div>
       <div class="stat-val">{{ stats.total_tenders }}</div>
       <div class="stat-lbl">Tenders Discovered</div>
     </div>
   </div>
   <div class="stat-card">
-    <div class="stat-icon warning">★</div>
+    <div class="stat-icon success">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+    </div>
     <div>
-      <div class="stat-val">{{ stats.saved_count }}</div>
-      <div class="stat-lbl">Saved Bookmarks</div>
+      <div class="stat-val">{% if (stats.bid_count or 0) > 0 %}{{ stats.bid_count }}{% else %}{{ stats.review_count or 0 }}{% endif %}</div>
+      <div class="stat-lbl">{% if (stats.bid_count or 0) > 0 %}Recommended Bids (BID){% else %}Qualified Leads (Review){% endif %}</div>
     </div>
   </div>
   <div class="stat-card">
-    <div class="stat-icon danger">⏰</div>
+    <div class="stat-icon danger">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+    </div>
     <div>
       <div class="stat-val">{{ stats.urgent_closing_soon }}</div>
       <div class="stat-lbl">Closing &lt;7 Days</div>
     </div>
   </div>
   <div class="stat-card">
-    <div class="stat-icon success">🔍</div>
+    <div class="stat-icon warning">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+    </div>
     <div>
-      <div class="stat-val">{{ stats.active_watchlists }}</div>
-      <div class="stat-lbl">Active Watchlists</div>
+      <div class="stat-val">7 Portals</div>
+      <div class="stat-lbl">GeM &bull; CPPP &bull; IREPS &bull; States</div>
     </div>
   </div>
+</div>
+
+<!-- Quick Verdict Filter Pills -->
+<div class="verdict-pills-bar">
+  <a href="/?search={{ search_query or '' }}&portal={{ selected_portal or '' }}&urgency={{ selected_urgency or '' }}&watchlist_id={{ selected_watchlist or '' }}&sort_order={{ sort_order or '' }}" 
+     class="verdict-pill {% if not selected_verdict and not selected_urgency %}active{% endif %}">
+    All Tenders <span class="pill-count">{{ stats.total_tenders }}</span>
+  </a>
+  <a href="/?verdict=BID&search={{ search_query or '' }}&portal={{ selected_portal or '' }}&watchlist_id={{ selected_watchlist or '' }}&sort_order=match_score" 
+     class="verdict-pill bid-pill {% if selected_verdict == 'BID' %}active{% endif %}">
+    <span style="color:#059669;">&bull;</span> Recommended (BID) <span class="pill-count">{{ stats.bid_count }}</span>
+  </a>
+  <a href="/?verdict=REVIEW&search={{ search_query or '' }}&portal={{ selected_portal or '' }}&watchlist_id={{ selected_watchlist or '' }}&sort_order=match_score" 
+     class="verdict-pill review-pill {% if selected_verdict == 'REVIEW' %}active{% endif %}">
+    <span style="color:#d97706;">&bull;</span> Manual Review <span class="pill-count">{{ stats.review_count }}</span>
+  </a>
+  <a href="/?verdict=NO_BID&search={{ search_query or '' }}&portal={{ selected_portal or '' }}&watchlist_id={{ selected_watchlist or '' }}" 
+     class="verdict-pill nobid-pill {% if selected_verdict == 'NO_BID' %}active{% endif %}">
+    <span style="color:#dc2626;">&bull;</span> No-Bid Filtered <span class="pill-count">{{ stats.nobid_count }}</span>
+  </a>
+  <a href="/?urgency=Closing+Soon+(%3C7d)&search={{ search_query or '' }}&portal={{ selected_portal or '' }}&watchlist_id={{ selected_watchlist or '' }}" 
+     class="verdict-pill {% if selected_urgency == 'Closing Soon (<7d)' %}active{% endif %}">
+    Closing &lt;7 Days <span class="pill-count">{{ stats.urgent_closing_soon }}</span>
+  </a>
 </div>
 
 <!-- Filters & Search Toolbar -->
 <div class="toolbar-card">
   <form action="/" method="GET" class="filter-form">
+    {% if selected_verdict %}
+      <input type="hidden" name="verdict" value="{{ selected_verdict }}">
+    {% endif %}
+
     <input 
       type="text" 
       name="search" 
       class="form-input" 
-      placeholder="Search tender title, scope, authority..." 
+      placeholder="Search indexed tenders by title, scope, authority..." 
       value="{{ search_query or '' }}"
     >
 
@@ -72,11 +140,11 @@
 
     <select name="urgency" class="form-select">
       <option value="">All Urgencies</option>
-      <option value="Urgent (<3d)" {% if selected_urgency == 'Urgent (<3d)' %}selected{% endif %}>🔴 Urgent (&lt;3 Days)</option>
-      <option value="Closing Soon (<7d)" {% if selected_urgency == 'Closing Soon (<7d)' %}selected{% endif %}>🟡 Closing Soon (&lt;7 Days)</option>
-      <option value="Active (>7d)" {% if selected_urgency == 'Active (>7d)' %}selected{% endif %}>🟢 Active (&gt;7 Days)</option>
-      <option value="Flexible / Open" {% if selected_urgency == 'Flexible / Open' %}selected{% endif %}>🔵 Flexible / Open</option>
-      <option value="Expired" {% if selected_urgency == 'Expired' %}selected{% endif %}>⚪ Expired</option>
+      <option value="Urgent (<3d)" {% if selected_urgency == 'Urgent (<3d)' %}selected{% endif %}>Urgent (&lt;3 Days)</option>
+      <option value="Closing Soon (<7d)" {% if selected_urgency == 'Closing Soon (<7d)' %}selected{% endif %}>Closing Soon (&lt;7 Days)</option>
+      <option value="Active (>7d)" {% if selected_urgency == 'Active (>7d)' %}selected{% endif %}>Active (&gt;7 Days)</option>
+      <option value="Flexible / Open" {% if selected_urgency == 'Flexible / Open' %}selected{% endif %}>Flexible / Open</option>
+      <option value="Expired" {% if selected_urgency == 'Expired' %}selected{% endif %}>Expired</option>
     </select>
 
     <select name="watchlist_id" class="form-select">
@@ -89,25 +157,14 @@
     </select>
 
     <select name="sort_order" class="form-select">
-      <option value="asc" {% if sort_order == 'asc' %}selected{% endif %}>⏳ Deadline: Earliest First</option>
-      <option value="desc" {% if sort_order == 'desc' %}selected{% endif %}>⌛ Deadline: Furthest First</option>
-      <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>✨ Recently Discovered</option>
+      <option value="match_score" {% if sort_order == 'match_score' %}selected{% endif %}>Match Score: Highest First</option>
+      <option value="asc" {% if sort_order == 'asc' %}selected{% endif %}>Deadline: Earliest First</option>
+      <option value="desc" {% if sort_order == 'desc' %}selected{% endif %}>Deadline: Furthest First</option>
+      <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Recently Discovered</option>
     </select>
 
-    <label style="display: inline-flex; align-items: center; gap: 0.35rem; cursor: pointer; font-size: 0.83rem; font-weight: 600; padding: 0.4rem 0.65rem; border-radius: var(--radius); border: 1px solid {% if recommended %}var(--primary){% else %}var(--border-dark){% endif %}; background: {% if recommended %}var(--primary-light){% else %}#ffffff{% endif %}; color: {% if recommended %}var(--primary){% else %}var(--text-sub){% endif %}; user-select: none;">
-      <input 
-        type="checkbox" 
-        name="recommended" 
-        value="1" 
-        {% if recommended %}checked{% endif %}
-        onchange="this.form.submit()"
-        style="cursor: pointer;"
-      >
-      <span>🎯 Recommended for me</span>
-    </label>
-
     <button type="submit" class="btn btn-primary btn-sm">Filter</button>
-    {% if search_query or selected_portal or selected_urgency or selected_watchlist or recommended %}
+    {% if search_query or selected_portal or selected_urgency or selected_watchlist or selected_verdict or sort_order != 'asc' %}
       <a href="/" class="btn btn-secondary btn-sm">Reset</a>
     {% endif %}
   </form>
@@ -124,31 +181,31 @@
           </a>
           <div style="display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
             {% if tender.verdict == 'BID' %}
-              <span class="badge badge-bid">🟢 BID ({{ tender.match_score }}%)</span>
+              <span class="badge badge-bid">&bull; BID ({{ tender.match_score }}%)</span>
             {% elif tender.verdict == 'REVIEW' %}
-              <span class="badge badge-review">🟡 REVIEW ({{ tender.match_score }}%)</span>
+              <span class="badge badge-review">&bull; REVIEW ({{ tender.match_score }}%)</span>
             {% elif tender.verdict == 'NO_BID' %}
-              <span class="badge badge-nobid">🔴 NO-BID ({{ tender.match_score }}%)</span>
+              <span class="badge badge-nobid">&bull; NO-BID ({{ tender.match_score }}%)</span>
             {% endif %}
 
             {% if tender.urgency_status == 'Urgent (<3d)' %}
-              <span class="badge badge-urgent">🔴 Urgent (&lt;3d)</span>
+              <span class="badge badge-urgent">Urgent (&lt;3d)</span>
             {% elif tender.urgency_status == 'Closing Soon (<7d)' %}
-              <span class="badge badge-closing">🟡 Closing (&lt;7d)</span>
+              <span class="badge badge-closing">Closing (&lt;7d)</span>
             {% elif tender.urgency_status == 'Active (>7d)' %}
-              <span class="badge badge-active">🟢 Active (&gt;7d)</span>
+              <span class="badge badge-active">Active (&gt;7d)</span>
             {% elif tender.urgency_status == 'Expired' %}
-              <span class="badge badge-expired">⚪ Expired</span>
+              <span class="badge badge-expired">Expired</span>
             {% else %}
-              <span class="badge badge-flexible">🔵 {{ tender.urgency_status }}</span>
+              <span class="badge badge-flexible">{{ tender.urgency_status }}</span>
             {% endif %}
           </div>
         </div>
 
         <div class="tender-meta-tags">
-          <span class="badge badge-portal">🏛️ {{ tender.portal_name }}</span>
+          <span class="badge badge-portal">Portal: {{ tender.portal_name }}</span>
           {% if tender.watchlist_keyword %}
-            <span class="badge badge-keyword">🏷️ Watchlist: {{ tender.watchlist_keyword }}</span>
+            <span class="badge badge-keyword">Tracked: {{ tender.watchlist_keyword }}</span>
           {% endif %}
           {% if tender.published_date %}
             <span class="text-muted" style="font-size:0.75rem;">Published: {{ tender.published_date }}</span>
@@ -158,47 +215,55 @@
         <!-- Key Financial & Deadline Metrics -->
         <div class="metrics-row">
           <div class="metric-item">
-            <span class="metric-label">📅 Bid Submission Deadline</span>
+            <span class="metric-label">Bid Submission Deadline</span>
             <span class="metric-value">
               {{ tender.deadline_date or 'Refer to Portal Document' }}
             </span>
           </div>
           <div class="metric-item">
-            <span class="metric-label">💰 EMD (Deposit)</span>
-            <span class="metric-value">{{ tender.emd_amount or 'Not Specified' }}</span>
+            <span class="metric-label">EMD Amount</span>
+            <span class="metric-value">
+              {{ tender.emd_amount or 'Not Specified' }}
+              {% if profile.msme_registered and 'exempt' not in (tender.emd_amount or '').lower() %}
+                <span class="badge badge-bid" style="font-size:0.68rem; margin-left:0.25rem;">MSME Exempt &check;</span>
+              {% endif %}
+            </span>
           </div>
           <div class="metric-item">
-            <span class="metric-label">🏷️ Tender Fee</span>
+            <span class="metric-label">Tender Document Fee</span>
             <span class="metric-value">{{ tender.tender_fee or 'Nil / Online' }}</span>
           </div>
         </div>
 
-        <!-- Bid Advisor Quick Assessment -->
+        <!-- Bid Advisor Spotlight Panel -->
         {% if tender.advisor_verdict %}
-          <div class="advisor-summary-panel">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.4rem;">
-              <div style="font-weight: 600; font-size: 0.85rem; color: var(--text-main); display: flex; align-items: center; gap: 0.4rem;">
-                <span>🎯 Bid Advisor Verdict:</span>
+          <div class="advisor-spotlight-card {% if tender.verdict == 'BID' %}verdict-bid{% elif tender.verdict == 'REVIEW' %}verdict-review{% else %}verdict-nobid{% endif %}">
+            <div class="advisor-spotlight-header">
+              <div class="advisor-verdict-title">
+                <span>Bid Advisor Verdict:</span>
                 {% if tender.verdict == 'BID' %}
-                  <strong style="color: #047857;">BID (Recommended)</strong>
+                  <strong style="color: #047857;">RECOMMENDED TO BID</strong>
                 {% elif tender.verdict == 'REVIEW' %}
-                  <strong style="color: #b45309;">MANUAL REVIEW</strong>
+                  <strong style="color: #b45309;">MANUAL REVIEW REQUIRED</strong>
                 {% else %}
-                  <strong style="color: #b91c1c;">NO-BID (High Risk)</strong>
+                  <strong style="color: #b91c1c;">NO-BID (MISMATCH / RISK)</strong>
                 {% endif %}
+                <span class="match-score-badge {% if (tender.match_score or 0) >= 70 %}high{% elif (tender.match_score or 0) >= 40 %}medium{% else %}low{% endif %}">
+                  {{ tender.match_score }}% Match
+                </span>
               </div>
               <button 
                 type="button" 
                 class="btn btn-secondary btn-sm" 
-                style="padding: 0.2rem 0.45rem; font-size: 0.73rem;"
+                style="padding: 0.18rem 0.45rem; font-size: 0.73rem;"
                 onclick="const el = document.getElementById('details-{{ tender.id }}'); el.style.display = el.style.display === 'none' ? 'block' : 'none';"
               >
-                🔍 Toggle Analysis
+                Analysis Details
               </button>
             </div>
 
-            <div id="details-{{ tender.id }}" style="display: block;">
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.45rem; margin-bottom: 0.5rem; font-size: 0.78rem;">
+            <div id="details-{{ tender.id }}" style="display: block; margin-top: 0.5rem;">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.45rem; margin-bottom: 0.45rem; font-size: 0.78rem;">
                 <div style="background: #ffffff; padding: 0.35rem 0.5rem; border: 1px solid var(--border); border-radius: var(--radius);">
                   <span style="color: var(--text-muted); font-size: 0.7rem; display: block;">Est. Contract Value</span>
                   <strong>{{ tender.advisor_verdict.key_details.est_value }}</strong>
@@ -214,7 +279,7 @@
               </div>
 
               {% if tender.advisor_verdict.reasons %}
-                <div style="margin-bottom: 0.4rem;">
+                <div style="margin-bottom: 0.35rem;">
                   <span style="font-weight: 600; font-size: 0.78rem; color: var(--text-main);">Strategic Reasoning:</span>
                   <ul style="padding-left: 1.25rem; font-size: 0.78rem; color: var(--text-sub); margin-top: 0.15rem; line-height: 1.45;">
                     {% for reason in tender.advisor_verdict.reasons %}
@@ -229,11 +294,11 @@
                   {% for flag in tender.advisor_verdict.flags %}
                     <div class="flag-badge flag-{{ flag.severity }}">
                       {% if flag.severity == 'critical' %}
-                        <strong style="color: #b91c1c;">⛔ CRITICAL:</strong>
+                        <strong style="color: #b91c1c;">CRITICAL:</strong>
                       {% elif flag.severity == 'warning' %}
-                        <strong style="color: #b45309;">⚠️ WARNING:</strong>
+                        <strong style="color: #b45309;">WARNING:</strong>
                       {% else %}
-                        <strong style="color: #0369a1;">ℹ️ INFO:</strong>
+                        <strong style="color: #0369a1;">NOTICE:</strong>
                       {% endif %}
                       <span>{{ flag.text }}</span>
                     </div>
@@ -244,10 +309,10 @@
           </div>
         {% endif %}
 
-        <!-- AI Scope Overview -->
+        <!-- Scope & Deliverables Overview -->
         <div class="ai-summary-box">
           <div class="ai-section-title">
-            <span>📋 Scope & Deliverables</span>
+            <span>Scope &amp; Deliverables</span>
           </div>
           <p class="ai-text">{{ tender.scope_summary or tender.snippet }}</p>
           {% if tender.eligibility %}
@@ -257,13 +322,13 @@
           {% endif %}
         </div>
 
-        <!-- Card Footer Actions -->
+        <!-- Clean Card Footer Actions (Zero Scraper Debug Leaks) -->
         <div class="card-footer">
-          <span class="portal-source-link">
-            Canonical URL: <code>{{ tender.canonical_url | truncate(55, True, '...') }}</code>
+          <span class="portal-attribution">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+            Source: <strong>{{ tender.portal_name }} Official Portal</strong>
           </span>
           <div class="card-actions">
-            <!-- Save / Unsave Button -->
             <button 
               type="button" 
               class="btn btn-save btn-sm {% if tender.is_saved %}is-saved{% endif %}" 
@@ -271,10 +336,10 @@
               onclick="toggleSaveTender(this, {{ tender.id }})"
               title="{% if tender.is_saved %}Remove from Saved{% else %}Bookmark this tender{% endif %}"
             >
-              {% if tender.is_saved %}★ Saved{% else %}☆ Save{% endif %}
+              {% if tender.is_saved %}&starf; Saved{% else %}&star; Save{% endif %}
             </button>
             <a href="/tenders/{{ tender.id }}" class="btn btn-secondary btn-sm">
-              📄 View Details
+              View Brief
             </a>
             <a 
               href="{{ tender.portal_url or select_portal_url(tender.original_url, tender.canonical_url) }}" 
@@ -282,7 +347,7 @@
               rel="noopener noreferrer" 
               class="btn btn-primary btn-sm"
             >
-              🔗 Open Official Portal ↗
+              Open Official Portal &nearr;
             </a>
           </div>
         </div>
@@ -293,21 +358,23 @@
 {% else %}
   <!-- Empty State -->
   <div class="empty-state">
-    <div class="empty-icon">🛰️</div>
+    <div class="empty-icon">
+      <svg class="icon-lg" style="width:40px;height:40px;stroke:#94a3b8;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+    </div>
     <h3 class="empty-title">No Tenders Found</h3>
     <p class="empty-desc">
-      {% if search_query or selected_portal or selected_urgency or selected_watchlist %}
-        No tenders matched your filter criteria. Try resetting filters or searching a different term.
+      {% if search_query or selected_portal or selected_urgency or selected_watchlist or selected_verdict %}
+        No tenders match your active filter criteria. Try resetting filters to view all discovered tenders.
       {% else %}
-        No tenders discovered yet. Run a discovery scan to search live government bids via SerpApi across GeM and CPPP portals!
+        No tenders discovered yet. Configure sector keywords in Watchlists, then run a multi-portal discovery scan via SerpApi.
       {% endif %}
     </p>
     <div>
-      {% if search_query or selected_portal or selected_urgency or selected_watchlist %}
+      {% if search_query or selected_portal or selected_urgency or selected_watchlist or selected_verdict %}
         <a href="/" class="btn btn-secondary">Clear Filters</a>
       {% else %}
         <form action="/scan" method="POST" style="display:inline;">
-          <button type="submit" class="btn btn-primary scan-btn">⚡ Run SerpApi Portal Scan Now</button>
+          <button type="submit" class="btn btn-primary scan-btn">Scan Portals Now via SerpApi</button>
         </form>
       {% endif %}
     </div>

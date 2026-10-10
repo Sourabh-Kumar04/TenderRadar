@@ -13,7 +13,7 @@
       onclick="toggleSaveTender(this, {{ tender.id }})"
       title="{% if tender.is_saved %}Remove from Saved{% else %}Bookmark this tender{% endif %}"
     >
-      {% if tender.is_saved %}★ Saved{% else %}☆ Save Tender{% endif %}
+      {% if tender.is_saved %}&starf; Saved{% else %}&star; Save Tender{% endif %}
     </button>
     <a 
       href="{{ tender.portal_url or select_portal_url(tender.original_url, tender.canonical_url) }}" 
@@ -21,7 +21,7 @@
       rel="noopener noreferrer" 
       class="btn btn-primary btn-sm"
     >
-      🚀 Open Official Portal ↗
+      Open Official Portal &nearr;
     </a>
   </div>
 </div>
@@ -34,24 +34,24 @@
         {{ tender.title }}
       </h1>
       <div class="tender-meta-tags">
-        <span class="badge badge-portal">🏛️ {{ tender.portal_name }}</span>
+        <span class="badge badge-portal">Portal: {{ tender.portal_name }}</span>
         {% if tender.watchlist_keyword %}
-          <span class="badge badge-keyword">🏷️ Watchlist: {{ tender.watchlist_keyword }}</span>
+          <span class="badge badge-keyword">Tracked: {{ tender.watchlist_keyword }}</span>
         {% endif %}
         <span class="text-muted" style="font-size: 0.78rem;">Discovered: {{ tender.created_at }}</span>
       </div>
     </div>
     <div>
       {% if tender.urgency_status == 'Urgent (<3d)' %}
-        <span class="badge badge-urgent" style="font-size: 0.85rem; padding: 0.35rem 0.65rem;">🔴 Urgent (&lt;3 Days Left)</span>
+        <span class="badge badge-urgent" style="font-size: 0.85rem; padding: 0.35rem 0.65rem;">Urgent (&lt;3 Days Left)</span>
       {% elif tender.urgency_status == 'Closing Soon (<7d)' %}
-        <span class="badge badge-closing" style="font-size: 0.85rem; padding: 0.35rem 0.65rem;">🟡 Closing Soon (&lt;7 Days Left)</span>
+        <span class="badge badge-closing" style="font-size: 0.85rem; padding: 0.35rem 0.65rem;">Closing Soon (&lt;7 Days Left)</span>
       {% elif tender.urgency_status == 'Active (>7d)' %}
-        <span class="badge badge-active" style="font-size: 0.85rem; padding: 0.35rem 0.65rem;">🟢 Active (&gt;7 Days Left)</span>
+        <span class="badge badge-active" style="font-size: 0.85rem; padding: 0.35rem 0.65rem;">Active (&gt;7 Days Left)</span>
       {% elif tender.urgency_status == 'Expired' %}
-        <span class="badge badge-expired" style="font-size: 0.85rem; padding: 0.35rem 0.65rem;">⚪ Expired</span>
+        <span class="badge badge-expired" style="font-size: 0.85rem; padding: 0.35rem 0.65rem;">Expired</span>
       {% else %}
-        <span class="badge badge-flexible" style="font-size: 0.85rem; padding: 0.35rem 0.65rem;">🔵 {{ tender.urgency_status }}</span>
+        <span class="badge badge-flexible" style="font-size: 0.85rem; padding: 0.35rem 0.65rem;">{{ tender.urgency_status }}</span>
       {% endif %}
     </div>
   </div>
@@ -59,19 +59,19 @@
   <!-- Key Metrics Row -->
   <div class="metrics-row" style="margin: 1.25rem 0;">
     <div class="metric-item">
-      <span class="metric-label">📅 Submission Deadline</span>
+      <span class="metric-label">Submission Deadline</span>
       <span class="metric-value" style="font-size: 1.05rem; color: var(--primary);">
         {{ tender.deadline_date or 'Refer to Portal Document' }}
       </span>
     </div>
     <div class="metric-item">
-      <span class="metric-label">💰 Earnest Money Deposit (EMD)</span>
+      <span class="metric-label">Earnest Money Deposit (EMD)</span>
       <span class="metric-value" style="font-size: 1.05rem;">
         {{ tender.emd_amount or 'Not Specified' }}
       </span>
     </div>
     <div class="metric-item">
-      <span class="metric-label">🏷️ Tender Document Fee</span>
+      <span class="metric-label">Tender Document Fee</span>
       <span class="metric-value" style="font-size: 1.05rem;">
         {{ tender.tender_fee or 'Nil / Online' }}
       </span>
@@ -83,7 +83,6 @@
     <div style="background: #ffffff; border: 1px solid {% if tender.verdict == 'BID' %}#a7f3d0{% elif tender.verdict == 'REVIEW' %}#fde68a{% else %}#fecaca{% endif %}; border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1.5rem; box-shadow: var(--shadow-sm);">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; flex-wrap: wrap; gap: 0.5rem;">
         <div style="display: flex; align-items: center; gap: 0.65rem;">
-          <span style="font-size: 1.35rem;">🎯</span>
           <div>
             <h2 style="font-size: 1.15rem; font-weight: 700; margin: 0; color: var(--text-main);">
               Bid Advisor Recommendation: 
@@ -130,7 +129,7 @@
       {% if tender.advisor_verdict.reasons %}
         <div style="margin-bottom: 0.85rem;">
           <h4 style="font-size: 0.88rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.35rem;">
-            💡 Strategic Decision Rationale
+            Strategic Decision Rationale
           </h4>
           <ul style="padding-left: 1.25rem; font-size: 0.85rem; line-height: 1.55; color: var(--text-sub);">
             {% for reason in tender.advisor_verdict.reasons %}
@@ -144,17 +143,17 @@
       {% if tender.advisor_verdict.flags %}
         <div>
           <h4 style="font-size: 0.88rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.35rem;">
-            🚩 Risk & Opportunity Flags
+            Risk &amp; Opportunity Flags
           </h4>
           <div style="display: flex; flex-direction: column; gap: 0.4rem;">
             {% for flag in tender.advisor_verdict.flags %}
               <div class="flag-badge flag-{{ flag.severity }}">
                 {% if flag.severity == 'critical' %}
-                  <strong style="color: #b91c1c;">⛔ CRITICAL:</strong>
+                  <strong style="color: #b91c1c;">CRITICAL:</strong>
                 {% elif flag.severity == 'warning' %}
-                  <strong style="color: #b45309;">⚠️ WARNING:</strong>
+                  <strong style="color: #b45309;">WARNING:</strong>
                 {% else %}
-                  <strong style="color: #0369a1;">ℹ️ INFO:</strong>
+                  <strong style="color: #0369a1;">NOTICE:</strong>
                 {% endif %}
                 <span>{{ flag.text }}</span>
               </div>
@@ -169,7 +168,7 @@
   <div style="display: flex; flex-direction: column; gap: 1.25rem; margin-bottom: 1.5rem;">
     <div>
       <h3 style="color: var(--text-main); font-size: 1.05rem; margin-bottom: 0.35rem; font-weight: 600;">
-        📋 Scope of Work & Deliverables
+        Scope of Work &amp; Deliverables
       </h3>
       <div style="background: var(--bg-subtle); border: 1px solid var(--border); padding: 0.85rem 1rem; border-radius: var(--radius); line-height: 1.55; font-size: 0.9rem;">
         {{ tender.scope_summary or 'Detailed scope available in the official RFP document.' }}
@@ -178,7 +177,7 @@
 
     <div>
       <h3 style="color: var(--text-main); font-size: 1.05rem; margin-bottom: 0.35rem; font-weight: 600;">
-        🎓 Eligibility & Qualification Requirements
+        Eligibility &amp; Qualification Requirements
       </h3>
       <div style="background: var(--bg-subtle); border: 1px solid var(--border); padding: 0.85rem 1rem; border-radius: var(--radius); line-height: 1.55; font-size: 0.9rem;">
         {{ tender.eligibility or 'Open competitive tender for registered government vendors.' }}
@@ -187,7 +186,7 @@
 
     <div>
       <h3 style="color: var(--text-main); font-size: 1.05rem; margin-bottom: 0.35rem; font-weight: 600;">
-        💡 Strategic Bid Advice & Takeaways
+        Strategic Bid Advice &amp; Takeaways
       </h3>
       <div style="background: #fffbeb; border: 1px solid #fde68a; padding: 0.85rem 1rem; border-radius: var(--radius); line-height: 1.55; color: #92400e; font-size: 0.9rem;">
         {{ tender.key_takeaways or 'Carefully review tender annexures, pre-bid queries, and submission checklist.' }}
@@ -197,7 +196,7 @@
     <!-- Notes Editing for this Tender -->
     <div class="notes-container">
       <div class="notes-header">
-        <span>📝 Private Notes & Bidding Strategy for this Tender</span>
+        <span>Private Notes &amp; Bidding Strategy for this Tender</span>
         <span id="notes-status-{{ tender.id }}" class="notes-status"></span>
       </div>
       <textarea 
@@ -211,18 +210,19 @@
           class="btn btn-secondary btn-sm" 
           onclick="saveTenderNotes({{ tender.id }})"
         >
-          💾 Save Note
+          Save Note
         </button>
       </div>
     </div>
 
-    <div>
-      <h3 style="color: var(--text-main); font-size: 1.05rem; margin-bottom: 0.35rem; font-weight: 600;">
-        🔍 Raw SerpApi Snippet & Verification
-      </h3>
-      <div style="background: var(--bg-subtle); border: 1px solid var(--border); padding: 0.75rem 1rem; border-radius: var(--radius); font-size: 0.82rem; color: var(--text-muted);">
-        <p style="margin-bottom: 0.35rem;"><em>Original Google Organic Snippet:</em> {{ tender.snippet }}</p>
-        <p><em>Normalized Canonical URL:</em> <code>{{ tender.canonical_url }}</code></p>
+    <!-- Clean Source Reference (No developer scraping debug blocks) -->
+    <div class="source-verification-card" style="background: var(--bg-subtle); border: 1px solid var(--border); padding: 0.85rem 1rem; border-radius: var(--radius);">
+      <div style="font-weight: 600; font-size: 0.88rem; color: var(--text-main); margin-bottom: 0.35rem;">
+        Official Source Notice &amp; Attribution
+      </div>
+      <p style="color: var(--text-sub); font-size: 0.85rem; line-height: 1.5; margin-bottom: 0.45rem;">"{{ tender.snippet }}"</p>
+      <div style="font-size: 0.78rem; color: var(--text-muted);">
+        Indexed via SerpApi from <strong>{{ tender.portal_name }}</strong>.
       </div>
     </div>
   </div>
@@ -240,7 +240,7 @@
         onclick="toggleSaveTender(this, {{ tender.id }})"
         title="{% if tender.is_saved %}Remove from Saved{% else %}Bookmark this tender{% endif %}"
       >
-        {% if tender.is_saved %}★ Saved{% else %}☆ Save Tender{% endif %}
+        {% if tender.is_saved %}&starf; Saved{% else %}&star; Save Tender{% endif %}
       </button>
       <a 
         href="{{ tender.portal_url or select_portal_url(tender.original_url, tender.canonical_url) }}" 
@@ -249,7 +249,7 @@
         class="btn btn-primary" 
         style="padding: 0.5rem 1.15rem;"
       >
-        🚀 Open Official Tender Portal ↗
+        Open Official Tender Portal &nearr;
       </a>
     </div>
   </div>

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Scan Monitor & Audit Log - TenderRadar{% endblock %}
+{% block title %}Scan Monitor &amp; Audit Logs - TenderRadar{% endblock %}
 
 {% block content %}
 <div class="page-header">
@@ -11,7 +11,8 @@
   <div>
     <form action="/scan" method="POST" style="display:inline;">
       <button type="submit" class="btn btn-primary scan-btn">
-        ⚡ Run Full Portal Scan Now
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        Run Full Portal Scan Now
       </button>
     </form>
   </div>
@@ -20,11 +21,11 @@
 <!-- Active Scan Status Card -->
 <div class="stat-card" style="margin-bottom: 2rem;">
   <div class="stat-icon {% if scan_status.status == 'Running' %}warning{% else %}primary{% endif %}">
-    {% if scan_status.status == 'Running' %}🔄{% else %}🛰️{% endif %}
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
   </div>
   <div style="flex: 1;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
-      <span style="font-weight: 700; font-size: 1.1rem; color: var(--primary-dark);">
+      <span style="font-weight: 700; font-size: 1.1rem; color: var(--text-main);">
         Scheduler Status: {{ scan_status.status }}
       </span>
       <span class="text-muted" style="font-size: 0.8rem;">
@@ -63,9 +64,9 @@
           </td>
           <td>
             {% if log.status == 'Success' %}
-              <span class="badge badge-active">✔️ {{ log.status }}</span>
+              <span class="badge badge-active">&bull; {{ log.status }}</span>
             {% elif log.status == 'Failed' %}
-              <span class="badge badge-urgent">❌ {{ log.status }}</span>
+              <span class="badge badge-urgent">&bull; {{ log.status }}</span>
             {% else %}
               <span class="badge badge-closing">{{ log.status }}</span>
             {% endif %}

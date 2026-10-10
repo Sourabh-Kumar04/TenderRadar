@@ -5,8 +5,8 @@
 {% block content %}
 <div class="page-header">
   <div>
-    <h1 class="page-title">Bidder Profile & Capability Setup</h1>
-    <p class="page-subtitle">Configure your technical competencies and financial capacity. TenderRadar uses this to automatically calculate BID / NO-BID recommendations, match scores, and risk flags.</p>
+    <h1 class="page-title">Bidder Profile &amp; Capability Setup</h1>
+    <p class="page-subtitle">Configure your technical competencies and financial capacity. TenderRadar uses this to automatically calculate BID / REVIEW / NO-BID recommendations, match scores, and risk flags.</p>
   </div>
   <div>
     <a href="/" class="btn btn-secondary">&larr; Back to Dashboard</a>
@@ -19,7 +19,7 @@
     <form action="/profile" method="POST" id="profileForm">
       <div style="margin-bottom: 1.25rem;">
         <label for="company_name" style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.35rem; color: var(--text-main);">
-          🏢 Company / Contractor Name *
+          Company / Contractor Name *
         </label>
         <input 
           type="text" 
@@ -35,7 +35,7 @@
 
       <div style="margin-bottom: 1.25rem;">
         <label for="categories" style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.35rem; color: var(--text-main);">
-          🏷️ Core Domains & Categories (Comma-separated) *
+          Core Domains &amp; Categories (Comma-separated) *
         </label>
         <input 
           type="text" 
@@ -47,14 +47,14 @@
           placeholder="e.g. Solar EPC, Road Construction, CCTV Surveillance, Electrical Works"
           required
         >
-        <span class="text-muted" style="font-size: 0.75rem;">TenderRadar matches notice titles & snippets against these categories.</span>
+        <span class="text-muted" style="font-size: 0.75rem;">TenderRadar matches notice titles &amp; snippets against these categories.</span>
       </div>
 
       <!-- Financial Limits Grid -->
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; margin-bottom: 1.25rem;">
         <div>
           <label for="min_contract_value" style="display: block; font-weight: 600; font-size: 0.82rem; margin-bottom: 0.3rem; color: var(--text-main);">
-            📉 Min Contract Value (₹ INR)
+            Min Contract Value (₹ INR)
           </label>
           <input 
             type="number" 
@@ -70,7 +70,7 @@
 
         <div>
           <label for="max_contract_value" style="display: block; font-weight: 600; font-size: 0.82rem; margin-bottom: 0.3rem; color: var(--text-main);">
-            📈 Max Contract Value (₹ INR)
+            Max Contract Value (₹ INR)
           </label>
           <input 
             type="number" 
@@ -88,7 +88,7 @@
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; margin-bottom: 1.25rem;">
         <div>
           <label for="annual_turnover" style="display: block; font-weight: 600; font-size: 0.82rem; margin-bottom: 0.3rem; color: var(--text-main);">
-            💼 Annual Turnover (₹ INR)
+            Annual Turnover (₹ INR)
           </label>
           <input 
             type="number" 
@@ -104,7 +104,7 @@
 
         <div>
           <label for="max_emd_capacity" style="display: block; font-weight: 600; font-size: 0.82rem; margin-bottom: 0.3rem; color: var(--text-main);">
-            🏦 Max EMD Liquid Capacity (₹ INR)
+            Max EMD Liquid Capacity (₹ INR)
           </label>
           <input 
             type="number" 
@@ -122,7 +122,7 @@
       <!-- Government Registrations -->
       <div style="background: var(--bg-subtle); border: 1px solid var(--border); padding: 0.85rem; border-radius: var(--radius); margin-bottom: 1.25rem;">
         <span style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem; color: var(--text-main);">
-          🏛️ Special Preferential Registrations
+          Preferential Registrations &amp; Exemptions
         </span>
         <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
           <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; font-size: 0.85rem;">
@@ -132,7 +132,7 @@
               value="true" 
               {% if profile.msme_registered %}checked{% endif %}
             >
-            <span>Udyam Registered MSME (EMD & Fee Exempt)</span>
+            <span>Udyam Registered MSME (EMD &amp; Fee Exempt)</span>
           </label>
 
           <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; font-size: 0.85rem;">
@@ -149,7 +149,7 @@
 
       <div style="margin-bottom: 1.25rem;">
         <label for="certifications" style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.35rem; color: var(--text-main);">
-          📜 Contractor Licenses & Quality Certifications
+          Contractor Licenses &amp; Quality Certifications
         </label>
         <input 
           type="text" 
@@ -165,7 +165,7 @@
 
       <div style="margin-bottom: 1.5rem;">
         <label for="preferred_states" style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.35rem; color: var(--text-main);">
-          📍 Preferred States / Territories (Comma-separated)
+          Preferred Operating States &amp; Geotargets
         </label>
         <input 
           type="text" 
@@ -176,12 +176,12 @@
           value="{{ profile.preferred_states | join(', ') }}" 
           placeholder="e.g. Maharashtra, Gujarat, Delhi, All India"
         >
-        <span class="text-muted" style="font-size: 0.75rem;">Tenders located in preferred regions receive higher match scores.</span>
+        <span class="text-muted" style="font-size: 0.75rem;">Tenders located in preferred regions receive higher priority.</span>
       </div>
 
       <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
         <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1.25rem;">
-          💾 Save Bidder Profile
+          Save Bidder Profile
         </button>
         <span class="text-muted" style="font-size: 0.8rem;">Recommendations recalculate automatically upon saving.</span>
       </div>
@@ -192,28 +192,28 @@
   <div style="display: flex; flex-direction: column; gap: 1rem;">
     <div class="tender-card">
       <h3 style="color: var(--text-main); font-size: 1rem; margin-bottom: 0.65rem; font-weight: 700;">
-        ⚡ How Bid Advisor Works
+        How the Bid Advisor Evaluates Tenders
       </h3>
       <ol style="padding-left: 1.25rem; font-size: 0.85rem; line-height: 1.6; color: var(--text-sub);">
         <li>
-          <strong>Deterministic Pre-Filter:</strong> Tenders are filtered by domain keywords, contract value bracket, and EMD capacity.
+          <strong>Capacity Screening:</strong> Matches bids against your turnover, contract value range, and available EMD budget.
         </li>
         <li>
-          <strong>DeepSeek AI Reasoning:</strong> Evaluates tender RFP nuances, technical requirements, and contractor fit.
+          <strong>Technical Fit Analysis:</strong> Analyzes the scope of work against your core trade categories, domains, and certifications.
         </li>
         <li>
-          <strong>Risk & Opportunity Flags:</strong> Flags tight deadlines (&lt;7 days), liquidity risks, and MSME fee waivers.
+          <strong>Risk &amp; Exemption Detection:</strong> Highlights tight deadlines (&lt;7 days) and identifies MSME/Startup fee exemptions under Govt procurement rules.
         </li>
         <li>
-          <strong>Decision Caching:</strong> Results are cached by profile hash. When you edit your profile here, verdicts recalculate instantly!
+          <strong>Instant Recalculation:</strong> Updating your profile immediately re-scores and re-ranks all active tenders.
         </li>
       </ol>
     </div>
 
     <div style="background: var(--success-bg); border: 1px solid var(--success-border); padding: 1rem; border-radius: var(--radius); color: #166534;">
-      <h4 style="font-size: 0.88rem; margin-bottom: 0.35rem; font-weight: 600;">💡 Pro-Tip for Indian MSMEs</h4>
+      <h4 style="font-size: 0.88rem; margin-bottom: 0.35rem; font-weight: 600;">Pro-Tip for Indian MSMEs</h4>
       <p style="font-size: 0.8rem; line-height: 1.5;">
-        Under the Public Procurement Policy for MSEs Order 2012, registered MSMEs are exempt from Earnest Money Deposit (EMD) and tender document fees on Central Government portals (GeM & CPPP).
+        Under the Public Procurement Policy for MSEs Order 2012, registered MSMEs are exempt from Earnest Money Deposit (EMD) and tender document fees on Central Government portals (GeM &amp; CPPP).
       </p>
     </div>
   </div>

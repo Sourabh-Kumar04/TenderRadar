@@ -27,47 +27,47 @@
           </a>
           <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
             {% if tender.verdict == 'BID' %}
-              <span class="badge badge-bid">🟢 BID ({{ tender.match_score }}%)</span>
+              <span class="badge badge-bid">&bull; BID ({{ tender.match_score }}%)</span>
             {% elif tender.verdict == 'REVIEW' %}
-              <span class="badge badge-review">🟡 REVIEW ({{ tender.match_score }}%)</span>
+              <span class="badge badge-review">&bull; REVIEW ({{ tender.match_score }}%)</span>
             {% elif tender.verdict == 'NO_BID' %}
-              <span class="badge badge-nobid">🔴 NO-BID ({{ tender.match_score }}%)</span>
+              <span class="badge badge-nobid">&bull; NO-BID ({{ tender.match_score }}%)</span>
             {% endif %}
 
             {% if tender.urgency_status == 'Urgent (<3d)' %}
-              <span class="badge badge-urgent">🔴 Urgent (&lt;3d)</span>
+              <span class="badge badge-urgent">Urgent (&lt;3d)</span>
             {% elif tender.urgency_status == 'Closing Soon (<7d)' %}
-              <span class="badge badge-closing">🟡 Closing (&lt;7d)</span>
+              <span class="badge badge-closing">Closing (&lt;7d)</span>
             {% elif tender.urgency_status == 'Active (>7d)' %}
-              <span class="badge badge-active">🟢 Active (&gt;7d)</span>
+              <span class="badge badge-active">Active (&gt;7d)</span>
             {% elif tender.urgency_status == 'Expired' %}
-              <span class="badge badge-expired">⚪ Expired</span>
+              <span class="badge badge-expired">Expired</span>
             {% else %}
-              <span class="badge badge-flexible">🔵 {{ tender.urgency_status }}</span>
+              <span class="badge badge-flexible">{{ tender.urgency_status }}</span>
             {% endif %}
           </div>
         </div>
 
         <div class="tender-meta-tags">
-          <span class="badge badge-portal">🏛️ {{ tender.portal_name }}</span>
+          <span class="badge badge-portal">Portal: {{ tender.portal_name }}</span>
           {% if tender.watchlist_keyword %}
-            <span class="badge badge-keyword">🏷️ Watchlist: {{ tender.watchlist_keyword }}</span>
+            <span class="badge badge-keyword">Tracked: {{ tender.watchlist_keyword }}</span>
           {% endif %}
-          <span class="text-muted" style="font-size:0.75rem;">★ Bookmarked: {{ tender.saved_at }}</span>
+          <span class="text-muted" style="font-size:0.75rem;">Bookmarked: {{ tender.saved_at }}</span>
         </div>
 
         <!-- Metrics Row -->
         <div class="metrics-row">
           <div class="metric-item">
-            <span class="metric-label">📅 Bid Submission Deadline</span>
+            <span class="metric-label">Bid Submission Deadline</span>
             <span class="metric-value">{{ tender.deadline_date or 'Refer to Portal RFP' }}</span>
           </div>
           <div class="metric-item">
-            <span class="metric-label">💰 EMD Deposit</span>
+            <span class="metric-label">EMD Amount</span>
             <span class="metric-value">{{ tender.emd_amount or 'Not Specified' }}</span>
           </div>
           <div class="metric-item">
-            <span class="metric-label">🏷️ Tender Fee</span>
+            <span class="metric-label">Tender Document Fee</span>
             <span class="metric-value">{{ tender.tender_fee or 'Nil / Online' }}</span>
           </div>
         </div>
@@ -75,7 +75,7 @@
         <!-- AI Scope Overview -->
         <div class="ai-summary-box">
           <div class="ai-section-title">
-            <span>📋 Scope of Work</span>
+            <span>Scope of Work</span>
           </div>
           <p class="ai-text">{{ tender.scope_summary or tender.snippet }}</p>
         </div>
@@ -83,7 +83,7 @@
         <!-- Notes Editing Section -->
         <div class="notes-container">
           <div class="notes-header">
-            <span>📝 Private Notes & Bidding Strategy</span>
+            <span>Private Notes &amp; Bidding Strategy</span>
             <span id="notes-status-{{ tender.id }}" class="notes-status"></span>
           </div>
           <textarea 
@@ -97,15 +97,16 @@
               class="btn btn-secondary btn-sm" 
               onclick="saveTenderNotes({{ tender.id }})"
             >
-              💾 Save Notes
+              Save Notes
             </button>
           </div>
         </div>
 
-        <!-- Card Footer Actions -->
+        <!-- Clean Card Footer Actions -->
         <div class="card-footer">
-          <span class="portal-source-link">
-            Canonical URL: <code>{{ tender.canonical_url | truncate(60, True, '...') }}</code>
+          <span class="portal-attribution">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+            Source: <strong>{{ tender.portal_name }} Official Portal</strong>
           </span>
           <div class="card-actions">
             <button 
@@ -115,10 +116,10 @@
               onclick="toggleSaveTender(this, {{ tender.id }})"
               title="Remove from Saved"
             >
-              ★ Saved
+              &starf; Saved
             </button>
             <a href="/tenders/{{ tender.id }}" class="btn btn-secondary btn-sm">
-              📄 View Full Details
+              View Brief
             </a>
             <a 
               href="{{ tender.portal_url or select_portal_url(tender.original_url, tender.canonical_url) }}" 
@@ -126,7 +127,7 @@
               rel="noopener noreferrer" 
               class="btn btn-primary btn-sm"
             >
-              🔗 Open Official Portal ↗
+              Open Official Portal &nearr;
             </a>
           </div>
         </div>
@@ -137,14 +138,16 @@
 {% else %}
   <!-- Empty State -->
   <div class="empty-state">
-    <div class="empty-icon">★</div>
+    <div class="empty-icon">
+      <svg class="icon-lg" style="width:36px;height:36px;stroke:#94a3b8;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+    </div>
     <h3 class="empty-title">No Saved Tenders Yet</h3>
     <p class="empty-desc">
       You haven't bookmarked any tenders yet. When browsing the dashboard or tender details, click the "Save" button to bookmark tenders and keep private bidding notes.
     </p>
     <div>
       <a href="/" class="btn btn-primary">
-        🔍 Explore Live Tenders
+        Explore Live Tenders
       </a>
     </div>
   </div>

@@ -12,22 +12,46 @@
   <nav class="navbar">
     <div class="nav-container">
       <a href="/" class="nav-brand">
-        <div class="brand-logo">T</div>
+        <div class="brand-logo">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        </div>
         <div>
           <span class="brand-name">TenderRadar</span>
-          <span class="brand-badge">SerpApi · India 2026</span>
+          <span class="serpapi-live-pill {% if is_mock_serpapi %}mock{% endif %}" title="SerpApi Real-Time Google & Portal Search Engine">
+            <span class="pulse-dot {% if is_mock_serpapi %}warning{% endif %}"></span>
+            {% if is_mock_serpapi %}SerpApi · Cached Mode{% else %}SerpApi · Live Engine (gl=in){% endif %}
+          </span>
         </div>
       </a>
       <div class="nav-links">
-        <a href="/" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}">📊 Dashboard</a>
-        <a href="/saved" class="nav-link {% if active_page == 'saved' %}active{% endif %}">★ Saved</a>
-        <a href="/profile" class="nav-link {% if active_page == 'profile' %}active{% endif %}">🎯 Profile</a>
-        <a href="/watchlists" class="nav-link {% if active_page == 'watchlists' %}active{% endif %}">🔍 Watchlists</a>
-        <a href="/scans" class="nav-link {% if active_page == 'scans' %}active{% endif %}">⏱️ Scans</a>
-        <a href="/export/csv" class="btn btn-secondary btn-sm" title="Export tenders to CSV">📥 CSV</a>
+        <a href="/" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          Dashboard
+        </a>
+        <a href="/saved" class="nav-link {% if active_page == 'saved' %}active{% endif %}">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          Saved
+        </a>
+        <a href="/profile" class="nav-link {% if active_page == 'profile' %}active{% endif %}">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          Bidder Profile
+        </a>
+        <a href="/watchlists" class="nav-link {% if active_page == 'watchlists' %}active{% endif %}">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          Watchlists
+        </a>
+        <a href="/scans" class="nav-link {% if active_page == 'scans' %}active{% endif %}">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          Audit Scans
+        </a>
+        <a href="/export/csv" class="btn btn-secondary btn-sm" title="Export current tenders to CSV">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          CSV Export
+        </a>
         <form action="/scan" method="POST" style="display:inline;">
-          <button type="submit" class="btn btn-primary btn-sm scan-btn" title="Run discovery scan across portals">
-            ⚡ Scan Portals
+          <button type="submit" class="btn btn-primary btn-sm scan-btn" title="Run live multi-portal discovery scan across GeM, CPPP & State portals">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            Scan Portals
           </button>
         </form>
       </div>
@@ -38,12 +62,12 @@
   <main class="container">
     {% if message %}
       <div class="alert alert-info alert-dismissible">
-        <span>ℹ️ {{ message }}</span>
+        <span>{{ message }}</span>
       </div>
     {% endif %}
     {% if error %}
       <div class="alert alert-danger alert-dismissible">
-        <span>⚠️ {{ error }}</span>
+        <span>{{ error }}</span>
       </div>
     {% endif %}
 
@@ -54,11 +78,10 @@
   <footer class="footer">
     <div class="footer-container">
       <div>
-        <strong>TenderRadar</strong> — Built for <em>SerpApi India Hackathon 2026</em>.
-        Discovery & AI Bid Intelligence across GeM, CPPP, IREPS & State portals.
+        <strong>TenderRadar</strong> — Autonomous Indian Government Tender Discovery & Bid Intelligence across GeM, CPPP, IREPS & State portals.
       </div>
       <div>
-        <span>Powered by <strong>SerpApi</strong> & Fireworks AI (DeepSeek V4P1 Flash)</span> · Apache-2.0
+        <span>Multi-portal discovery powered by <strong>SerpApi</strong> &bull; DeepSeek AI Procurement Advisor</span>
       </div>
     </div>
   </footer>
