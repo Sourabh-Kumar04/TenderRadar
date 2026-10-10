@@ -542,6 +542,13 @@ def set_cached_search(db_path: str, query_hash: str, query: str, results: List[D
         conn.commit()
 
 
+def get_search_cache_count(db_path: str) -> int:
+    """Returns number of unique SerpApi queries cached in SQLite."""
+    with get_db_connection(db_path) as conn:
+        row = conn.execute("SELECT COUNT(*) FROM search_cache").fetchone()
+        return row[0] if row else 0
+
+
 # ==========================================
 # Audit & Scan Logging
 # ==========================================

@@ -27,21 +27,21 @@
           </a>
           <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
             {% if tender.verdict == 'BID' %}
-              <span class="badge badge-bid"><span class="badge-dot" style="background:var(--success);"></span>BID ({{ tender.match_score }}%)</span>
+              <span class="badge badge-bid"><span class="badge-dot"></span>BID ({{ tender.match_score }}%)</span>
             {% elif tender.verdict == 'REVIEW' %}
-              <span class="badge badge-review"><span class="badge-dot" style="background:var(--warning);"></span>REVIEW ({{ tender.match_score }}%)</span>
+              <span class="badge badge-review"><span class="badge-dot"></span>REVIEW ({{ tender.match_score }}%)</span>
             {% elif tender.verdict == 'NO_BID' %}
-              <span class="badge badge-nobid"><span class="badge-dot" style="background:var(--text-muted);"></span>NO-BID ({{ tender.match_score }}%)</span>
+              <span class="badge badge-nobid"><span class="badge-dot"></span>NO-BID ({{ tender.match_score }}%)</span>
             {% endif %}
 
             {% if tender.urgency_status == 'Urgent (<3d)' %}
-              <span class="badge badge-urgent"><span class="badge-dot" style="background:var(--danger);"></span>Urgent (&lt;3d)</span>
+              <span class="badge badge-urgent"><span class="badge-dot"></span>Urgent (&lt;3d)</span>
             {% elif tender.urgency_status == 'Closing Soon (<7d)' %}
-              <span class="badge badge-closing"><span class="badge-dot" style="background:var(--warning);"></span>Closing (&lt;7d)</span>
+              <span class="badge badge-closing"><span class="badge-dot"></span>Closing (&lt;7d)</span>
             {% elif tender.urgency_status == 'Active (>7d)' %}
-              <span class="badge badge-active"><span class="badge-dot" style="background:var(--success);"></span>Active (&gt;7d)</span>
+              <span class="badge badge-active"><span class="badge-dot"></span>Active (&gt;7d)</span>
             {% elif tender.urgency_status == 'Expired' %}
-              <span class="badge badge-expired">Expired</span>
+              <span class="badge badge-expired"><span class="badge-dot"></span>Expired</span>
             {% else %}
               <span class="badge badge-flexible">{{ tender.urgency_status }}</span>
             {% endif %}

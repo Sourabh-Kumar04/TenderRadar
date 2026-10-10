@@ -102,15 +102,18 @@
         <tr>
           <td>
             <strong>{{ wl.keyword }}</strong>
+            <div class="code-dense text-muted" style="font-size: 0.68rem; margin-top: 0.2rem;">
+              SerpApi [gl=in]: "{{ wl.keyword }}" {% if wl.state_filter and wl.state_filter != 'All India' %}"{{ wl.state_filter }}" {% endif %}tender (site:eprocure.gov.in OR site:gem.gov.in...)
+            </div>
           </td>
           <td>{{ wl.category }}</td>
-          <td>{{ wl.min_value }}</td>
+          <td><span class="tnum">{{ wl.min_value }}</span></td>
           <td>{{ wl.state_filter }}</td>
           <td>
             {% if wl.is_active %}
-              <span class="badge badge-active"><span class="badge-dot" style="background:var(--success);"></span>Active</span>
+              <span class="badge badge-active"><span class="badge-dot"></span>Active</span>
             {% else %}
-              <span class="badge badge-expired"><span class="badge-dot" style="background:var(--text-muted);"></span>Paused</span>
+              <span class="badge badge-expired"><span class="badge-dot"></span>Paused</span>
             {% endif %}
           </td>
           <td>

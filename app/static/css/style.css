@@ -19,6 +19,7 @@
   --success-border: #a7f3d0;
 
   --warning: #d97706;           /* Stitch REVIEW Amber */
+  --warning-text: #92400e;      /* WCAG AA Compliant Amber Text (4.5:1+) */
   --warning-bg: #fffbeb;
   --warning-border: #fde68a;
 
@@ -497,7 +498,16 @@ input[type="checkbox"] {
   border-radius: 50%;
   display: inline-block;
   flex-shrink: 0;
+  background: currentColor;
 }
+.badge-bid .badge-dot,
+.badge-active .badge-dot { background: var(--success) !important; }
+.badge-review .badge-dot,
+.badge-closing .badge-dot { background: var(--warning) !important; }
+.badge-nobid .badge-dot,
+.badge-expired .badge-dot { background: var(--text-muted) !important; }
+.badge-urgent .badge-dot { background: var(--danger) !important; }
+
 .badge-urgent {
   background: var(--danger-bg);
   color: var(--danger);
@@ -506,7 +516,7 @@ input[type="checkbox"] {
 }
 .badge-closing {
   background: var(--warning-bg);
-  color: var(--warning);
+  color: var(--warning-text);
   border: 1px solid var(--warning-border);
   border-radius: var(--radius-pill) !important;
 }
@@ -520,11 +530,19 @@ input[type="checkbox"] {
   background: var(--bg-subtle);
   color: var(--text-muted);
   border: 1px solid var(--border);
+  border-radius: var(--radius-pill) !important;
 }
 .badge-flexible {
   background: var(--info-bg);
   color: var(--info);
   border: 1px solid var(--info-border);
+  border-radius: var(--radius-pill) !important;
+}
+.badge-benefit {
+  background: var(--success-bg);
+  color: var(--success);
+  border: 1px solid var(--success-border);
+  border-radius: var(--radius);
 }
 .badge-portal {
   background: var(--bg-subtle);
@@ -544,7 +562,7 @@ input[type="checkbox"] {
 }
 .badge-review {
   background: var(--warning-bg) !important;
-  color: var(--warning) !important;
+  color: var(--warning-text) !important;
   border: 1px solid var(--warning-border) !important;
   border-radius: var(--radius-pill) !important;
 }
@@ -568,6 +586,14 @@ input[type="checkbox"] {
   align-items: flex-start;
   gap: 0.45rem;
 }
+.flag-badge strong {
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.03em;
+}
+.flag-critical strong { color: var(--danger); }
+.flag-warning strong { color: var(--warning-text); }
+.flag-info strong { color: var(--info); }
 .flag-critical {
   background: var(--danger-bg);
   border: 1px solid var(--danger-border);
@@ -934,6 +960,20 @@ input[type="checkbox"] {
   }
 }
 
+@media (max-width: 540px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  .stat-card {
+    padding: 1rem 1.15rem;
+  }
+  .tender-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+
 /* ========================================================
    Icon Utilities (Crisp SVGs - Zero Broken Emojis)
    ======================================================== */
@@ -1257,15 +1297,15 @@ input[type="checkbox"] {
 }
 .advisor-spotlight-card.verdict-bid {
   border-left-color: var(--success);
-  background: #ffffff;
+  background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 45%);
 }
 .advisor-spotlight-card.verdict-review {
   border-left-color: var(--warning);
-  background: #ffffff;
+  background: linear-gradient(180deg, #fffbeb 0%, #ffffff 45%);
 }
 .advisor-spotlight-card.verdict-nobid {
-  border-left-color: #64748b;
-  background: #ffffff;
+  border-left-color: var(--text-muted);
+  background: linear-gradient(180deg, var(--bg-subtle) 0%, #ffffff 45%);
 }
 .advisor-spotlight-header {
   display: flex;
@@ -1319,3 +1359,82 @@ input[type="checkbox"] {
 .portal-attribution strong {
   color: var(--text-sub);
 }
+
+/* Strategic Reasons Custom List */
+.advisor-reasons-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.35rem 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.advisor-reasons-list li {
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--text-sub);
+  position: relative;
+  padding-left: 1.15rem;
+}
+.advisor-reasons-list li::before {
+  content: "•";
+  color: var(--primary);
+  position: absolute;
+  left: 0.2rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+/* Dedicated Scanner Status Banner */
+.status-banner {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.15rem 1.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  flex-wrap: wrap;
+}
+.status-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+.status-banner-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-light);
+  color: var(--primary);
+  flex-shrink: 0;
+}
+.status-banner-icon.running {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+.status-banner-icon.completed, .status-banner-icon.idle {
+  background: var(--success-bg);
+  color: var(--success);
+}
+.status-banner-title {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.status-banner-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+

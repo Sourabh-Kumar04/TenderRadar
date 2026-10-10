@@ -36,7 +36,8 @@ from app.db import (
     unsave_tender,
     is_tender_saved,
     update_saved_tender_notes,
-    get_saved_tenders
+    get_saved_tenders,
+    get_search_cache_count
 )
 from app.models import (
     WatchlistCreate,
@@ -399,13 +400,16 @@ async def trigger_scan_view():
 async def scans_view(request: Request):
     settings = get_settings()
     logs = get_scan_logs(settings.DATABASE_PATH, limit=50)
+    cache_count = get_search_cache_count(settings.DATABASE_PATH)
     return templates.TemplateResponse(
         request=request,
         name="scans.html",
         context={
             "active_page": "scans",
             "logs": logs,
-            "scan_status": scan_manager.last_scan_info
+            "scan_status": scan_manager.last_scan_info,
+            "cache_count": cache_count,
+            "is_mock_serpapi": settings.MOCK_SERPAPI
         }
     )
 

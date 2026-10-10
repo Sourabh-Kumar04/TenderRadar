@@ -95,7 +95,7 @@ class ScanManager:
                 total_new += res["items_new"]
 
             now = datetime.now().isoformat()
-            summary_msg = f"Completed full scan. Found {total_found} tenders ({total_new} new) across {len(active_watchlists)} watchlists."
+            summary_msg = f"[SerpApi Multi-Portal Scan] Completed full scan across {len(active_watchlists)} watchlists. Retrieved {total_found} tenders ({total_new} newly indexed), deduplicated by canonical URL."
             self.last_scan_info.update({
                 "status": "Completed",
                 "last_run": now,
@@ -224,7 +224,7 @@ class ScanManager:
                 items_new += 1
 
         touch_watchlist_scanned(self.db_path, wl_id)
-        log_msg = f"Watchlist '{keyword}': {items_found} found, {items_new} newly indexed."
+        log_msg = f"[SerpApi Google Search | gl=in | India] Watchlist '{keyword}': {items_found} found, {items_new} newly indexed."
         log_scan(self.db_path, wl_id, "Success", items_found, items_new, log_msg)
 
         return {

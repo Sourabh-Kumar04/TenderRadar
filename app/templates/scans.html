@@ -18,24 +18,79 @@
   </div>
 </div>
 
-<!-- Active Scan Status Card -->
-<div class="stat-card" style="margin-bottom: 2rem;">
-  <div class="stat-icon {% if scan_status.status == 'Running' %}warning{% else %}primary{% endif %}">
-    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-  </div>
-  <div style="flex: 1;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
-      <span style="font-weight: 700; font-size: 1.1rem; color: var(--text-main);">
+<!-- Active Scan Status Banner (Dedicated Clean Layout) -->
+<div class="status-banner">
+  <div class="status-banner-left">
+    <div class="status-banner-icon {% if scan_status.status == 'Running' %}running{% elif scan_status.status == 'Completed' %}completed{% else %}idle{% endif %}">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+    </div>
+    <div>
+      <div class="status-banner-title">
         Scheduler Status: {{ scan_status.status }}
-      </span>
-      <span class="text-muted" style="font-size: 0.8rem;">
-        Last Run: {{ scan_status.last_run or 'Never' }}
-      </span>
-    </div>
-    <div class="text-sub" style="font-size: 0.9rem;">
-      {{ scan_status.message }}
+        {% if scan_status.status == 'Running' %}
+          <span class="badge badge-closing"><span class="badge-dot"></span>Active Scan</span>
+        {% else %}
+          <span class="badge badge-active"><span class="badge-dot"></span>Engine Ready</span>
+        {% endif %}
+      </div>
+      <div class="status-banner-subtitle">
+        {{ scan_status.message }}
+      </div>
     </div>
   </div>
+  <div class="text-muted tnum" style="font-size: 0.8rem; text-align: right;">
+    Last Scan: <strong>{{ scan_status.last_run or 'Never' }}</strong>
+  </div>
+</div>
+
+<!-- SerpApi Engine Telemetry Strip -->
+<div class="stats-grid" style="margin-bottom: 1.5rem;">
+  <div class="stat-card">
+    <div class="stat-card-top">
+      <span class="stat-lbl">Search Engine</span>
+      <span class="stat-delta positive">SerpApi Sponsor</span>
+    </div>
+    <div class="stat-val" style="font-size: 1.25rem;">Google Search</div>
+    <div class="stat-sub">Structured JSON via SerpApi Python SDK</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card-top">
+      <span class="stat-lbl">India Geotargeting</span>
+      <span class="stat-delta positive">Active</span>
+    </div>
+    <div class="stat-val code-dense" style="font-size: 1.1rem; color: var(--text-main);">gl=in · hl=en</div>
+    <div class="stat-sub">Strict Domestic Indian Search Results</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card-top">
+      <span class="stat-lbl">Query Footprint</span>
+      <span class="stat-delta positive">Multi-Portal</span>
+    </div>
+    <div class="stat-val tnum" style="font-size: 1.25rem;">8 Official Portals</div>
+    <div class="stat-sub">GeM, CPPP, IREPS &amp; 5 State Portals</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-card-top">
+      <span class="stat-lbl">Credit Optimization</span>
+      <span class="stat-delta positive">24h TTL</span>
+    </div>
+    <div class="stat-val tnum" style="font-size: 1.25rem;">{{ cache_count }} Cached</div>
+    <div class="stat-sub">SQLite SHA-256 Credit Conservation</div>
+  </div>
+</div>
+
+<!-- "Why SerpApi Powers TenderRadar" Architectural Insight Callout -->
+<div style="background: var(--bg-card); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 1.5rem; box-shadow: var(--shadow-sm);">
+  <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
+    <span class="badge badge-keyword">Architecture Note</span>
+    <strong style="font-size: 0.95rem; color: var(--text-main);">Why SerpApi Powers TenderRadar's Core Discovery</strong>
+  </div>
+  <p style="font-size: 0.84rem; color: var(--text-sub); line-height: 1.55; margin: 0;">
+    Indian public procurement (over ₹50 Lakh Crore annually) is fragmented across dozens of legacy government portals (CPPP, GeM, IREPS, State PWDs) that enforce session cookies (<code>;jsessionid=...</code>) and aggressive CAPTCHAs. Traditional scrapers break continuously. <strong>TenderRadar uses SerpApi's Google Search API with domestic India localization (<code>gl=in</code>, <code>location=India</code>)</strong> to simultaneously index notices across 8+ official domains without CAPTCHA locks, caching results via SQLite to protect monthly API quotas.
+  </p>
 </div>
 
 <!-- Logs History Table -->
@@ -54,7 +109,7 @@
     <tbody>
       {% for log in logs %}
         <tr>
-          <td style="font-size: 0.8rem; white-space: nowrap;">{{ log.created_at }}</td>
+          <td class="tnum" style="font-size: 0.8rem; white-space: nowrap;">{{ log.created_at }}</td>
           <td>
             {% if log.watchlist_keyword %}
               <strong>{{ log.watchlist_keyword }}</strong>
@@ -64,15 +119,15 @@
           </td>
           <td>
             {% if log.status == 'Success' %}
-              <span class="badge badge-active">&bull; {{ log.status }}</span>
+              <span class="badge badge-active"><span class="badge-dot"></span>{{ log.status }}</span>
             {% elif log.status == 'Failed' %}
-              <span class="badge badge-urgent">&bull; {{ log.status }}</span>
+              <span class="badge badge-urgent"><span class="badge-dot"></span>{{ log.status }}</span>
             {% else %}
-              <span class="badge badge-closing">{{ log.status }}</span>
+              <span class="badge badge-closing"><span class="badge-dot"></span>{{ log.status }}</span>
             {% endif %}
           </td>
-          <td>{{ log.items_found }}</td>
-          <td>
+          <td class="tnum">{{ log.items_found }}</td>
+          <td class="tnum">
             <strong>{{ log.items_new }}</strong>
           </td>
           <td style="font-size: 0.825rem; color: var(--text-muted); max-width: 450px;">

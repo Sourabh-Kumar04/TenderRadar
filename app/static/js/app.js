@@ -5,8 +5,21 @@ document.addEventListener("DOMContentLoaded", () => {
   const scanButtons = document.querySelectorAll(".scan-btn");
   scanButtons.forEach(btn => {
     btn.addEventListener("click", () => {
-      btn.innerHTML = `<span class="spinner">⚡</span> Scanning...`;
+      btn.innerHTML = `<span class="spinner">⚡</span> Querying SerpApi...`;
       btn.disabled = true;
+
+      // Show non-blocking informational toast
+      const toast = document.createElement("div");
+      toast.className = "alert alert-info";
+      toast.style.position = "fixed";
+      toast.style.bottom = "24px";
+      toast.style.right = "24px";
+      toast.style.zIndex = "99999";
+      toast.style.maxWidth = "420px";
+      toast.style.boxShadow = "var(--shadow-lg)";
+      toast.innerHTML = `<span style="display:flex; align-items:center; gap:0.5rem;"><span class="spinner">⚡</span> <strong>SerpApi Multi-Portal Scan Active:</strong> Querying GeM, CPPP &amp; State portals...</span>`;
+      document.body.appendChild(toast);
+
       btn.form?.submit();
     });
   });

@@ -7,10 +7,11 @@
 <div class="hero-card">
   <div class="hero-badge-row">
     <div class="section-eyebrow">Indian Tender Discovery Hub &bull; Live Intelligence</div>
-    <span class="hero-profile-chip">
+    <span class="hero-profile-chip" title="Eligibility scores and verdicts tailored to your corporate financial capacity">
       <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-      Evaluating for: <strong>{{ profile.company_name }}</strong>
-      <a href="/profile" class="hero-chip-edit">Customize Profile &rarr;</a>
+      Active Bidder: <strong>{{ profile.company_name }}</strong> 
+      <span class="text-muted tnum" style="font-size:0.75rem;">(Cap: ₹{{ "%.1f"|format(profile.max_contract_value / 10000000) }} Cr)</span>
+      <a href="/profile" class="hero-chip-edit">Customize &rarr;</a>
     </span>
   </div>
 
@@ -49,16 +50,16 @@
 
   <!-- Primary Hero Actions Row (Instant Clarity for First-Time Visitors) -->
   <div class="hero-actions-row">
+    <a href="#tenders-feed" class="btn btn-primary btn-lg" title="Explore live discovered tenders">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+      Explore Recommended Bids ({{ stats.bid_count }})
+    </a>
     <form action="/scan" method="POST" style="display:inline;">
-      <button type="submit" class="btn btn-primary btn-lg scan-btn" title="Run discovery scan across official portals via SerpApi">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-        Scan Portals Now via SerpApi
+      <button type="submit" class="btn btn-secondary btn-lg scan-btn" title="Run discovery scan across official portals via SerpApi">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        Scan Portals via SerpApi
       </button>
     </form>
-    <a href="/profile" class="btn btn-secondary btn-lg" title="Configure your turnover and contractor eligibility parameters">
-      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-      Configure Bidder Profile
-    </a>
   </div>
 </div>
 
@@ -181,7 +182,7 @@
     </select>
 
     <button type="submit" class="btn btn-primary">Filter</button>
-    {% if search_query or selected_portal or selected_urgency or selected_watchlist or selected_verdict or sort_order != 'asc' %}
+    {% if search_query or selected_portal or selected_urgency or selected_watchlist or selected_verdict or (sort_order and sort_order != 'match_score') %}
       <a href="/" class="btn btn-secondary">Reset</a>
     {% endif %}
     <a href="/export/csv" class="btn btn-secondary" title="Export filtered view to CSV">
@@ -189,11 +190,20 @@
       Export CSV
     </a>
   </form>
+  <!-- Sector Quick Filters Strip -->
+  <div style="display: flex; gap: 0.4rem; align-items: center; margin-top: 0.75rem; flex-wrap: wrap;">
+    <span class="text-muted" style="font-size: 0.75rem; font-weight: 600;">Sector Quick Filters:</span>
+    <a href="/?search=Solar" class="badge badge-portal">⚡ Solar EPC</a>
+    <a href="/?search=CCTV" class="badge badge-portal">📹 CCTV & Telecom</a>
+    <a href="/?search=Road" class="badge badge-portal">🛣️ Highway & Civil</a>
+    <a href="/?search=Hospital" class="badge badge-portal">🏥 Healthcare</a>
+    <a href="/?search=Cloud" class="badge badge-portal">☁️ Cloud & IT</a>
+  </div>
 </div>
 
 <!-- Tenders Feed -->
 {% if tenders %}
-  <div class="tenders-list">
+  <div class="tenders-list" id="tenders-feed">
     {% for tender in tenders %}
       <div class="tender-card">
         <div class="tender-header">
@@ -202,21 +212,21 @@
           </a>
           <div style="display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
             {% if tender.verdict == 'BID' %}
-              <span class="badge badge-bid"><span class="badge-dot" style="background:var(--success);"></span>BID ({{ tender.match_score }}%)</span>
+              <span class="badge badge-bid"><span class="badge-dot"></span>BID ({{ tender.match_score }}%)</span>
             {% elif tender.verdict == 'REVIEW' %}
-              <span class="badge badge-review"><span class="badge-dot" style="background:var(--warning);"></span>REVIEW ({{ tender.match_score }}%)</span>
+              <span class="badge badge-review"><span class="badge-dot"></span>REVIEW ({{ tender.match_score }}%)</span>
             {% elif tender.verdict == 'NO_BID' %}
-              <span class="badge badge-nobid"><span class="badge-dot" style="background:var(--text-muted);"></span>NO-BID ({{ tender.match_score }}%)</span>
+              <span class="badge badge-nobid"><span class="badge-dot"></span>NO-BID ({{ tender.match_score }}%)</span>
             {% endif %}
 
             {% if tender.urgency_status == 'Urgent (<3d)' %}
-              <span class="badge badge-urgent"><span class="badge-dot" style="background:var(--danger);"></span>Urgent (&lt;3d)</span>
+              <span class="badge badge-urgent"><span class="badge-dot"></span>Urgent (&lt;3d)</span>
             {% elif tender.urgency_status == 'Closing Soon (<7d)' %}
-              <span class="badge badge-closing"><span class="badge-dot" style="background:var(--warning);"></span>Closing (&lt;7d)</span>
+              <span class="badge badge-closing"><span class="badge-dot"></span>Closing (&lt;7d)</span>
             {% elif tender.urgency_status == 'Active (>7d)' %}
-              <span class="badge badge-active"><span class="badge-dot" style="background:var(--success);"></span>Active (&gt;7d)</span>
+              <span class="badge badge-active"><span class="badge-dot"></span>Active (&gt;7d)</span>
             {% elif tender.urgency_status == 'Expired' %}
-              <span class="badge badge-expired">Expired</span>
+              <span class="badge badge-expired"><span class="badge-dot"></span>Expired</span>
             {% else %}
               <span class="badge badge-flexible">{{ tender.urgency_status }}</span>
             {% endif %}
@@ -247,7 +257,7 @@
             <span class="metric-value tnum">
               {{ tender.emd_amount or 'Not Specified' }}
               {% if profile.msme_registered and 'exempt' not in (tender.emd_amount or '').lower() %}
-                <span class="badge badge-bid" style="font-size:0.68rem; margin-left:0.25rem;">MSME Exempt &check;</span>
+                <span class="badge badge-benefit" style="font-size:0.68rem; margin-left:0.25rem;">MSME Exempt &check;</span>
               {% endif %}
             </span>
           </div>
@@ -272,7 +282,7 @@
                 {% if tender.verdict == 'BID' %}
                   <strong style="color: var(--success);">RECOMMENDED TO BID</strong>
                 {% elif tender.verdict == 'REVIEW' %}
-                  <strong style="color: var(--warning);">MANUAL REVIEW REQUIRED</strong>
+                  <strong style="color: var(--warning-text);">MANUAL REVIEW REQUIRED</strong>
                 {% else %}
                   <strong style="color: var(--text-muted);">NO-BID (MISMATCH / RISK)</strong>
                 {% endif %}
@@ -285,7 +295,7 @@
             {% if tender.advisor_verdict.reasons %}
               <div style="margin-top: 0.55rem;">
                 <span style="font-weight: 600; font-size: 0.8rem; color: var(--text-main);">Strategic Reasoning:</span>
-                <ul style="padding-left: 1.25rem; font-size: 0.8rem; color: var(--text-sub); margin-top: 0.2rem; line-height: 1.45;">
+                <ul class="advisor-reasons-list">
                   {% for reason in tender.advisor_verdict.reasons %}
                     <li>{{ reason }}</li>
                   {% endfor %}
