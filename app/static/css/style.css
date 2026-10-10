@@ -1119,6 +1119,17 @@ input[type="checkbox"] {
   max-width: 900px;
   margin-bottom: 1.5rem;
 }
+.hero-tagline {
+  font-size: 0.97rem;
+  color: var(--text-sub);
+  line-height: 1.6;
+  max-width: 900px;
+  margin-bottom: 0.75rem;
+  padding: 0.65rem 1rem;
+  background: var(--primary-light);
+  border-left: 3px solid var(--primary);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
 .section-eyebrow {
   font-size: 0.72rem;
   font-weight: 700;
