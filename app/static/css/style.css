@@ -2017,3 +2017,9 @@ body { background: #fafafa; }
   animation: float 2.5s ease-in-out infinite;
   filter: drop-shadow(0 4px 8px rgba(242, 102, 37, 0.3));
 }
+
+.nav-bidpilot { display: inline-flex; align-items: center; }
+.nav-soon {
+  font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+  background: #f26625; color: #fff; padding: 0.15rem 0.4rem; border-radius: 999px; margin-left: 0.35rem;
+}
