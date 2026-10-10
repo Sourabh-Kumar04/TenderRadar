@@ -50,3 +50,5 @@ htmlcov/
 *.swo
 .DS_Store
 Thumbs.db
+DEMO_SCRIPT.md
+QA_REPORT.md
