@@ -60,6 +60,21 @@ def extract_regex_deadline(text: str) -> Optional[str]:
         mon_num = months[mon.lower()]
         return f"{year}-{mon_num}-{day.zfill(2)}"
 
+    # 4. Match DD-Mon-YY or DD-Mon-YYYY like "10-Jul-2026" or "10-Jul-26"
+    dash_named = re.search(rf"\b([0-3]?\d)-({month_regex})-(\d{{2,4}})\b", text, flags=re.IGNORECASE)
+    if dash_named:
+        day, mon, year = dash_named.groups()
+        mon_num = months[mon.lower()]
+        if len(year) == 2:
+            year = "20" + year
+        return f"{year}-{mon_num}-{day.zfill(2)}"
+
+    # 5. Match DD.MM.YYYY (dots, common in Indian govt docs)
+    dot_match = re.search(r"\b([0-3]\d)\.([01]\d)\.(202\d)\b", text)
+    if dot_match:
+        day, month, year = dot_match.groups()
+        return f"{year}-{month}-{day}"
+
     return None
 
 

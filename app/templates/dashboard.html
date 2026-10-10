@@ -221,7 +221,7 @@
             <a href="/tenders/{{ tender.id }}" class="tender-row-title">{{ display_title(tender.title, tender.portal_name, tender.snippet) }}</a>
           </div>
           <div class="tender-row-meta">
-            <span>{{ tender.portal_name }}</span><span class="meta-sep">&middot;</span><span class="tnum">{{ tender.deadline_date or 'No deadline listed' }}</span><span class="meta-sep">&middot;</span><span class="tnum">#TR-{{ "%04d" % tender.id }}</span>{% if tender.advisor_verdict and tender.advisor_verdict.key_details.est_value and tender.advisor_verdict.key_details.est_value != 'Not specified' %}<span class="meta-sep">&middot;</span><span class="tnum">{{ tender.advisor_verdict.key_details.est_value }}</span>{% endif %}
+            <span>{{ tender.portal_name }}</span><span class="meta-sep">&middot;</span>{% if tender.deadline_date %}<span class="tnum">{{ tender.deadline_date }}</span>{% else %}<a href="{{ select_portal_url(tender.original_url, tender.canonical_url, tender.portal_name) }}" target="_blank" rel="noopener" class="deadline-check-link" title="Check deadline on official portal">No deadline listed &nearr;</a>{% endif %}<span class="meta-sep">&middot;</span><span class="tnum">#TR-{{ "%04d" % tender.id }}</span>{% if tender.advisor_verdict and tender.advisor_verdict.key_details.est_value and tender.advisor_verdict.key_details.est_value != 'Not specified' %}<span class="meta-sep">&middot;</span><span class="tnum">{{ tender.advisor_verdict.key_details.est_value }}</span>{% endif %}
           </div>
         </div>
         <div class="tender-row-side">
