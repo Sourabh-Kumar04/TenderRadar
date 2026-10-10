@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}TenderRadar - Indian Government Tender Intelligence Agent{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/css/style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%23f26625'/><text y='.75em' x='50%' text-anchor='middle' font-size='70' font-family='sans-serif' font-weight='bold' fill='white'>T</text></svg>">
 </head>
@@ -19,7 +22,7 @@
           <span class="brand-name">TenderRadar</span>
           <span class="serpapi-live-pill {% if is_mock_serpapi %}mock{% endif %}" title="SerpApi Real-Time Google & Portal Search Engine">
             <span class="pulse-dot {% if is_mock_serpapi %}warning{% endif %}"></span>
-            {% if is_mock_serpapi %}SerpApi · Cached Mode{% else %}SerpApi · Live Engine (gl=in){% endif %}
+            {% if is_mock_serpapi %}SerpApi · Cached Mode{% else %}SerpApi · Live Search Engine (India){% endif %}
           </span>
         </div>
       </a>
@@ -42,7 +45,7 @@
         </a>
         <a href="/scans" class="nav-link {% if active_page == 'scans' %}active{% endif %}">
           <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-          Audit Scans
+          Scan History
         </a>
         <a href="/export/csv" class="btn btn-secondary btn-sm" title="Export current tenders to CSV">
           <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>

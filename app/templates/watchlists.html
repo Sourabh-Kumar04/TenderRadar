@@ -108,17 +108,17 @@
           <td>{{ wl.state_filter }}</td>
           <td>
             {% if wl.is_active %}
-              <span class="badge badge-active">&bull; Active</span>
+              <span class="badge badge-active"><span class="badge-dot" style="background:var(--success);"></span>Active</span>
             {% else %}
-              <span class="badge badge-expired">Paused</span>
+              <span class="badge badge-expired"><span class="badge-dot" style="background:var(--text-muted);"></span>Paused</span>
             {% endif %}
           </td>
           <td>
             <a href="/?watchlist_id={{ wl.id }}">
-              <strong>{{ wl.tender_count }}</strong> bids
+              <strong class="tnum">{{ wl.tender_count }}</strong> bids
             </a>
           </td>
-          <td style="font-size: 0.8rem; color: var(--text-muted);">
+          <td class="tnum" style="font-size: 0.8rem; color: var(--text-muted);">
             {{ wl.last_scanned_at or 'Never' }}
           </td>
           <td style="text-align: right;">

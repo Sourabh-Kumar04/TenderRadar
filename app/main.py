@@ -104,6 +104,8 @@ app = FastAPI(
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 templates.env.globals["select_portal_url"] = select_portal_url
+templates.env.globals["is_mock_serpapi"] = get_settings().MOCK_SERPAPI
+
 
 
 # ==========================================

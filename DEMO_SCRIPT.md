@@ -26,38 +26,39 @@
 
 ---
 
-#### Scene 3: Live Dashboard & Urgency-Ranked Feed (1:00 – 1:45)
-- **Visual:** Open browser to `http://localhost:8000`. Show the TenderRadar Dashboard. Point out the top metrics cards (Tenders Discovered, Closing Within 7 Days, Active Watchlists).
+#### Scene 3: Live Dashboard & Bid Advisor Spotlight (1:00 – 1:40)
+- **Visual:** Open browser to `http://localhost:8000`. Show the TenderRadar Dashboard. Point out the top metrics cards (Tenders Discovered, Recommended Bids, Closing <7 Days) and quick verdict filter pills (`BID`, `REVIEW`, `NO_BID`).
 - **Speaker:**  
-  > *"Here is the live TenderRadar dashboard. Tenders are automatically organized into clean bid cards, strictly sorted by submission deadline.  
-  > Look at our urgency badges:  
-  > - Red for bids closing within 3 days — urgent action required.  
-  > - Yellow for bids closing within 7 days.  
-  > - Green for active tenders with more than a week.  
-  > Notice what our LLM pipeline extracts for each bid: the exact EMD deposit, tender document fees, structured eligibility qualifications, a concise scope of work, and an actionable bidder tip — plus a direct link back to the official government RFP document."*
+  > *"Here is the live TenderRadar dashboard, populated with live discovery across GeM, CPPP, and state portals via SerpApi.  
+  > But discoverability is only half the battle. Our category-winning differentiator is the autonomous Bid/No-Bid Advisor.  
+  > Based on our bidder profile, TenderRadar scores every tender with an instant match percentage and verdict:  
+  > - Recommended Bids (BID) in Emerald  
+  > - Manual Review in Amber  
+  > - High-risk or out-of-bracket bids filtered out.  
+  > For Indian MSMEs, it automatically flags zero-rupee EMD deposit waivers under the Public Procurement Policy, saving lakhs in tied-up liquidity!"*
 
 ---
 
-#### Scene 4: Watchlist Management & Instant On-Demand Scan (1:45 – 2:20)
-- **Visual:** Navigate to the `/watchlists` tab. Demonstrate adding a new keyword (e.g., `"Electric Vehicle EV Charging Stations"`, Category `"Clean Tech"`, Min Value `"₹1 Crore+"`, State `"Delhi NCR"`). Click **Save Watchlist**.
+#### Scene 4: Watchlist Search & Instant On-Demand Discovery (1:40 – 2:10)
+- **Visual:** Navigate to `/watchlists`. Add or inspect a keyword (e.g., `"Solar Rooftop EPC"`, Category `"Renewable Energy"`). Trigger **Scan Now** or view live search on Dashboard.
 - **Speaker:**  
-  > *"Users can define customized watchlists for their specific industry domain, minimum contract thresholds, and state filters.  
-  > When I click 'Save Watchlist', TenderRadar validates the input server-side, immediately schedules daily background monitoring using APScheduler, and triggers an on-demand SerpApi scan.  
-  > In seconds, the new bids are fetched, normalized, deduplicated against existing database entries, summarized by our AI pipeline, and populated directly on the dashboard."*
+  > *"Users define targeted watchlists with domain keywords, turnover brackets, and preferred states.  
+  > On-demand or on a daily APScheduler cron, TenderRadar executes SerpApi searches with India geotargeting (`gl=in`, `location=India`), bypassing portal CAPTCHAs, caching queries to conserve API credits, and deduplicating URLs against our SQLite database."*
 
 ---
 
-#### Scene 5: CSV Export & Contractor Workflow (2:20 – 2:40)
-- **Visual:** Click **Export View to CSV** button on the dashboard. Open the downloaded CSV in Excel or preview it in terminal. Show structured columns: Title, Portal, Deadline, EMD, Scope, Eligibility, Strategic Advice, and Direct Portal Link.
+#### Scene 5: Tender Summary, Private Notes & 1-Click CSV Export (2:10 – 2:40)
+- **Visual:** Click into a tender to view the executive brief: scope summary, eligibility criteria, and private strategy notes. Return to Dashboard and click **Export CSV**. Preview the exported CSV with structured columns.
 - **Speaker:**  
-  > *"For bid consultants and estimating teams who run weekly pipeline meetings, one click exports the entire filtered view into a structured CSV with all AI-extracted financial and eligibility data. Bidders can immediately import this into their CRM or project tracker."*
+  > *"Clicking any tender opens a concise executive brief: AI-extracted scope of work, technical eligibility, strategic advice, and private bidding notes.  
+  > Finally, one click exports the entire filtered pipeline to a structured CSV — complete with portal sources, deadlines, EMD amounts, and Bid Advisor verdicts ready for weekly estimating meetings."*
 
 ---
 
 #### Scene 6: Conclusion & Hackathon Submission (2:40 – 2:45)
-- **Visual:** Display GitHub repository, passing test suite (`37 passed in pytest`), and offline mock mode switch.
+- **Visual:** Display GitHub repository, passing test suite (`74 passed in pytest`), and offline mock mode switch.
 - **Speaker:**  
-  > *"TenderRadar turns fragmented government tender discovery into an automated, actionable advantage. Powered by SerpApi. Thank you!"*
+  > *"TenderRadar turns fragmented government tender discovery into an automated, actionable advantage. Powered by SerpApi. All 74 tests green. Thank you!"*
 
 ---
 

@@ -34,24 +34,25 @@
         {{ tender.title }}
       </h1>
       <div class="tender-meta-tags">
+        <span class="tender-code">#TR-{{ "%04d" % tender.id }}</span>
         <span class="badge badge-portal">Portal: {{ tender.portal_name }}</span>
         {% if tender.watchlist_keyword %}
           <span class="badge badge-keyword">Tracked: {{ tender.watchlist_keyword }}</span>
         {% endif %}
-        <span class="text-muted" style="font-size: 0.78rem;">Discovered: {{ tender.created_at }}</span>
+        <span class="text-muted tnum" style="font-size: 0.78rem;">Discovered: {{ tender.created_at }}</span>
       </div>
     </div>
     <div>
       {% if tender.urgency_status == 'Urgent (<3d)' %}
-        <span class="badge badge-urgent" style="font-size: 0.85rem; padding: 0.35rem 0.65rem;">Urgent (&lt;3 Days Left)</span>
+        <span class="badge badge-urgent"><span class="badge-dot" style="background:var(--danger);"></span>Urgent (&lt;3 Days Left)</span>
       {% elif tender.urgency_status == 'Closing Soon (<7d)' %}
-        <span class="badge badge-closing" style="font-size: 0.85rem; padding: 0.35rem 0.65rem;">Closing Soon (&lt;7 Days Left)</span>
+        <span class="badge badge-closing"><span class="badge-dot" style="background:var(--warning);"></span>Closing Soon (&lt;7 Days Left)</span>
       {% elif tender.urgency_status == 'Active (>7d)' %}
-        <span class="badge badge-active" style="font-size: 0.85rem; padding: 0.35rem 0.65rem;">Active (&gt;7 Days Left)</span>
+        <span class="badge badge-active"><span class="badge-dot" style="background:var(--success);"></span>Active (&gt;7 Days Left)</span>
       {% elif tender.urgency_status == 'Expired' %}
-        <span class="badge badge-expired" style="font-size: 0.85rem; padding: 0.35rem 0.65rem;">Expired</span>
+        <span class="badge badge-expired">Expired</span>
       {% else %}
-        <span class="badge badge-flexible" style="font-size: 0.85rem; padding: 0.35rem 0.65rem;">{{ tender.urgency_status }}</span>
+        <span class="badge badge-flexible">{{ tender.urgency_status }}</span>
       {% endif %}
     </div>
   </div>
@@ -60,19 +61,19 @@
   <div class="metrics-row" style="margin: 1.25rem 0;">
     <div class="metric-item">
       <span class="metric-label">Submission Deadline</span>
-      <span class="metric-value" style="font-size: 1.05rem; color: var(--primary);">
+      <span class="metric-value tnum" style="font-size: 1.05rem; color: var(--primary);">
         {{ tender.deadline_date or 'Refer to Portal Document' }}
       </span>
     </div>
     <div class="metric-item">
       <span class="metric-label">Earnest Money Deposit (EMD)</span>
-      <span class="metric-value" style="font-size: 1.05rem;">
+      <span class="metric-value tnum" style="font-size: 1.05rem;">
         {{ tender.emd_amount or 'Not Specified' }}
       </span>
     </div>
     <div class="metric-item">
       <span class="metric-label">Tender Document Fee</span>
-      <span class="metric-value" style="font-size: 1.05rem;">
+      <span class="metric-value tnum" style="font-size: 1.05rem;">
         {{ tender.tender_fee or 'Nil / Online' }}
       </span>
     </div>
@@ -80,25 +81,25 @@
 
   <!-- Bid Advisor Verdict Card -->
   {% if tender.advisor_verdict %}
-    <div style="background: #ffffff; border: 1px solid {% if tender.verdict == 'BID' %}#a7f3d0{% elif tender.verdict == 'REVIEW' %}#fde68a{% else %}#fecaca{% endif %}; border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1.5rem; box-shadow: var(--shadow-sm);">
+    <div class="advisor-spotlight-card verdict-{{ tender.verdict|lower }}">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; flex-wrap: wrap; gap: 0.5rem;">
         <div style="display: flex; align-items: center; gap: 0.65rem;">
           <div>
             <h2 style="font-size: 1.15rem; font-weight: 700; margin: 0; color: var(--text-main);">
               Bid Advisor Recommendation: 
               {% if tender.verdict == 'BID' %}
-                <span style="color: #059669;">BID (Recommended)</span>
+                <span style="color: var(--success);">BID (Recommended)</span>
               {% elif tender.verdict == 'REVIEW' %}
-                <span style="color: #d97706;">REVIEW (Proceed with Caution)</span>
+                <span style="color: var(--warning);">REVIEW (Proceed with Caution)</span>
               {% else %}
-                <span style="color: #dc2626;">NO-BID (High Risk / Mismatch)</span>
+                <span style="color: var(--danger);">NO-BID (High Risk / Mismatch)</span>
               {% endif %}
             </h2>
             <span class="text-muted" style="font-size: 0.8rem;">Evaluated against profile for <strong>{{ profile.company_name if profile else 'Active Bidder' }}</strong></span>
           </div>
         </div>
         <div style="text-align: right;">
-          <div style="font-size: 1.35rem; font-weight: 800; color: {% if tender.verdict == 'BID' %}#059669{% elif tender.verdict == 'REVIEW' %}#d97706{% else %}#dc2626{% endif %};">
+          <div class="tnum" style="font-size: 1.45rem; font-weight: 800; color: {% if tender.verdict == 'BID' %}var(--success){% elif tender.verdict == 'REVIEW' %}var(--warning){% else %}var(--danger){% endif %};">
             {{ tender.match_score }}% Match
           </div>
           <span class="text-muted" style="font-size: 0.72rem;">Capability Alignment</span>
@@ -109,15 +110,15 @@
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.65rem; margin-bottom: 1rem;">
         <div style="background: var(--bg-subtle); padding: 0.5rem 0.7rem; border: 1px solid var(--border); border-radius: var(--radius);">
           <span style="color: var(--text-muted); font-size: 0.72rem; display: block;">Est. Contract Value</span>
-          <strong style="font-size: 0.9rem;">{{ tender.advisor_verdict.key_details.est_value }}</strong>
+          <strong class="tnum" style="font-size: 0.9rem;">{{ tender.advisor_verdict.key_details.est_value }}</strong>
         </div>
         <div style="background: var(--bg-subtle); padding: 0.5rem 0.7rem; border: 1px solid var(--border); border-radius: var(--radius);">
           <span style="color: var(--text-muted); font-size: 0.72rem; display: block;">EMD Deposit</span>
-          <strong style="font-size: 0.9rem;">{{ tender.advisor_verdict.key_details.emd }}</strong>
+          <strong class="tnum" style="font-size: 0.9rem;">{{ tender.advisor_verdict.key_details.emd }}</strong>
         </div>
         <div style="background: var(--bg-subtle); padding: 0.5rem 0.7rem; border: 1px solid var(--border); border-radius: var(--radius);">
           <span style="color: var(--text-muted); font-size: 0.72rem; display: block;">Submission Deadline</span>
-          <strong style="font-size: 0.9rem;">{{ tender.advisor_verdict.key_details.deadline }}</strong>
+          <strong class="tnum" style="font-size: 0.9rem;">{{ tender.advisor_verdict.key_details.deadline }}</strong>
         </div>
         <div style="background: var(--bg-subtle); padding: 0.5rem 0.7rem; border: 1px solid var(--border); border-radius: var(--radius);">
           <span style="color: var(--text-muted); font-size: 0.72rem; display: block;">Eligibility Summary</span>
@@ -149,11 +150,11 @@
             {% for flag in tender.advisor_verdict.flags %}
               <div class="flag-badge flag-{{ flag.severity }}">
                 {% if flag.severity == 'critical' %}
-                  <strong style="color: #b91c1c;">CRITICAL:</strong>
+                  <strong style="color: var(--danger);">CRITICAL:</strong>
                 {% elif flag.severity == 'warning' %}
-                  <strong style="color: #b45309;">WARNING:</strong>
+                  <strong style="color: var(--warning);">WARNING:</strong>
                 {% else %}
-                  <strong style="color: #0369a1;">NOTICE:</strong>
+                  <strong style="color: var(--info);">NOTICE:</strong>
                 {% endif %}
                 <span>{{ flag.text }}</span>
               </div>
@@ -188,7 +189,7 @@
       <h3 style="color: var(--text-main); font-size: 1.05rem; margin-bottom: 0.35rem; font-weight: 600;">
         Strategic Bid Advice &amp; Takeaways
       </h3>
-      <div style="background: #fffbeb; border: 1px solid #fde68a; padding: 0.85rem 1rem; border-radius: var(--radius); line-height: 1.55; color: #92400e; font-size: 0.9rem;">
+      <div style="background: var(--warning-bg); border: 1px solid var(--warning-border); padding: 0.85rem 1rem; border-radius: var(--radius); line-height: 1.55; color: var(--warning); font-size: 0.9rem;">
         {{ tender.key_takeaways or 'Carefully review tender annexures, pre-bid queries, and submission checklist.' }}
       </div>
     </div>
