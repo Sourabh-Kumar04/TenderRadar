@@ -40,7 +40,7 @@ def test_dashboard_renders(client_with_temp_db):
     response = client_with_temp_db.get("/")
     assert response.status_code == 200
     assert "TenderRadar" in response.text
-    assert "Powered by SerpApi" in response.text
+    assert "TENDERS SCORED" in response.text
     assert "Discovered" in response.text
 
 

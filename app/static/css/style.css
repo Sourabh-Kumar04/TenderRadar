@@ -1753,3 +1753,72 @@ body { font-family: var(--font-sans); }
   .tender-row-meta .meta-sep { display: none; }
   .tender-row-meta > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 }
+
+/* ========================================================
+   Command Center Hero — distinctive UI hackathon identity
+   ======================================================== */
+.cmd-hero {
+  position: relative; background: #0f0f0f; color: #fff;
+  border-radius: 20px; overflow: hidden;
+  margin: 1rem 0 1.5rem; padding: 3rem 2.5rem;
+}
+.cmd-hero-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 0%, rgba(242,102,37,0.12), transparent),
+    radial-gradient(ellipse 40% 40% at 90% 100%, rgba(37,99,235,0.08), transparent);
+  pointer-events: none;
+}
+.cmd-hero-content { position: relative; z-index: 1; max-width: 640px; }
+.cmd-eyebrow {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em;
+  color: #a1a1aa; margin-bottom: 1rem;
+}
+.cmd-live-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: #22c55e;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+.cmd-headline {
+  font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 800;
+  letter-spacing: -0.03em; line-height: 1.05; margin: 0 0 1rem;
+  color: #fff;
+}
+.cmd-bid { color: #22c55e; }
+.cmd-skip { color: #f26625; }
+.cmd-sub {
+  font-size: 1.05rem; color: #a1a1aa; line-height: 1.6;
+  max-width: 52ch; margin: 0 0 1.75rem;
+}
+.cmd-stats { display: flex; gap: 2.5rem; margin-bottom: 1.75rem; }
+.cmd-stat { display: flex; flex-direction: column; }
+.cmd-num {
+  font-size: 2rem; font-weight: 800; letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums; color: #fff;
+}
+.cmd-lbl {
+  font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.1em; color: #71717a; margin-top: 0.15rem;
+}
+.cmd-actions { display: flex; gap: 0.75rem; align-items: center; }
+.cmd-btn-primary {
+  background: #f26625; color: #fff; font-weight: 700; font-size: 0.9rem;
+  padding: 0.75rem 1.5rem; border-radius: 999px; text-decoration: none;
+  transition: transform 0.15s, background 0.15s;
+}
+.cmd-btn-primary:hover { background: #d9531e; transform: translateY(-1px); color: #fff; }
+.cmd-btn-ghost {
+  color: #a1a1aa; font-weight: 600; font-size: 0.9rem; text-decoration: none;
+  padding: 0.75rem 0.5rem;
+}
+.cmd-btn-ghost:hover { color: #fff; }
+.cmd-tricolor {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 4px;
+  background: linear-gradient(90deg, #ff9933 33%, #ffffff 33%, #ffffff 66%, #138808 66%);
+  opacity: 0.9;
+}
+@media (max-width: 720px) {
+  .cmd-hero { padding: 2rem 1.5rem; }
+  .cmd-stats { gap: 1.5rem; }
+}
