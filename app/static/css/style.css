@@ -1502,3 +1502,83 @@ input[type="checkbox"] {
 
 /* Trust signal: portal attribution, quieter */
 .portal-attribution { font-size: 0.72rem; color: var(--text-muted); }
+
+/* ========================================================
+   De-boxed editorial redesign (2026-10-10)
+   Replaces card/box-heavy design with clean list rows,
+   typography-led hero, and inline stats.
+   ======================================================== */
+
+/* --- Hero: no box, typography-led --- */
+.hero-card {
+  background: transparent; border: none; box-shadow: none;
+  padding: 1.5rem 0 1rem; margin-bottom: 0.5rem;
+}
+.hero-headline { font-size: 2rem; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+.hero-badge-row { margin-bottom: 0.75rem; }
+.how-it-works-strip {
+  background: transparent; border: none; padding: 0.75rem 0;
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  border-radius: 0;
+}
+.hero-actions-row { margin-top: 1rem; }
+
+/* --- Stats: inline strip, not cards --- */
+.stats-grid {
+  display: flex; gap: 0; background: transparent; border: none;
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  border-radius: 0; padding: 0.6rem 0; margin: 0 0 1rem;
+}
+.stat-card {
+  background: transparent; border: none; box-shadow: none; border-radius: 0;
+  padding: 0 1.25rem; flex: 1;
+}
+.stat-card + .stat-card { border-left: 1px solid var(--border); }
+.stat-card:first-child { padding-left: 0; }
+.stat-val { font-size: 1.5rem; }
+.stat-lbl { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* --- Tender list: rows with dividers, not boxes --- */
+.tenders-list { display: block; }
+.tender-card {
+  background: transparent; border: none; border-radius: 0; box-shadow: none;
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0.25rem; margin: 0;
+}
+.tender-card:first-child { border-top: 1px solid var(--border); }
+.tender-card:hover { background: var(--bg-subtle); }
+
+/* Deadline strip: inline, no box */
+.deadline-strip {
+  background: transparent; border: none; padding: 0.25rem 0;
+  margin: 0.4rem 0 0;
+}
+
+/* Details toggle: subtler */
+.tender-details { border-top: none; padding-top: 0; margin-top: 0.25rem; }
+.tender-details-toggle { font-size: 0.78rem; padding: 0.25rem 0; }
+
+/* Card footer: no separation line */
+.card-footer { border-top: none; padding-top: 0.5rem; margin-top: 0.25rem; }
+
+/* --- Toolbar: minimal, no card --- */
+.toolbar-card {
+  background: transparent; border: none; box-shadow: none;
+  padding: 0.75rem 0; border-bottom: 1px solid var(--border); border-radius: 0;
+  margin-bottom: 1rem;
+}
+.verdict-pills-bar { padding: 0.5rem 0; }
+
+/* --- Advisor spotlight: left border accent, not box --- */
+.advisor-spotlight-card {
+  background: transparent; border: none; border-left: 3px solid var(--border-dark);
+  border-radius: 0; padding: 0.5rem 0 0.5rem 0.85rem; margin-top: 0.6rem;
+}
+.advisor-spotlight-card.verdict-bid { border-left-color: var(--success); }
+.advisor-spotlight-card.verdict-review { border-left-color: var(--warning); }
+.advisor-spotlight-card.verdict-nobid { border-left-color: var(--text-muted); }
+
+/* --- AI summary: plain, not boxed --- */
+.ai-summary-box {
+  background: transparent; border: none; padding: 0.5rem 0; margin-top: 0.5rem;
+}
