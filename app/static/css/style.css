@@ -2026,9 +2026,10 @@ body { background: #fafafa; }
 
 /* BidPilot Floating Mascot */
 .bidpilot-mascot {
-  position: fixed; left: 20px; bottom: 20px; z-index: 9999;
+  position: fixed; right: 24px; bottom: 24px; z-index: 9999;
   cursor: grab; transition: transform 0.2s;
 }
+.bidpilot-mascot svg { width: 60px; height: 60px; }
 .bidpilot-mascot:active { cursor: grabbing; }
 .bidpilot-mascot:hover { transform: scale(1.1); }
 .bidpilot-link { display: block; position: relative; text-decoration: none; }
@@ -2046,7 +2047,7 @@ body { background: #fafafa; }
   animation: bpBlink 4s infinite;
 }
 .bidpilot-tip {
-  position: absolute; left: 60px; top: 50%; transform: translateY(-50%);
+  position: absolute; right: 72px; top: 50%; transform: translateY(-50%);
   background: #1a1a2e; color: #fff; font-size: 0.78rem; font-weight: 600;
   padding: 0.5rem 0.9rem; border-radius: 8px; white-space: nowrap;
   opacity: 0; pointer-events: none; transition: opacity 0.2s;
