@@ -127,6 +127,7 @@ async def dashboard_view(
     sort_order: str = Query("match_score"),
     recommended: Optional[str] = Query(None),
     verdict: Optional[str] = Query(None),
+    doc_backed: Optional[str] = Query(None),
     message: Optional[str] = Query(None),
     error: Optional[str] = Query(None)
 ):
@@ -196,6 +197,11 @@ async def dashboard_view(
     if selected_verdict:
         tenders = [t for t in tenders if t.get("verdict") == selected_verdict]
 
+    # Filter to document-backed only if requested
+    show_doc_backed = doc_backed in ("1", "true", "yes")
+    if show_doc_backed:
+        tenders = [t for t in tenders if t.get("has_document") == 1]
+
     # In-memory match score sort guarantee
     if sort_by == "match_score":
         tenders.sort(key=lambda x: x.get("match_score") or 0, reverse=True)
@@ -223,6 +229,7 @@ async def dashboard_view(
             "selected_urgency": urgency,
             "selected_watchlist": watchlist_id,
             "sort_order": sort_order,
+            "doc_backed": show_doc_backed,
             "sort_by": sort_by,
             "is_mock_serpapi": settings.MOCK_SERPAPI,
             "is_mock_llm": settings.MOCK_LLM,

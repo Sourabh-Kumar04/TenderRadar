@@ -28,7 +28,11 @@
  class="verdict-pill nobid-pill {% if selected_verdict == 'NO_BID' %}active{% endif %}"><span class="badge-dot" style="background:var(--text-muted);"></span>
  Filtered (NO-BID) <span class="pill-count">{{ stats.nobid_count }}</span></a><a href="/?urgency=Closing+Soon+(%3C7d)&search={{ search_query or '' }}&portal={{ selected_portal or '' }}&watchlist_id={{ selected_watchlist or '' }}" 
  class="verdict-pill urgent-pill {% if selected_urgency == 'Closing Soon (<7d)' %}active{% endif %}"><span class="badge-dot" style="background:var(--danger);"></span>
- Closing &lt;7 Days <span class="pill-count">{{ stats.urgent_closing_soon }}</span></a></div><!-- Filters & Search Toolbar --><div class="toolbar-card"><form action="/" method="GET" class="filter-form">
+ Closing &lt;7 Days <span class="pill-count">{{ stats.urgent_closing_soon }}</span></a>
+  <a href="?doc_backed=1" class="verdict-pill" title="Only show tenders backed by official documents" style="border-color:#4ade80;">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    Verified Docs
+  </a></div><!-- Filters & Search Toolbar --><div class="toolbar-card"><form action="/" method="GET" class="filter-form">
  {% if selected_verdict %}
  <input type="hidden" name="verdict" value="{{ selected_verdict }}">
  {% endif %}
