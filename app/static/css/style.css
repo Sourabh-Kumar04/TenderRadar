@@ -2064,3 +2064,28 @@ body { background: #fafafa; }
 .nav-avatar:hover { border-color: #f26625; color: #fff; }
 .cmd-nav .nav-container { display: flex; align-items: center; }
 .cmd-nav .nav-links { flex: 1; }
+
+/* === Button Spacing Audit Fixes === */
+/* Tender row actions: consistent gap */
+.tender-row-actions { display: flex; gap: 0.5rem; align-items: center; }
+.row-btn { padding: 0.5rem 0.9rem; font-size: 0.8rem; white-space: nowrap; }
+
+/* Navbar: consistent link spacing */
+.cmd-nav .nav-links { display: flex; align-items: center; gap: 0.15rem; }
+.cmd-nav .nav-link { padding: 0.55rem 0.85rem; }
+
+/* Filter toolbar: button alignment */
+.toolbar-card .btn, .toolbar-card button { margin: 0; }
+.toolbar-actions { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
+
+/* Hero CTAs: breathing room */
+.cmd-actions { display: flex; gap: 0.9rem; align-items: center; flex-wrap: wrap; }
+
+/* Verdict pills: even spacing */
+.verdict-pills-bar { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; }
+
+/* Chat modal buttons */
+.chat-input-row { gap: 0.7rem; }
+
+/* Queue header: title + scan button alignment */
+.queue-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
