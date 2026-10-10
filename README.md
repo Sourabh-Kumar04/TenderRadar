@@ -328,4 +328,40 @@ The test suite covers (74 tests passing):
 * ✅ Cache invalidation on profile change.
 * ✅ "Recommended for me" filtering across Web UI and REST API.
 * ✅ Web route rendering (`/`, `/saved`, `/profile`, `/watchlists`, `/scans`, `/tenders/{id}`) and portal button hrefs.
+* ✅ Vercel serverless adaptation (read-only SQLite fallback and background scheduler suppression).
+
+---
+
+## 🚀 Deploying to Vercel (Serverless)
+
+TenderRadar can be deployed to Vercel using the official Python Serverless Runtime (`@vercel/python`).
+
+### Architecture Overview on Serverless
+1. **Entry Point:** `api/index.py` exposes the FastAPI ASGI application directly to Vercel functions.
+2. **Bundled Database:** `vercel.json` bundles a pre-seeded, read-only copy of `data/tenders.db` containing Indian government tenders with computed BidAdvisor verdicts.
+3. **Read-Only SQLite Graceful Fallback:** In serverless execution, SQLite operates in read-only mode (`?mode=ro`). Dynamic user actions (such as bookmarking saved tenders, updating notes, editing organizational profiles, or trigger logs) automatically fallback to in-memory storage so the app never throws database write errors.
+4. **Disabled Background Scheduler:** The APScheduler lifespan task is automatically disabled on Vercel (`is_vercel`), avoiding background thread leaks in serverless functions.
+
+### Environment Variables on Vercel Dashboard
+
+Configure the following environment variables in your Vercel Project Settings (**Settings → Environment Variables**):
+
+| Variable | Required | Default | Description |
+|---|---|---|---|
+| `SERPAPI_API_KEY` | Optional (for live scans) | `""` | SerpApi API key from [serpapi.com](https://serpapi.com). Used for live multi-portal Indian tender searches and PDF document discovery. |
+| `FIREWORKS_API_KEY` | Optional (for live LLM) | `""` | Fireworks AI key from [fireworks.ai](https://fireworks.ai). Powers DeepSeek V4P1 Flash for automated tender summarization, eligibility extraction, and BidAdvisor scoring. |
+| `MOCK_SERPAPI` | Optional | `true` (in vercel.json) | Set to `true` to use the built-in offline mock search engine (zero SerpApi credits consumed). Set to `false` when using a live `SERPAPI_API_KEY`. |
+| `MOCK_LLM` | Optional | `true` (in vercel.json) | Set to `true` for deterministic offline LLM summaries and BidAdvisor verdicts. Set to `false` when using a live `FIREWORKS_API_KEY`. |
+
+> **Security Note:** Never hardcode API keys in repository source code or `vercel.json`. Always set sensitive tokens in the Vercel dashboard.
+
+### Deploying via Vercel CLI
+```bash
+# 1. Install Vercel CLI (if not already installed)
+npm install -g vercel
+
+# 2. Deploy to Production
+vercel --prod
+```
+
 
