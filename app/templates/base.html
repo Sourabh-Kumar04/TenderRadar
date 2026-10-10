@@ -17,13 +17,15 @@
       <a href="/" class="nav-brand">
         <div class="brand-logo cmd-logo">TR</div>
         <span class="brand-name">TenderRadar</span>
-        <span class="cmd-nav-live"><span class="cmd-live-dot"></span>LIVE</span>
+        <span class="cmd-nav-live {% if is_mock_serpapi %}is-mock{% endif %}" title="{% if is_mock_serpapi %}Demo data{% else %}Live SerpApi{% endif %}">
+          <span class="cmd-live-dot"></span>{% if is_mock_serpapi %}DEMO{% else %}LIVE{% endif %}
+        </span>
       </a>
       <div class="nav-links">
-        <a href="/" class="nav-link">Verdicts</a>
-        <a href="/watchlists" class="nav-link">Watchlists</a>
-        <a href="/scans" class="nav-link">Scans</a>
-        <a href="/saved" class="nav-link">Saved</a>
+        <a href="/" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}">Verdicts</a>
+        <a href="/watchlists" class="nav-link {% if active_page == 'watchlists' %}active{% endif %}">Watchlists</a>
+        <a href="/scans" class="nav-link {% if active_page == 'scans' %}active{% endif %}">Scans</a>
+        <a href="/saved" class="nav-link {% if active_page == 'saved' %}active{% endif %}">Saved</a>
         <a href="/auto-bid" class="nav-link nav-bidpilot">
           <svg viewBox="0 0 64 64" fill="none" width="16" height="16" style="vertical-align:-3px;margin-right:4px;">
             <rect x="8" y="16" width="48" height="36" rx="10" fill="#1a1a2e" stroke="#f26625" stroke-width="4"/>
