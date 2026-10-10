@@ -3,273 +3,144 @@
 {% block title %}{{ tender.title }} - TenderRadar{% endblock %}
 
 {% block content %}
-<div style="margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
-  <a href="/" style="font-size: 0.88rem; color: var(--text-muted);">&larr; Back to Dashboard</a>
-  <div style="display: flex; gap: 0.5rem; align-items: center;">
-    <button 
-      type="button" 
-      class="btn btn-save btn-sm {% if tender.is_saved %}is-saved{% endif %}" 
-      data-tender-id="{{ tender.id }}"
-      onclick="toggleSaveTender(this, {{ tender.id }})"
-      title="{% if tender.is_saved %}Remove from Saved{% else %}Bookmark this tender{% endif %}"
-    >
-      {% if tender.is_saved %}&starf; Saved{% else %}&star; Save Tender{% endif %}
+<!-- Breadcrumb + Actions -->
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.75rem;">
+  <a href="/" style="font-size: 0.85rem; color: var(--text-muted); display: inline-flex; align-items: center; gap: 0.35rem;">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    Verdict Queue
+  </a>
+  <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+    <button type="button" class="row-btn {% if tender.is_saved %}is-saved{% endif %}" data-tender-id="{{ tender.id }}" onclick="toggleSaveTender(this, {{ tender.id }})" title="{% if tender.is_saved %}Remove from Saved{% else %}Bookmark{% endif %}">
+      {% if tender.is_saved %}&starf; Saved{% else %}&star; Save{% endif %}
     </button>
-    <a 
-      href="{{ tender.portal_url or select_portal_url(tender.original_url, tender.canonical_url, tender.portal_name) }}" 
-      target="_blank" 
-      rel="noopener noreferrer" 
-      class="btn btn-primary btn-sm"
-    >
-      Open Official Portal &nearr;
-    </a>
-    <button 
-      type="button" 
-      class="btn btn-secondary btn-sm"
-      onclick="openTenderChat({{ tender.id }}, this)"
-      data-title="{{ tender.title | e }}"
-      title="Chat with AI about this tender"
-    >
+    <button type="button" class="row-btn" onclick="openTenderChat({{ tender.id }}, this)" data-title="{{ tender.title | e }}" title="Chat with AI about this tender">
       Chat
     </button>
+    <a href="{{ tender.portal_url or select_portal_url(tender.original_url, tender.canonical_url, tender.portal_name) }}" target="_blank" rel="noopener noreferrer" class="row-btn row-btn-primary">
+      Portal &nearr;
+    </a>
   </div>
 </div>
 
-<div class="tender-card" style="margin-bottom: 2rem;">
-  <!-- Title & Status Header -->
-  <div class="tender-header">
-    <div>
-      <h1 style="font-size: 1.4rem; color: var(--text-main); line-height: 1.35; margin-bottom: 0.5rem; font-weight: 700;">
-        {{ tender.title }}
-      </h1>
-      <div class="tender-meta-tags">
-        <span class="tender-code">#TR-{{ "%04d" % tender.id }}</span>
-        <span class="badge badge-portal">Portal: {{ tender.portal_name }}</span>
-        {% if tender.watchlist_keyword %}
-          <span class="badge badge-keyword">Tracked: {{ tender.watchlist_keyword }}</span>
-        {% endif %}
-        <span class="text-muted tnum" style="font-size: 0.78rem;">Discovered: {{ tender.created_at }}</span>
-      </div>
-    </div>
-    <div>
-      {% if tender.urgency_status == 'Urgent (<3d)' %}
-        <span class="badge badge-urgent"><span class="badge-dot"></span>Urgent (&lt;3 Days Left)</span>
-      {% elif tender.urgency_status == 'Closing Soon (<7d)' %}
-        <span class="badge badge-closing"><span class="badge-dot"></span>Closing Soon (&lt;7 Days Left)</span>
-      {% elif tender.urgency_status == 'Active (>7d)' %}
-        <span class="badge badge-active"><span class="badge-dot"></span>Active (&gt;7 Days Left)</span>
-      {% elif tender.urgency_status == 'Expired' %}
-        <span class="badge badge-expired"><span class="badge-dot"></span>Expired</span>
-      {% else %}
-        <span class="badge badge-flexible">{{ tender.urgency_status }}</span>
-      {% endif %}
+<!-- Title Block -->
+<div style="margin-bottom: 1.5rem;">
+  <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.6rem;">
+    {% if tender.verdict == 'BID' %}
+      <span class="vr-pill vr-bid">BID {{ tender.match_score }}%</span>
+    {% elif tender.verdict == 'REVIEW' %}
+      <span class="vr-pill vr-review">REVIEW {{ tender.match_score }}%</span>
+    {% elif tender.verdict == 'NO_BID' %}
+      <span class="vr-pill vr-nobid">NO-BID {{ tender.match_score }}%</span>
+    {% endif %}
+    <span class="tender-code">#TR-{{ "%04d" % tender.id }}</span>
+    {% if tender.urgency_status == 'Urgent (<3d)' %}
+      <span class="dl-badge dl-urgent">Urgent</span>
+    {% elif tender.urgency_status == 'Closing Soon (<7d)' %}
+      <span class="dl-badge dl-soon">&lt;7d left</span>
+    {% elif tender.urgency_status == 'Expired' %}
+      <span class="dl-badge dl-expired">Expired</span>
+    {% endif %}
+  </div>
+  <h1 style="font-size: 1.65rem; font-weight: 700; line-height: 1.3; color: var(--text-main); margin: 0 0 0.5rem 0; letter-spacing: -0.01em;">
+    {{ tender.title }}
+  </h1>
+  <div style="font-size: 0.85rem; color: var(--text-muted);">
+    {{ tender.portal_name }}
+    {% if tender.watchlist_keyword %}<span style="margin: 0 0.4rem;">·</span>Tracked: {{ tender.watchlist_keyword }}{% endif %}
+    <span style="margin: 0 0.4rem;">·</span>Discovered {{ tender.created_at }}
+  </div>
+</div>
+
+<!-- Key Facts Strip -->
+<div style="display: flex; gap: 2rem; flex-wrap: wrap; padding: 1.1rem 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: 1.75rem;">
+  <div>
+    <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 0.25rem;">Deadline</div>
+    <div class="tnum" style="font-size: 1.05rem; font-weight: 700; color: {% if tender.deadline_date %}var(--primary){% else %}var(--text-muted){% endif %};">
+      {{ tender.deadline_date or 'Not listed' }}
     </div>
   </div>
-
-  <!-- Key Metrics Row (Official Portal Parameters) -->
-  <div class="metrics-row" style="margin: 1.25rem 0;">
-    <div class="metric-item">
-      <span class="metric-label">Submission Deadline</span>
-      <span class="metric-value tnum" style="font-size: 1.05rem; color: var(--primary);">
-        {{ tender.deadline_date or 'Refer to Portal Document' }}
-      </span>
-    </div>
-    <div class="metric-item">
-      <span class="metric-label">Earnest Money Deposit (EMD)</span>
-      <span class="metric-value tnum" style="font-size: 1.05rem;">
-        {{ tender.emd_amount or 'Not Specified' }}
-      </span>
-    </div>
-    <div class="metric-item">
-      <span class="metric-label">Tender Document Fee</span>
-      <span class="metric-value tnum" style="font-size: 1.05rem;">
-        {{ tender.tender_fee or 'Nil / Online' }}
-      </span>
-    </div>
+  <div>
+    <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 0.25rem;">EMD</div>
+    <div class="tnum" style="font-size: 1.05rem; font-weight: 700;">{{ tender.emd_amount or 'Not specified' }}</div>
   </div>
-
-  <!-- Bid Advisor Verdict Card -->
-  {% if tender.advisor_verdict %}
-    <div class="advisor-spotlight-card verdict-{{ tender.verdict|lower }}">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; flex-wrap: wrap; gap: 0.5rem;">
-        <div style="display: flex; align-items: center; gap: 0.65rem;">
-          <div>
-            <h2 style="font-size: 1.15rem; font-weight: 700; margin: 0; color: var(--text-main);">
-              Bid Advisor Recommendation: 
-              {% if tender.verdict == 'BID' %}
-                <span style="color: var(--success);">BID (Recommended)</span>
-              {% elif tender.verdict == 'REVIEW' %}
-                <span style="color: var(--warning-text);">REVIEW (Proceed with Caution)</span>
-              {% else %}
-                <span style="color: var(--danger);">NO-BID (High Risk / Mismatch)</span>
-              {% endif %}
-            </h2>
-            <span class="text-muted" style="font-size: 0.8rem;">Evaluated against profile for <strong>{{ profile.company_name if profile else 'Active Bidder' }}</strong></span>
-          </div>
-        </div>
-        <div style="text-align: right;">
-          <div class="tnum" style="font-size: 1.45rem; font-weight: 800; color: {% if tender.verdict == 'BID' %}var(--success){% elif tender.verdict == 'REVIEW' %}var(--warning-text){% else %}var(--danger){% endif %};">
-            {{ tender.match_score }}% Match
-          </div>
-          <span class="text-muted" style="font-size: 0.72rem;">Capability Alignment</span>
-        </div>
-      </div>
-
-      <!-- Strategic Advisor Intelligence (Zero Duplication with Portal Row) -->
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.65rem; margin-bottom: 1rem;">
-        <div style="background: var(--bg-subtle); padding: 0.5rem 0.7rem; border: 1px solid var(--border); border-radius: var(--radius);">
-          <span style="color: var(--text-muted); font-size: 0.72rem; display: block;">Est. Contract Value</span>
-          <strong class="tnum" style="font-size: 0.9rem;">{{ tender.advisor_verdict.key_details.est_value }}</strong>
-        </div>
-        <div style="background: var(--bg-subtle); padding: 0.5rem 0.7rem; border: 1px solid var(--border); border-radius: var(--radius);">
-          <span style="color: var(--text-muted); font-size: 0.72rem; display: block;">EMD Waiver Status</span>
-          <strong style="font-size: 0.9rem;">
-            {% if profile and profile.msme_registered %}
-              MSME Waiver Eligible &check;
-            {% else %}
-              Standard Deposit Required
-            {% endif %}
-          </strong>
-        </div>
-        <div style="background: var(--bg-subtle); padding: 0.5rem 0.7rem; border: 1px solid var(--border); border-radius: var(--radius);">
-          <span style="color: var(--text-muted); font-size: 0.72rem; display: block;">Turnover Capacity Fit</span>
-          <strong class="tnum" style="font-size: 0.9rem;">
-            {{ tender.match_score }}% Alignment
-          </strong>
-        </div>
-        <div style="background: var(--bg-subtle); padding: 0.5rem 0.7rem; border: 1px solid var(--border); border-radius: var(--radius);">
-          <span style="color: var(--text-muted); font-size: 0.72rem; display: block;">Eligibility Summary</span>
-          <span style="font-size: 0.82rem;">{{ tender.advisor_verdict.key_details.eligibility_summary }}</span>
-        </div>
-      </div>
-
-      <!-- Strategic Reasoning -->
-      {% if tender.advisor_verdict.reasons %}
-        <div style="margin-bottom: 0.85rem;">
-          <h4 style="font-size: 0.88rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.35rem;">
-            Strategic Decision Rationale
-          </h4>
-          <ul class="advisor-reasons-list">
-            {% for reason in tender.advisor_verdict.reasons %}
-              <li>{{ reason }}</li>
-            {% endfor %}
-          </ul>
-        </div>
-      {% endif %}
-
-      <!-- Risk & Opportunity Flags -->
-      {% if tender.advisor_verdict.flags %}
-        <div>
-          <h4 style="font-size: 0.88rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.35rem;">
-            Risk &amp; Opportunity Flags
-          </h4>
-          <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-            {% for flag in tender.advisor_verdict.flags %}
-              <div class="flag-badge flag-{{ flag.severity }}">
-                {% if flag.severity == 'critical' %}
-                  <strong style="color: var(--danger);">CRITICAL:</strong>
-                {% elif flag.severity == 'warning' %}
-                  <strong style="color: var(--warning);">WARNING:</strong>
-                {% else %}
-                  <strong style="color: var(--info);">NOTICE:</strong>
-                {% endif %}
-                <span>{{ flag.text }}</span>
-              </div>
-            {% endfor %}
-          </div>
-        </div>
-      {% endif %}
-    </div>
+  <div>
+    <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 0.25rem;">Tender Fee</div>
+    <div class="tnum" style="font-size: 1.05rem; font-weight: 700;">{{ tender.tender_fee or 'Nil' }}</div>
+  </div>
+  {% if tender.advisor_verdict and tender.advisor_verdict.key_details.est_value %}
+  <div>
+    <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 0.25rem;">Est. Value</div>
+    <div class="tnum" style="font-size: 1.05rem; font-weight: 700;">{{ tender.advisor_verdict.key_details.est_value }}</div>
+  </div>
   {% endif %}
+</div>
 
-  <!-- Scope & Deliverables Breakdown -->
-  <div style="display: flex; flex-direction: column; gap: 1.25rem; margin-bottom: 1.5rem;">
-    <div>
-      <h3 style="color: var(--text-main); font-size: 1.05rem; margin-bottom: 0.35rem; font-weight: 600;">
-        Scope of Work &amp; Deliverables
-      </h3>
-      <div style="background: var(--bg-subtle); border: 1px solid var(--border); padding: 0.85rem 1rem; border-radius: var(--radius); line-height: 1.55; font-size: 0.9rem;">
-        {{ tender.scope_summary or 'Detailed scope available in the official RFP document.' }}
-      </div>
+<!-- Verdict Reasoning -->
+{% if tender.advisor_verdict %}
+<div style="margin-bottom: 1.75rem;">
+  <h2 style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.75rem;">
+    Why {{ tender.verdict }} — {{ tender.match_score }}% match
+  </h2>
+  {% if tender.advisor_verdict.reasons %}
+  <ul style="list-style: none; padding: 0; margin: 0 0 1rem 0;">
+    {% for reason in tender.advisor_verdict.reasons %}
+    <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-light); font-size: 0.92rem; line-height: 1.55; display: flex; gap: 0.6rem;">
+      <span style="color: var(--primary); flex-shrink: 0;">→</span>
+      <span>{{ reason }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% if tender.advisor_verdict.flags %}
+  <div style="display: flex; flex-direction: column; gap: 0.45rem;">
+    {% for flag in tender.advisor_verdict.flags %}
+    <div style="font-size: 0.88rem; padding: 0.55rem 0.85rem; border-radius: var(--radius); {% if flag.severity == 'critical' %}background: var(--danger-bg); border-left: 3px solid var(--danger);{% elif flag.severity == 'warning' %}background: var(--warning-bg); border-left: 3px solid var(--warning);{% else %}background: var(--bg-subtle); border-left: 3px solid var(--border-dark);{% endif %}">
+      {{ flag.text }}
     </div>
-
-    <div>
-      <h3 style="color: var(--text-main); font-size: 1.05rem; margin-bottom: 0.35rem; font-weight: 600;">
-        Eligibility &amp; Qualification Requirements
-      </h3>
-      <div style="background: var(--bg-subtle); border: 1px solid var(--border); padding: 0.85rem 1rem; border-radius: var(--radius); line-height: 1.55; font-size: 0.9rem;">
-        {{ tender.eligibility or 'Open competitive tender for registered government vendors.' }}
-      </div>
-    </div>
-
-    <div>
-      <h3 style="color: var(--text-main); font-size: 1.05rem; margin-bottom: 0.35rem; font-weight: 600;">
-        Strategic Bid Advice &amp; Takeaways
-      </h3>
-      <div style="background: var(--warning-bg); border: 1px solid var(--warning-border); padding: 0.85rem 1rem; border-radius: var(--radius); line-height: 1.55; color: var(--warning-text); font-size: 0.9rem;">
-        {{ tender.key_takeaways or 'Carefully review tender annexures, pre-bid queries, and submission checklist.' }}
-      </div>
-    </div>
-
-    <!-- Notes Editing for this Tender -->
-    <div class="notes-container">
-      <div class="notes-header">
-        <span>Private Notes &amp; Bidding Strategy for this Tender</span>
-        <span id="notes-status-{{ tender.id }}" class="notes-status"></span>
-      </div>
-      <textarea 
-        id="notes-input-{{ tender.id }}" 
-        class="notes-input" 
-        placeholder="Add private bidding notes for this tender (e.g. consortium partners, questions for pre-bid meeting)..."
-      >{{ tender.saved_notes }}</textarea>
-      <div class="notes-actions">
-        <button 
-          type="button" 
-          class="btn btn-secondary btn-sm" 
-          onclick="saveTenderNotes({{ tender.id }})"
-        >
-          Save Note
-        </button>
-      </div>
-    </div>
-
-    <!-- Clean Source Reference (No developer scraping debug blocks) -->
-    <div class="source-verification-card" style="background: var(--bg-subtle); border: 1px solid var(--border); padding: 0.85rem 1rem; border-radius: var(--radius);">
-      <div style="font-weight: 600; font-size: 0.88rem; color: var(--text-main); margin-bottom: 0.35rem;">
-        Official Source Notice &amp; Attribution
-      </div>
-      <p style="color: var(--text-sub); font-size: 0.85rem; line-height: 1.5; margin-bottom: 0.45rem;">"{{ tender.snippet }}"</p>
-      <div style="font-size: 0.78rem; color: var(--text-muted);">
-        Indexed via SerpApi from <strong>{{ tender.portal_name }}</strong>.
-      </div>
-    </div>
+    {% endfor %}
   </div>
+  {% endif %}
+</div>
+{% endif %}
 
-  <!-- Direct Portal CTA (Consistent Card Footer) -->
-  <div class="card-footer" style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border);">
-    <span class="portal-attribution">
-      Source Portal: <strong>{{ tender.portal_name }}</strong>
-    </span>
-    <div class="card-actions">
-      <button 
-        type="button" 
-        class="btn btn-save btn-sm {% if tender.is_saved %}is-saved{% endif %}" 
-        data-tender-id="{{ tender.id }}"
-        onclick="toggleSaveTender(this, {{ tender.id }})"
-        title="{% if tender.is_saved %}Remove from Saved{% else %}Bookmark this tender{% endif %}"
-      >
-        {% if tender.is_saved %}&starf; Saved{% else %}&star; Save Tender{% endif %}
-      </button>
-      <a 
-        href="{{ tender.portal_url or select_portal_url(tender.original_url, tender.canonical_url, tender.portal_name) }}" 
-        target="_blank" 
-        rel="noopener noreferrer" 
-        class="btn btn-primary" 
-        style="padding: 0.5rem 1.15rem;"
-      >
-        Open Official Tender Portal &nearr;
-      </a>
-    </div>
+<!-- Scope / Eligibility / Takeaways -->
+<div style="display: grid; gap: 1.5rem; margin-bottom: 1.75rem;">
+  <div>
+    <h2 style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.5rem;">Scope of Work</h2>
+    <p style="font-size: 0.95rem; line-height: 1.65; color: var(--text-sub); margin: 0;">
+      {{ tender.scope_summary or 'Detailed scope available in the official RFP document.' }}
+    </p>
   </div>
+  <div>
+    <h2 style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.5rem;">Eligibility</h2>
+    <p style="font-size: 0.95rem; line-height: 1.65; color: var(--text-sub); margin: 0;">
+      {{ tender.eligibility or 'Open competitive tender for registered government vendors.' }}
+    </p>
+  </div>
+  {% if tender.key_takeaways %}
+  <div>
+    <h2 style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.5rem;">Bid Strategy</h2>
+    <p style="font-size: 0.95rem; line-height: 1.65; color: var(--warning-text); margin: 0;">
+      {{ tender.key_takeaways }}
+    </p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Notes -->
+<div style="margin-bottom: 1.75rem; padding-top: 1.25rem; border-top: 1px solid var(--border);">
+  <h2 style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.6rem;">Private Notes</h2>
+  <textarea id="notes-input-{{ tender.id }}" class="notes-input" placeholder="Bidding strategy, consortium partners, pre-bid questions..." style="width: 100%;">{{ tender.saved_notes }}</textarea>
+  <div style="margin-top: 0.5rem;">
+    <button type="button" class="btn btn-secondary btn-sm" onclick="saveTenderNotes({{ tender.id }})">Save Note</button>
+    <span id="notes-status-{{ tender.id }}" class="notes-status"></span>
+  </div>
+</div>
+
+<!-- Source -->
+<div style="font-size: 0.82rem; color: var(--text-muted); padding-top: 1rem; border-top: 1px solid var(--border-light);">
+  <span style="font-weight: 600; color: var(--text-sub);">Source:</span> {{ tender.portal_name }}
+  <span style="margin: 0 0.4rem;">·</span>
+  <a href="{{ tender.portal_url or select_portal_url(tender.original_url, tender.canonical_url, tender.portal_name) }}" target="_blank" rel="noopener" style="color: var(--primary);">Open official notice &nearr;</a>
 </div>
 {% endblock %}
