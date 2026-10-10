@@ -83,11 +83,21 @@ def _extract_from_article(article_url: str, title: str) -> Dict:
     text = re.sub(r'<[^>]+>', ' ', text)
     text = re.sub(r'\s+', ' ', text)
 
-    # Find official portal/document links in the article
+    # Find official portal/document links - broad detection
     official_links = []
+    official_hints = [
+        '.gov.in', '.nic.in', '.org.in', '.gov.', '.nic.',
+        'eprocure', 'etender', 'tender', 'gem.gov',
+        'ireps', 'defproc', 'mahatenders', 'kppp',
+        'tenderwizard', 'eproc.', '/tender/', '/bid/',
+        'nit', 'rfp', 'eoi',  # Notice Inviting Tender, RFP, EOI
+    ]
     for m in re.finditer(r'href="([^"]+)"', html, re.I):
-        url = m.group(1)
-        if any(d in url.lower() for d in ['.gov.in', '.nic.in', 'eprocure', 'gem.gov']):
+        url = m.group(1).lower()
+        # Skip social, ads, navigation
+        if any(s in url for s in ['facebook', 'twitter', 'linkedin', 'whatsapp', 'telegram', 'advertisement', '#']):
+            continue
+        if any(h in url for h in official_hints):
             if url.startswith('/'):
                 from urllib.parse import urljoin
                 url = urljoin(article_url, url)
