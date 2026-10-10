@@ -2023,3 +2023,33 @@ body { background: #fafafa; }
   font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
   background: #f26625; color: #fff; padding: 0.15rem 0.4rem; border-radius: 999px; margin-left: 0.35rem;
 }
+
+/* BidPilot Floating Mascot */
+.bidpilot-mascot {
+  position: fixed; left: 20px; bottom: 20px; z-index: 9999;
+  cursor: grab; transition: transform 0.2s;
+}
+.bidpilot-mascot:active { cursor: grabbing; }
+.bidpilot-mascot:hover { transform: scale(1.1); }
+.bidpilot-link { display: block; position: relative; text-decoration: none; }
+.bidpilot-mascot svg {
+  animation: float 3s ease-in-out infinite;
+  filter: drop-shadow(0 6px 16px rgba(242, 102, 37, 0.4));
+  background: rgba(26, 26, 46, 0.9); border-radius: 50%; padding: 6px;
+}
+@keyframes bpBlink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+.bidpilot-mascot .bp-eye {
+  transform-origin: center; transform-box: fill-box;
+  animation: bpBlink 4s infinite;
+}
+.bidpilot-tip {
+  position: absolute; left: 60px; top: 50%; transform: translateY(-50%);
+  background: #1a1a2e; color: #fff; font-size: 0.78rem; font-weight: 600;
+  padding: 0.5rem 0.9rem; border-radius: 8px; white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s;
+  border: 1px solid #f26625;
+}
+.bidpilot-mascot:hover .bidpilot-tip { opacity: 1; }

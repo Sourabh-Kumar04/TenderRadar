@@ -77,5 +77,44 @@
   </footer>
 
   <script src="/static/js/app.js"></script>
+<!-- BidPilot Floating Mascot -->
+<div id="bidpilotMascot" class="bidpilot-mascot" title="BidPilot — Coming Soon">
+  <a href="/auto-bid" class="bidpilot-link">
+    <svg viewBox="0 0 64 64" fill="none" width="48" height="48">
+      <rect x="8" y="16" width="48" height="36" rx="10" fill="#1a1a2e" stroke="#f26625" stroke-width="2.5"/>
+      <circle class="bp-eye" cx="24" cy="32" r="5" fill="#4ade80"/>
+      <circle class="bp-eye" cx="40" cy="32" r="5" fill="#4ade80"/>
+      <rect x="26" y="44" width="12" height="3" rx="1.5" fill="#71717a"/>
+      <line x1="32" y1="16" x2="32" y2="8" stroke="#f26625" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="32" cy="6" r="3" fill="#f26625"/>
+      <rect x="4" y="28" width="4" height="12" rx="2" fill="#52525b"/>
+      <rect x="56" y="28" width="4" height="12" rx="2" fill="#52525b"/>
+    </svg>
+    <span class="bidpilot-tip">BidPilot is coming soon!</span>
+  </a>
+</div>
+<script>
+(function() {
+  const m = document.getElementById('bidpilotMascot');
+  let isDown = false, ox = 0, oy = 0;
+  m.addEventListener('mousedown', e => {
+    if (e.target.closest('a') && !m.dataset.moved) return;
+    isDown = true; m.dataset.moved = '';
+    ox = e.clientX - m.offsetLeft; oy = e.clientY - m.offsetTop;
+    m.style.transition = 'none';
+  });
+  document.addEventListener('mousemove', e => {
+    if (!isDown) return;
+    m.dataset.moved = '1';
+    m.style.left = (e.clientX - ox) + 'px';
+    m.style.top = (e.clientY - oy) + 'px';
+    m.style.right = 'auto'; m.style.bottom = 'auto';
+  });
+  document.addEventListener('mouseup', () => {
+    isDown = false; m.style.transition = '';
+    setTimeout(() => delete m.dataset.moved, 100);
+  });
+})();
+</script>
 </body>
 </html>
