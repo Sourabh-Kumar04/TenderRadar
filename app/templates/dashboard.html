@@ -39,45 +39,15 @@
 </div>
 
 <!-- Key Performance Metrics / High-Density Stitch KPI Strip -->
-<div class="stats-grid">
-  <div class="stat-card">
-    <div class="stat-card-top">
-      <span class="stat-lbl">Tenders Discovered</span>
-      <span class="stat-delta positive">Live SerpApi</span>
-    </div>
-    <div class="stat-val tnum">{{ stats.total_tenders }}</div>
-    <div class="stat-sub">Across 7 Indian Govt Portals &mdash; <a href="/scans" style="color: var(--primary); font-weight: 600; font-size: 0.72rem;">See SerpApi architecture →</a></div>
-  </div>
 
-  <div class="stat-card">
-    <div class="stat-card-top">
-      <span class="stat-lbl">Recommended Bids</span>
-      <span class="stat-delta positive">BID Verdict</span>
-    </div>
-    <div class="stat-val tnum" style="color: var(--success);">{{ stats.bid_count or 0 }}</div>
-    <div class="stat-sub">High Capability Fit (&ge;70% Match)</div>
-  </div>
-
-  <div class="stat-card">
-    <div class="stat-card-top">
-      <span class="stat-lbl">Manual Review</span>
-      <span class="stat-delta neutral">Evaluating</span>
-    </div>
-    <div class="stat-val tnum" style="color: var(--warning);">{{ stats.review_count or 0 }}</div>
-    <div class="stat-sub">Conditional Match (40–69%)</div>
-  </div>
-
-  <div class="stat-card">
-    <div class="stat-card-top">
-      <span class="stat-lbl">Closing &lt;7 Days</span>
-      <span class="stat-delta urgent">Urgent Action</span>
-    </div>
-    <div class="stat-val tnum" style="color: var(--danger);">{{ stats.urgent_closing_soon or 0 }}</div>
-    <div class="stat-sub">Approaching Submission Cutoff</div>
-  </div>
-</div>
 
 <!-- Quick Verdict Filter Tabs (Stitch Compliant Pills) -->
+<div class="queue-header">
+  <div>
+    <h2 class="queue-title">Verdict Queue</h2>
+    <p class="queue-sub">Every tender scored against your bidder profile. Expand any row for the reasoning.</p>
+  </div>
+</div>
 <div class="verdict-pills-bar">
   <a href="/?search={{ search_query or '' }}&portal={{ selected_portal or '' }}&urgency={{ selected_urgency or '' }}&watchlist_id={{ selected_watchlist or '' }}&sort_order={{ sort_order or '' }}" 
      class="verdict-pill {% if not selected_verdict and not selected_urgency %}active{% endif %}">
