@@ -2054,3 +2054,13 @@ body { background: #fafafa; }
   border: 1px solid #f26625;
 }
 .bidpilot-mascot:hover .bidpilot-tip { opacity: 1; }
+
+.nav-avatar {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: #1f1f1f; border: 1px solid #2f2f2f; color: #a1a1aa;
+  margin-left: 0.75rem; flex-shrink: 0; transition: all 0.15s;
+}
+.nav-avatar:hover { border-color: #f26625; color: #fff; }
+.cmd-nav .nav-container { display: flex; align-items: center; }
+.cmd-nav .nav-links { flex: 1; }
