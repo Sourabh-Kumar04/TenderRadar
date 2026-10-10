@@ -112,65 +112,7 @@
  {% endif %}
  </div></div>
 {% endif %}
-<!-- Tender Chat Modal -->
-<div id="tenderChatModal" class="dd-modal" style="display:none;">
-  <div class="dd-modal-content chat-modal">
-    <div class="dd-modal-header">
-      <div>
-        <h3>Chat about this tender</h3>
-        <div id="chatTenderTitle" class="chat-tender-title"></div>
-      </div>
-      <button class="dd-close" onclick="closeTenderChat()">&times;</button>
-    </div>
-    <div id="chatMessages" class="chat-messages"></div>
-    <div class="chat-input-row">
-      <input id="chatInput" type="text" placeholder="Ask about deadline, EMD, eligibility..." onkeydown="if(event.key==='Enter')sendChatMsg()" />
-      <button onclick="sendChatMsg()" class="btn btn-primary btn-sm">Send</button>
-    </div>
-  </div>
-</div>
-<script>
-let chatTenderId = null, chatHistory = [];
-function openTenderChat(tenderId, btn) {
-  chatTenderId = tenderId; chatHistory = [];
-  document.getElementById('chatTenderTitle').textContent = btn.dataset.title || '';
-  document.getElementById('chatMessages').innerHTML = '';
-  document.getElementById('tenderChatModal').style.display = 'flex';
-  addChatMsg('assistant', 'Hi! Ask me anything about this tender — deadline, EMD, eligibility, risks.');
-}
-function closeTenderChat() {
-  document.getElementById('tenderChatModal').style.display = 'none';
-}
-function addChatMsg(role, text) {
-  const d = document.createElement('div');
-  d.className = 'chat-msg chat-' + role;
-  d.textContent = text;
-  document.getElementById('chatMessages').appendChild(d);
-  d.scrollIntoView({behavior: 'smooth', block: 'end'});
-}
-async function sendChatMsg() {
-  const inp = document.getElementById('chatInput');
-  const msg = inp.value.trim();
-  if (!msg) return;
-  inp.value = '';
-  addChatMsg('user', msg);
-  chatHistory.push({role: 'user', content: msg});
-  addChatMsg('assistant', 'Thinking...');
-  try {
-    const r = await fetch(`/api/tenders/${chatTenderId}/chat`, {
-      method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({message: msg, history: chatHistory.slice(0, -1)})
-    });
-    const data = await r.json();
-    const msgs = document.getElementById('chatMessages');
-    msgs.removeChild(msgs.lastChild);
-    addChatMsg('assistant', data.reply);
-    chatHistory.push({role: 'assistant', content: data.reply});
-  } catch (e) {
-    addChatMsg('assistant', 'Something went wrong. Try again.');
-  }
-}
-</script>
+
 {% endblock %}
 
 

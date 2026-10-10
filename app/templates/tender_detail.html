@@ -23,6 +23,15 @@
     >
       Open Official Portal &nearr;
     </a>
+    <button 
+      type="button" 
+      class="btn btn-secondary btn-sm"
+      onclick="openTenderChat({{ tender.id }}, this)"
+      data-title="{{ tender.title | e }}"
+      title="Chat with AI about this tender"
+    >
+      Chat
+    </button>
   </div>
 </div>
 
