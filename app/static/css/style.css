@@ -1582,3 +1582,63 @@ input[type="checkbox"] {
 .ai-summary-box {
   background: transparent; border: none; padding: 0.5rem 0; margin-top: 0.5rem;
 }
+
+/* ========================================================
+   Definite-inspired design language (2026-10-10)
+   Confident minimalism: numbered workflow, data-forward,
+   "built to be checked" trust ethos.
+   ======================================================== */
+
+.definite-hero { padding: 2rem 0 1.25rem; }
+.definite-hero .hero-headline {
+  font-size: 2.4rem; font-weight: 700; letter-spacing: -0.025em;
+  line-height: 1.15; max-width: 20ch; margin-bottom: 0.6rem;
+}
+.definite-hero .hero-tagline {
+  font-size: 1.02rem; color: var(--text-sub); max-width: 58ch;
+  margin-bottom: 1.5rem;
+}
+
+/* Numbered workflow — Definite 01/02/03 */
+.definite-steps {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  padding: 1.25rem 0; margin-bottom: 0;
+}
+.definite-steps .how-step { display: block; }
+.definite-steps .how-step-num {
+  font-size: 0.75rem; font-weight: 700; color: var(--text-muted);
+  letter-spacing: 0.08em; margin-bottom: 0.4rem;
+}
+.definite-steps .how-step-title {
+  font-size: 1rem; font-weight: 650; margin-bottom: 0.3rem;
+}
+.definite-steps .how-step-desc {
+  font-size: 0.85rem; color: var(--text-muted); line-height: 1.55;
+}
+
+/* Trust strip — "Built to be checked" */
+.trust-strip {
+  display: flex; align-items: baseline; gap: 1.5rem; flex-wrap: wrap;
+  padding: 0.9rem 0; margin-bottom: 0.5rem;
+}
+.trust-strip .trust-title {
+  font-weight: 700; font-size: 0.9rem; letter-spacing: -0.01em;
+}
+.trust-strip .trust-item {
+  font-size: 0.82rem; color: var(--text-muted);
+  display: flex; align-items: center; gap: 0.4rem;
+}
+.trust-strip .trust-item::before {
+  content: ""; width: 5px; height: 5px; border-radius: 50%;
+  background: var(--success); flex-shrink: 0;
+}
+
+/* Tighter, more confident section rhythm */
+.verdict-pills-bar { margin: 1rem 0; }
+.tenders-list { margin-top: 0.5rem; }
+
+@media (max-width: 720px) {
+  .definite-steps { grid-template-columns: 1fr; gap: 1rem; }
+  .definite-hero .hero-headline { font-size: 1.8rem; }
+}

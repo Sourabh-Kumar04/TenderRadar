@@ -4,9 +4,9 @@
 
 {% block content %}
 <!-- Winner-Level Hero & Clarity Section -->
-<div class="hero-card">
+<div class="hero-card definite-hero">
   <div class="hero-badge-row">
-    <div class="section-eyebrow">Indian Tender Discovery Hub &bull; Live Intelligence</div>
+    <div class="section-eyebrow">Powered by SerpApi &bull; Indian Government Tenders</div>
     <span class="hero-profile-chip" title="Eligibility scores and verdicts tailored to your corporate financial capacity">
       <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
       Active Bidder: <strong>{{ profile.company_name }}</strong> 
@@ -15,34 +15,40 @@
     </span>
   </div>
 
-  <h1 class="hero-headline">Never Miss an Indian Govt Tender You Can Win</h1>
+  <h1 class="hero-headline">Turn tender discovery from manual to strategic.</h1>
   <p class="hero-tagline">AI agent that scans GeM, CPPP, IREPS &amp; state portals via <strong>SerpApi</strong> — then gives you a <strong>BID / REVIEW / NO-BID verdict</strong> per tender.</p>
 
-  <!-- 3-Step How It Works Strip -->
-  <div class="how-it-works-strip">
+  <!-- Definite-style numbered workflow -->
+  <div class="how-it-works-strip definite-steps">
     <div class="how-step">
       <div class="how-step-num">01</div>
       <div class="how-step-content">
-        <div class="how-step-title">Define Bidder Capability</div>
-        <div class="how-step-desc">Set your turnover, EMD capacity, categories.</div>
+        <div class="how-step-title">Define capability</div>
+        <div class="how-step-desc">Your turnover, EMD capacity, and categories become the scoring model.</div>
       </div>
     </div>
-    <div class="how-arrow">&rarr;</div>
     <div class="how-step">
       <div class="how-step-num">02</div>
       <div class="how-step-content">
-        <div class="how-step-title">SerpApi Multi-Portal Search</div>
-        <div class="how-step-desc">SerpApi scans GeM, CPPP, IREPS &amp; state portals.</div>
+        <div class="how-step-title">Scan portals</div>
+        <div class="how-step-desc">SerpApi searches GeM, CPPP, IREPS and state portals. Every tender keeps its source.</div>
       </div>
     </div>
-    <div class="how-arrow">&rarr;</div>
     <div class="how-step">
       <div class="how-step-num">03</div>
       <div class="how-step-content">
-        <div class="how-step-title">AI Bid/No-Bid Verdict</div>
-        <div class="how-step-desc">Match score, risk flags &amp; bid recommendation.</div>
+        <div class="how-step-title">Get the verdict</div>
+        <div class="how-step-desc">BID, REVIEW, or NO-BID — with the reasoning visible, not buried.</div>
       </div>
     </div>
+  </div>
+
+  <!-- Built to be checked (trust strip) -->
+  <div class="trust-strip">
+    <span class="trust-title">Built to be checked</span>
+    <span class="trust-item">Every tender links its official portal</span>
+    <span class="trust-item">Every verdict shows its reasoning</span>
+    <span class="trust-item">Every scan is reproducible</span>
   </div>
 
   <!-- Primary Hero Actions Row (Instant Clarity for First-Time Visitors) -->
