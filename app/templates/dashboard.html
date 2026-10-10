@@ -218,7 +218,7 @@
             {% elif tender.verdict == 'NO_BID' %}
               <span class="vr-pill vr-nobid">NO-BID {{ tender.match_score }}%</span>
             {% endif %}
-            <a href="/tenders/{{ tender.id }}" class="tender-row-title">{{ tender.title }}</a>
+            <a href="/tenders/{{ tender.id }}" class="tender-row-title">{{ display_title(tender.title, tender.portal_name, tender.snippet) }}</a>
           </div>
           <div class="tender-row-meta">
             <span>{{ tender.portal_name }}</span><span class="meta-sep">&middot;</span><span class="tnum">{{ tender.deadline_date or 'No deadline listed' }}</span><span class="meta-sep">&middot;</span><span class="tnum">#TR-{{ "%04d" % tender.id }}</span>{% if tender.advisor_verdict and tender.advisor_verdict.key_details.est_value and tender.advisor_verdict.key_details.est_value != 'Not specified' %}<span class="meta-sep">&middot;</span><span class="tnum">{{ tender.advisor_verdict.key_details.est_value }}</span>{% endif %}

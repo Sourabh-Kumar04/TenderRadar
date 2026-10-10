@@ -47,7 +47,7 @@ from app.models import (
     BidVerdict,
     SavedTenderSaveRequest
 )
-from app.normalizer import select_portal_url
+from app.normalizer import select_portal_url, display_title
 from app.bidder_profile import (
     BidderProfile,
     get_default_profile,
@@ -105,6 +105,7 @@ app = FastAPI(
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 templates.env.globals["select_portal_url"] = select_portal_url
+templates.env.globals["display_title"] = display_title
 templates.env.globals["is_mock_serpapi"] = get_settings().MOCK_SERPAPI
 
 

@@ -258,3 +258,28 @@ def select_portal_url(original_url: Optional[str], canonical_url: Optional[str] 
         return fallback
 
     return candidate
+
+
+def display_title(title, portal_name, snippet=""):
+    """Return a human-readable title, never a raw URL."""
+    t = (title or "").strip()
+    if t and not t.startswith("http"):
+        return t
+    # Title is a URL or empty — derive from portal
+    portal = (portal_name or "").strip()
+    # Clean "Gov Portal (example.com)" -> "example.com"
+    if portal.startswith("Gov Portal (") and portal.endswith(")"):
+        portal = portal[12:-1]
+    # Map known domains to friendly names
+    domain_names = {
+        "etenders.hry.nic.in": "Haryana eProcurement",
+        "wbpwd.gov.in": "West Bengal PWD",
+        "etenders.gov.in": "Central eProcurement",
+        "gem.gov.in": "GeM",
+        "eprocure.gov.in": "CPPP",
+        "ireps.gov.in": "IREPS Railways",
+    }
+    friendly = domain_names.get(portal, portal)
+    if friendly:
+        return f"{friendly} — Tender Notice"
+    return "Tender Notice"
