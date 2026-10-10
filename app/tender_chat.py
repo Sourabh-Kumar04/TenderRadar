@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 from app.deep_dive import fetch_page_text
 from app.doc_finder import get_tender_document
+from app.multi_doc import get_tender_document_multi
 
 
 def tender_chat(
@@ -40,9 +41,13 @@ def tender_chat(
     if not api_key:
         return "AI chat is not configured (missing API key)."
 
-    # Try real tender document first (via SerpApi PDF search)
-    doc = get_tender_document(title, portal_name)
+    # Try multi-source document retrieval (SerpApi + Bing + DDG + Wayback)
+    doc = get_tender_document_multi(title, portal_name, page_url)
     has_doc = doc.get("found", False)
+    if not has_doc:
+        # Fallback to single-source
+        doc = get_tender_document(title, portal_name)
+        has_doc = doc.get("found", False)
 
     # Fallback: fetch tender page
     page_text = fetch_page_text(page_url) if page_url and not has_doc else ""
@@ -63,7 +68,8 @@ def tender_chat(
         f"Tender: {title}\nPortal: {portal_name}\nDetails: {snippet}\n"
     )
     if has_doc:
-        context += f"\nOFFICIAL TENDER DOCUMENT (extracted from {doc['pdf_url']}):\n{doc['text'][:8000]}\n"
+        src_name = doc.get('source', 'document')
+        context += f"\nOFFICIAL TENDER DOCUMENT [via {src_name}] ({doc.get('pdf_url', 'archived')}) :\n{doc['text'][:8000]}\n"
         context += "\nAnswer ONLY from this document. Cite specific values.\n"
     elif has_page:
         context += f"\nFull tender page content:\n{page_text[:6000]}\n"
