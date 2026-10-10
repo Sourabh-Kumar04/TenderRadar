@@ -24,6 +24,7 @@ from app.db import (
 from app.serpapi_client import SerpApiClient
 from app.summarizer import TenderSummarizer
 from app.quality_gate import quality_gate
+from app.doc_cache import is_duplicate_title
 from app.multi_doc import _extract_from_article
 
 logger = logging.getLogger(__name__)
@@ -194,6 +195,11 @@ class ScanManager:
             # Deduplicate by normalized URL (Critical hackathon criterion!)
             if tender_exists(self.db_path, canonical_url):
                 logger.debug(f"Duplicate detected; skipping canonical URL: {canonical_url}")
+                continue
+
+            # Title-level dedup: skip exact duplicate titles before any AI call
+            if is_duplicate_title(item["title"], self.db_path):
+                logger.info(f"Duplicate title skipped: {item['title'][:50]}")
                 continue
 
             # AI Quality Gate: decide if this is a real tender worth showing

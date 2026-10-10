@@ -136,6 +136,15 @@ def get_tender_document_multi(title: str, portal_name: str = "", page_url: str =
     cache_key = f"{title[:40]}"
     if cache_key in _cache:
         return _cache[cache_key]
+    # Check SQLite persistent cache first
+    try:
+        from app.doc_cache import get_cached_document, cache_document
+        cached = get_cached_document(cache_key)
+        if cached:
+            _cache[cache_key] = cached
+            return cached
+    except:
+        pass
 
     result = {"found": False, "text": "", "source": None, "pdf_url": None}
 
@@ -146,6 +155,12 @@ def get_tender_document_multi(title: str, portal_name: str = "", page_url: str =
         if d.get("found"):
             result.update({"found": True, "text": d["text"], "source": "serpapi_pdf", "pdf_url": d["pdf_url"]})
             _cache[cache_key] = result
+            try:
+                from app.doc_cache import cache_document
+                if result.get("found"):
+                    cache_document(cache_key, result.get("text",""), result.get("pdf_url",""), result.get("source",""))
+            except:
+                pass
             return result
     except:
         pass
