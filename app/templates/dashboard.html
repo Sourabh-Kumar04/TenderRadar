@@ -7,7 +7,11 @@
  {% for t in tenders[:3] %}
  <div class="cmd-signal"><span class="vr-pill vr-{{ t.verdict|lower }}">{{ t.verdict }} {{ t.match_score }}%</span><span class="cmd-signal-title">{{ display_title(t.title, t.portal_name, t.snippet) }}</span></div>
  {% endfor %}
- <div class="cmd-side-note">Scored against your bidder profile</div></div><div class="cmd-tricolor"></div></div><!-- Key Performance Metrics / High-Density Stitch KPI Strip --><!-- Quick Verdict Filter Tabs (Stitch Compliant Pills) --><div class="queue-header"><div><h2 class="queue-title">Verdict Queue</h2><p class="queue-sub">Every tender scored against your bidder profile. Expand any row for the reasoning.</p></div></div><div class="verdict-pills-bar"><a href="/?search={{ search_query or '' }}&portal={{ selected_portal or '' }}&urgency={{ selected_urgency or '' }}&watchlist_id={{ selected_watchlist or '' }}&sort_order={{ sort_order or '' }}" 
+ <div class="cmd-side-note">Scored against your bidder profile</div></div><div class="cmd-tricolor"></div></div><!-- Key Performance Metrics / High-Density Stitch KPI Strip --><!-- Quick Verdict Filter Tabs (Stitch Compliant Pills) --><div class="autobid-banner">
+  <span class="autobid-badge">Coming Soon</span>
+  <span class="autobid-text"><strong>Auto-Bid Agent</strong> &mdash; AI prepares and submits bids automatically, only for tenders you explicitly approve.</span>
+</div>
+<div class="queue-header"><div><h2 class="queue-title">Verdict Queue</h2><p class="queue-sub">Every tender scored against your bidder profile. Expand any row for the reasoning.</p></div></div><div class="verdict-pills-bar"><a href="/?search={{ search_query or '' }}&portal={{ selected_portal or '' }}&urgency={{ selected_urgency or '' }}&watchlist_id={{ selected_watchlist or '' }}&sort_order={{ sort_order or '' }}" 
  class="verdict-pill {% if not selected_verdict and not selected_urgency %}active{% endif %}">
  All Tenders <span class="pill-count">{{ stats.total_tenders }}</span></a><a href="/?verdict=BID&search={{ search_query or '' }}&portal={{ selected_portal or '' }}&watchlist_id={{ selected_watchlist or '' }}&sort_order=match_score" 
  class="verdict-pill bid-pill {% if selected_verdict == 'BID' %}active{% endif %}"><span class="badge-dot" style="background:var(--success);"></span>
