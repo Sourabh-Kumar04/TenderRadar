@@ -1902,3 +1902,33 @@ body { background: #fafafa; }
   .cmd-hero { grid-template-columns: 1fr; }
   .cmd-side { display: none; }
 }
+
+/* Hackathon-grade toolbar */
+.verdict-pills-bar {
+  display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;
+}
+.verdict-pill {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-size: 0.82rem; font-weight: 600; padding: 0.5rem 0.9rem;
+  border-radius: 999px; border: 1px solid var(--border);
+  background: #fff; color: var(--text-sub); text-decoration: none;
+  transition: all 0.15s;
+}
+.verdict-pill:hover { border-color: var(--text-main); }
+.verdict-pill.active { background: #0f0f0f; color: #fff; border-color: #0f0f0f; }
+.verdict-pill .count {
+  font-size: 0.72rem; font-weight: 700; background: rgba(0,0,0,0.06);
+  padding: 0.1rem 0.4rem; border-radius: 999px; font-variant-numeric: tabular-nums;
+}
+.verdict-pill.active .count { background: rgba(255,255,255,0.15); }
+.toolbar-card {
+  background: #fff; border: 1px solid var(--border); border-radius: 12px;
+  padding: 1rem; margin-bottom: 1rem;
+}
+.sector-filters { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; margin-top: 0.75rem; }
+.sector-filters .badge {
+  font-size: 0.75rem; font-weight: 600; padding: 0.35rem 0.7rem;
+  border-radius: 999px; border: 1px solid var(--border);
+  background: #fafafa; color: var(--text-sub); text-decoration: none;
+}
+.sector-filters .badge:hover { border-color: var(--primary); color: var(--primary); }
