@@ -430,10 +430,16 @@ def evaluate_mock(
     else:
         score += 10
 
-    # Verdict assignment
-    if not prefilter["passed"] or has_critical or score < 50:
+    # Verdict assignment - dynamic threshold based on document availability
+    # When has_document=0, we have less signal, so scale threshold down
+    # to avoid penalizing data gaps instead of poor fit
+    has_doc = tender.get("has_document", 0)
+    bid_threshold = 75 if has_doc else 65
+    nobid_threshold = 50 if has_doc else 40
+
+    if not prefilter["passed"] or has_critical or score < nobid_threshold:
         verdict = "NO_BID"
-    elif score >= 75 and not has_warning:
+    elif score >= bid_threshold and not has_warning:
         verdict = "BID"
     else:
         verdict = "REVIEW"
