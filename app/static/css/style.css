@@ -2008,3 +2008,12 @@ body { background: #fafafa; }
 .autobid-feature h3 { font-size: 0.95rem; margin: 0 0 0.5rem; }
 .autobid-feature p { font-size: 0.85rem; color: var(--text-muted); margin: 0; line-height: 1.5; }
 @media (max-width: 640px) { .autobid-features { grid-template-columns: 1fr; } }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.autobid-icon-sm svg {
+  animation: float 2.5s ease-in-out infinite;
+  filter: drop-shadow(0 4px 8px rgba(242, 102, 37, 0.3));
+}
