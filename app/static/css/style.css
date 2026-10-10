@@ -1642,3 +1642,101 @@ input[type="checkbox"] {
   .definite-steps { grid-template-columns: 1fr; gap: 1rem; }
   .definite-hero .hero-headline { font-size: 1.8rem; }
 }
+
+/* ========================================================
+   PagerDuty-style data rows (2026-10-10)
+   Incident-list language: status pill | title+metadata | deadline+actions
+   ======================================================== */
+.tender-row {
+  display: grid; grid-template-columns: 1fr auto; gap: 0 1rem;
+  padding: 0.85rem 0.25rem; border-bottom: 1px solid var(--border);
+  align-items: start;
+}
+.tenders-list .tender-row:first-child { border-top: 1px solid var(--border); }
+.tender-row:hover { background: var(--bg-subtle); }
+.tender-row-main { min-width: 0; }
+.tender-row-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.3rem; }
+.tender-row-title {
+  font-size: 0.95rem; font-weight: 600; color: var(--text-main);
+  letter-spacing: -0.01em; line-height: 1.4;
+  overflow: hidden; text-overflow: ellipsis; display: -webkit-box;
+  -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+.tender-row-title:hover { color: var(--primary); }
+.tender-row-meta {
+  font-size: 0.78rem; color: var(--text-muted);
+  display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;
+}
+.tender-row-meta .meta-sep { color: var(--border-dark); }
+.tender-row-meta .tnum { font-variant-numeric: tabular-nums; }
+
+/* Verdict pills — PagerDuty severity language */
+.vr-pill {
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em;
+  padding: 0.22rem 0.55rem; border-radius: var(--radius-pill);
+  white-space: nowrap; flex-shrink: 0; font-variant-numeric: tabular-nums;
+}
+.vr-bid { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+.vr-review { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+.vr-nobid { background: var(--bg-subtle); color: var(--text-muted); border: 1px solid var(--border); }
+
+/* Right side: deadline + actions */
+.tender-row-side {
+  display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0;
+}
+.dl-badge {
+  font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-pill); white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.dl-urgent { background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger-border); }
+.dl-soon { background: var(--warning-bg); color: var(--warning-text); border: 1px solid var(--warning-border); }
+.dl-expired { background: var(--bg-subtle); color: var(--text-muted); border: 1px solid var(--border); }
+.tender-row-actions { display: flex; gap: 0.35rem; }
+.row-btn {
+  font-size: 0.75rem; font-weight: 600; padding: 0.35rem 0.65rem;
+  border-radius: var(--radius); border: 1px solid var(--border-dark);
+  background: var(--bg-card); color: var(--text-sub); cursor: pointer;
+  text-decoration: none; white-space: nowrap;
+}
+.row-btn:hover { border-color: var(--text-muted); }
+.row-btn-primary { background: var(--text-main); color: #fff; border-color: var(--text-main); }
+.row-btn-primary:hover { background: #000; color: #fff; }
+.row-btn.is-saved { color: var(--primary); border-color: var(--primary-border); }
+
+/* Expandable detail body */
+.tender-row-details { grid-column: 1 / -1; margin-top: 0.15rem; }
+.tender-row-details > summary {
+  cursor: pointer; font-size: 0.76rem; font-weight: 600; color: var(--text-muted);
+  list-style: none; padding: 0.2rem 0;
+}
+.tender-row-details > summary::-webkit-details-marker { display: none; }
+.tender-row-details > summary::before { content: "+ "; font-weight: 700; }
+.tender-row-details[open] > summary::before { content: "\2212  "; }
+.tender-row-detail-body {
+  padding: 0.75rem 0 0.25rem 0; display: grid; gap: 0.7rem;
+  border-top: 1px dashed var(--border); margin-top: 0.35rem;
+}
+.rd-label {
+  font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--text-muted); margin-bottom: 0.3rem;
+}
+.rd-reasons { margin: 0; padding-left: 1.1rem; font-size: 0.84rem; color: var(--text-sub); }
+.rd-reasons li { margin-bottom: 0.2rem; }
+.rd-flag { font-size: 0.8rem; padding: 0.25rem 0; color: var(--text-sub); }
+.rd-scope { font-size: 0.85rem; color: var(--text-sub); line-height: 1.6; margin: 0; max-width: 75ch; }
+.rd-elig { font-size: 0.8rem; color: var(--text-muted); margin: 0.3rem 0 0; }
+.rd-facts { display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: 0.78rem; color: var(--text-muted); }
+.rd-facts strong { color: var(--text-sub); font-weight: 600; }
+
+/* Definite-grade headline */
+.definite-hero .hero-headline {
+  font-size: clamp(2rem, 4.5vw, 3rem); font-weight: 700;
+  letter-spacing: -0.035em; line-height: 1.08;
+}
+.tnum, .stat-val { font-variant-numeric: tabular-nums; }
+
+@media (max-width: 720px) {
+  .tender-row { grid-template-columns: 1fr; }
+  .tender-row-side { margin-top: 0.4rem; }
+}

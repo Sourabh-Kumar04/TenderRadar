@@ -208,176 +208,59 @@
 {% if tenders %}
   <div class="tenders-list" id="tenders-feed">
     {% for tender in tenders %}
-      <div class="tender-card">
-        <div class="tender-header">
-          <a href="/tenders/{{ tender.id }}" class="tender-title-link">
-            {{ tender.title }}
-          </a>
-          <div style="display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
+      <div class="tender-row">
+        <div class="tender-row-main">
+          <div class="tender-row-head">
             {% if tender.verdict == 'BID' %}
-              <span class="badge badge-bid"><span class="badge-dot"></span>BID ({{ tender.match_score }}%)</span>
+              <span class="vr-pill vr-bid">BID {{ tender.match_score }}%</span>
             {% elif tender.verdict == 'REVIEW' %}
-              <span class="badge badge-review"><span class="badge-dot"></span>REVIEW ({{ tender.match_score }}%)</span>
+              <span class="vr-pill vr-review">REVIEW {{ tender.match_score }}%</span>
             {% elif tender.verdict == 'NO_BID' %}
-              <span class="badge badge-nobid"><span class="badge-dot"></span>NO-BID ({{ tender.match_score }}%)</span>
+              <span class="vr-pill vr-nobid">NO-BID {{ tender.match_score }}%</span>
             {% endif %}
-
-            {% if tender.urgency_status == 'Urgent (<3d)' %}
-              <span class="badge badge-urgent"><span class="badge-dot"></span>Urgent (&lt;3d)</span>
-            {% elif tender.urgency_status == 'Closing Soon (<7d)' %}
-              <span class="badge badge-closing"><span class="badge-dot"></span>Closing (&lt;7d)</span>
-            {% elif tender.urgency_status == 'Active (>7d)' %}
-              <span class="badge badge-active"><span class="badge-dot"></span>Active (&gt;7d)</span>
-            {% elif tender.urgency_status == 'Expired' %}
-              <span class="badge badge-expired"><span class="badge-dot"></span>Expired</span>
-            {% else %}
-              <span class="badge badge-flexible">{{ tender.urgency_status }}</span>
-            {% endif %}
+            <a href="/tenders/{{ tender.id }}" class="tender-row-title">{{ tender.title }}</a>
+          </div>
+          <div class="tender-row-meta">
+            <span>{{ tender.portal_name }}</span><span class="meta-sep">&middot;</span><span class="tnum">{{ tender.deadline_date or 'No deadline listed' }}</span><span class="meta-sep">&middot;</span><span class="tnum">#TR-{{ "%04d" % tender.id }}</span>{% if tender.advisor_verdict and tender.advisor_verdict.key_details.est_value and tender.advisor_verdict.key_details.est_value != 'Not specified' %}<span class="meta-sep">&middot;</span><span class="tnum">{{ tender.advisor_verdict.key_details.est_value }}</span>{% endif %}
           </div>
         </div>
-
-        <div class="tender-meta-tags">
-          <span class="tender-code">#TR-{{ "%04d" % tender.id }}</span>
-          <span class="badge badge-portal">Portal: {{ tender.portal_name }}</span>
-          {% if tender.watchlist_keyword %}
-            <span class="badge badge-keyword">Tracked: {{ tender.watchlist_keyword }}</span>
+        <div class="tender-row-side">
+          {% if tender.urgency_status == 'Urgent (<3d)' %}
+            <span class="dl-badge dl-urgent">Urgent</span>
+          {% elif tender.urgency_status == 'Closing Soon (<7d)' %}
+            <span class="dl-badge dl-soon">&lt;7d left</span>
+          {% elif tender.urgency_status == 'Expired' %}
+            <span class="dl-badge dl-expired">Expired</span>
           {% endif %}
-          {% if tender.published_date %}
-            <span class="text-muted tnum" style="font-size:0.75rem;">Published: {{ tender.published_date }}</span>
-          {% endif %}
+          <div class="tender-row-actions">
+            <button type="button" class="row-btn {% if tender.is_saved %}is-saved{% endif %}" data-tender-id="{{ tender.id }}" onclick="toggleSaveTender(this, {{ tender.id }})" title="{% if tender.is_saved %}Remove from Saved{% else %}Bookmark{% endif %}">{% if tender.is_saved %}&starf;{% else %}&star;{% endif %}</button>
+            <a href="{{ select_portal_url(tender.original_url, tender.canonical_url, tender.portal_name) }}" target="_blank" rel="noopener noreferrer" class="row-btn row-btn-primary">Portal &nearr;</a>
+          </div>
         </div>
-
-        <!-- Prominent deadline strip -->
-        <div class="deadline-strip {% if tender.urgency_status == 'Urgent (<3d)' %}deadline-urgent{% elif tender.urgency_status == 'Closing Soon (<7d)' %}deadline-soon{% elif tender.urgency_status == 'Expired' %}deadline-expired{% endif %}">
-          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          <span class="deadline-label">Bid deadline:</span>
-          <strong class="tnum">{{ tender.deadline_date or 'See portal document' }}</strong>
-        </div>
-
-        <details class="tender-details">
-          <summary class="tender-details-toggle">Tender details, AI verdict reasoning &amp; scope</summary>
-        <!-- Key Financial & Deadline Metrics -->
-        <div class="metrics-row">
-          <div class="metric-item">
-            <span class="metric-label">Bid Submission Deadline</span>
-            <span class="metric-value tnum">
-              {{ tender.deadline_date or 'Refer to Portal Document' }}
-            </span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">EMD Amount</span>
-            <span class="metric-value tnum">
-              {{ tender.emd_amount or 'Not Specified' }}
-              {% if profile.msme_registered and 'exempt' not in (tender.emd_amount or '').lower() %}
-                <span class="badge badge-benefit" style="font-size:0.68rem; margin-left:0.25rem;">MSME Exempt &check;</span>
-              {% endif %}
-            </span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">Tender Document Fee</span>
-            <span class="metric-value tnum">{{ tender.tender_fee or 'Nil / Online' }}</span>
-          </div>
-          {% if tender.advisor_verdict and tender.advisor_verdict.key_details.est_value and tender.advisor_verdict.key_details.est_value != 'Not specified' %}
-          <div class="metric-item">
-            <span class="metric-label">Est. Contract Value</span>
-            <span class="metric-value tnum">{{ tender.advisor_verdict.key_details.est_value }}</span>
-          </div>
-          {% endif %}
-        </div>
-
-        <!-- Bid Advisor Spotlight Panel (High Signal, Zero Duplication) -->
-        {% if tender.advisor_verdict %}
-          <div class="advisor-spotlight-card {% if tender.verdict == 'BID' %}verdict-bid{% elif tender.verdict == 'REVIEW' %}verdict-review{% else %}verdict-nobid{% endif %}">
-            <div class="advisor-spotlight-header">
-              <div class="advisor-verdict-title">
-                <span>Bid Advisor Verdict:</span>
-                {% if tender.verdict == 'BID' %}
-                  <strong style="color: var(--success);">RECOMMENDED TO BID</strong>
-                {% elif tender.verdict == 'REVIEW' %}
-                  <strong style="color: var(--warning-text);">MANUAL REVIEW REQUIRED</strong>
-                {% else %}
-                  <strong style="color: var(--text-muted);">NO-BID (MISMATCH / RISK)</strong>
-                {% endif %}
-                <span class="match-score-badge {% if (tender.match_score or 0) >= 70 %}high{% elif (tender.match_score or 0) >= 40 %}medium{% else %}low{% endif %}">
-                  {{ tender.match_score }}% Match
-                </span>
-              </div>
+        <details class="tender-row-details">
+          <summary>Verdict reasoning &amp; scope</summary>
+          <div class="tender-row-detail-body">
+            {% if tender.advisor_verdict and tender.advisor_verdict.reasons %}
+            <div class="rd-section"><div class="rd-label">Why this verdict</div>
+              <ul class="rd-reasons">{% for reason in tender.advisor_verdict.reasons %}<li>{{ reason }}</li>{% endfor %}</ul>
             </div>
-
-            {% if tender.advisor_verdict.reasons %}
-              <div style="margin-top: 0.55rem;">
-                <span style="font-weight: 600; font-size: 0.8rem; color: var(--text-main);">Strategic Reasoning:</span>
-                <ul class="advisor-reasons-list">
-                  {% for reason in tender.advisor_verdict.reasons %}
-                    <li>{{ reason }}</li>
-                  {% endfor %}
-                </ul>
-              </div>
             {% endif %}
-
-            {% if tender.advisor_verdict.flags %}
-              <div style="display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.55rem;">
-                {% for flag in tender.advisor_verdict.flags %}
-                  <div class="flag-badge flag-{{ flag.severity }}">
-                    {% if flag.severity == 'critical' %}
-                      <strong style="color: var(--danger);">CRITICAL:</strong>
-                    {% elif flag.severity == 'warning' %}
-                      <strong style="color: var(--warning);">WARNING:</strong>
-                    {% else %}
-                      <strong style="color: var(--info);">NOTICE:</strong>
-                    {% endif %}
-                    <span>{{ flag.text }}</span>
-                  </div>
-                {% endfor %}
-              </div>
-            {% endif %}
-          </div>
-        {% endif %}
-
-        <!-- Scope & Deliverables Overview -->
-        <div class="ai-summary-box">
-          <div class="ai-section-title">
-            <span>Scope &amp; Deliverables</span>
-          </div>
-          <p class="ai-text">{{ tender.scope_summary or tender.snippet }}</p>
-          {% if tender.eligibility %}
-            <div style="margin-top:0.35rem; font-size:0.8rem;">
-              <strong>Eligibility:</strong> <span class="text-sub">{{ tender.eligibility }}</span>
+            {% if tender.advisor_verdict and tender.advisor_verdict.flags %}
+            <div class="rd-section"><div class="rd-label">Risk flags</div>
+              {% for flag in tender.advisor_verdict.flags %}<div class="rd-flag rd-{{ flag.severity }}">{{ flag.text }}</div>{% endfor %}
             </div>
-          {% endif %}
-        </div>
-
+            {% endif %}
+            <div class="rd-section"><div class="rd-label">Scope</div>
+              <p class="rd-scope">{{ tender.scope_summary or tender.snippet }}</p>
+              {% if tender.eligibility %}<p class="rd-elig"><strong>Eligibility:</strong> {{ tender.eligibility }}</p>{% endif %}
+            </div>
+            <div class="rd-section rd-facts">
+              <span><strong>EMD:</strong> {{ tender.emd_amount or 'Not specified' }}</span>
+              <span><strong>Fee:</strong> {{ tender.tender_fee or 'Nil' }}</span>
+              {% if tender.published_date %}<span><strong>Published:</strong> {{ tender.published_date }}</span>{% endif %}
+            </div>
+          </div>
         </details>
-
-        <!-- Clean Card Footer Actions (Zero Scraper Debug Leaks) -->
-        <div class="card-footer">
-          <span class="portal-attribution">
-            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-            Source: <strong>{{ tender.portal_name }} Official Portal</strong>
-          </span>
-          <div class="card-actions">
-            <button 
-              type="button" 
-              class="btn btn-save btn-sm {% if tender.is_saved %}is-saved{% endif %}" 
-              data-tender-id="{{ tender.id }}"
-              onclick="toggleSaveTender(this, {{ tender.id }})"
-              title="{% if tender.is_saved %}Remove from Saved{% else %}Bookmark this tender{% endif %}"
-            >
-              {% if tender.is_saved %}&starf; Saved{% else %}&star; Save{% endif %}
-            </button>
-            <a href="/tenders/{{ tender.id }}" class="btn btn-secondary btn-sm">
-              View Brief
-            </a>
-            <a 
-              href="{{ tender.portal_url or select_portal_url(tender.original_url, tender.canonical_url, tender.portal_name) }}" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              class="btn btn-primary btn-sm"
-            >
-              Open Official Portal &nearr;
-            </a>
-          </div>
-        </div>
       </div>
     {% endfor %}
   </div>

@@ -305,10 +305,10 @@ def test_rendered_portal_button_url_and_theme(client_with_temp_db):
     # Check rendered dashboard HTML
     dash_res = client_with_temp_db.get("/")
     assert dash_res.status_code == 200
-    assert "Open Official Portal" in dash_res.text
+    assert "Portal" in dash_res.text
     # Check that href is an official URL and not empty
     assert 'href="http' in dash_res.text
-    assert "btn-save" in dash_res.text
+    assert "row-btn" in dash_res.text
 
     # Check rendered tender detail page HTML
     detail_res = client_with_temp_db.get(f"/tenders/{t_id}")
