@@ -10,6 +10,59 @@ import html
 from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode, parse_qs, unquote
 from typing import Optional
 
+
+# --- Official Indian government tender portal homepages ---
+# Used when a discovered URL points to a news/blog/aggregator instead of the
+# real bidding portal. Keys are lowercase substrings matched against portal_name.
+OFFICIAL_PORTAL_URLS = {
+    "gem": "https://gem.gov.in",
+    "cppp": "https://eprocure.gov.in/eprocure/app",
+    "central public procurement": "https://eprocure.gov.in/eprocure/app",
+    "eprocure": "https://eprocure.gov.in/eprocure/app",
+    "etenders": "https://etenders.gov.in/eprocure/app",
+    "ireps": "https://www.ireps.gov.in",
+    "railways": "https://www.ireps.gov.in",
+    "mahatenders": "https://mahatenders.gov.in",
+    "maharashtra": "https://mahatenders.gov.in",
+    "kppp": "https://kppp.karnataka.gov.in",
+    "karnataka": "https://kppp.karnataka.gov.in",
+    "odisha": "https://tendersodisha.gov.in",
+    "tendersodisha": "https://tendersodisha.gov.in",
+}
+
+# URL path fragments that indicate news articles / blog posts (not tender pages)
+NEWS_PATH_HINTS = ("/news/", "/blog/", "/article/", "/articles/", "/press-release/", "/media/")
+
+def _host_is_official_portal(host: str) -> bool:
+    """True if the host looks like a real Indian government tender portal."""
+    h = (host or "").lower()
+    if not h:
+        return False
+    if h.endswith(".gov.in") or h.endswith(".nic.in"):
+        return True
+    return False
+
+def _url_looks_like_news(url: str, host: str) -> bool:
+    """True if the URL is probably a news/blog article, not a tender page."""
+    u = (url or "").lower()
+    h = (host or "").lower()
+    if any(hint in u for hint in NEWS_PATH_HINTS):
+        return True
+    # Known tender-news aggregator domains
+    for d in ("energetica-india.net", "mercomindia.com", "saurenergy.com",
+              "tendersinfo.com", "tender247.com", "bidassist.com"):
+        if d in h:
+            return True
+    return False
+
+def official_portal_url_for(portal_name: Optional[str]) -> str:
+    """Best-effort official bidding-portal homepage for a portal name."""
+    name = (portal_name or "").lower()
+    for key, url in OFFICIAL_PORTAL_URLS.items():
+        if key in name:
+            return url
+    return "https://eprocure.gov.in/eprocure/app"
+
 # Tracking and volatile parameters to discard
 TRACKING_PARAMS = {
     "utm_source",
@@ -142,7 +195,7 @@ def detect_portal_name(url: str) -> str:
         return host.replace("www.", "")
 
 
-def select_portal_url(original_url: Optional[str], canonical_url: Optional[str] = None) -> str:
+def select_portal_url(original_url: Optional[str], canonical_url: Optional[str] = None, portal_name: Optional[str] = None) -> str:
     """Selects and cleans the best official portal URL for outbound navigation.
     
     The button MUST open the tender's real official portal page.
@@ -191,6 +244,11 @@ def select_portal_url(original_url: Optional[str], canonical_url: Optional[str] 
                     candidate = target
                     parsed = urlparse(candidate)
                     host = parsed.netloc.lower()
+
+    # 4b. If the candidate is a news/blog article (not a real bidding portal),
+    # redirect to the official portal homepage instead of the news link.
+    if host and (_url_looks_like_news(candidate, host) or not _host_is_official_portal(host)):
+        return official_portal_url_for(portal_name)
 
     # 4. If candidate ended up malformed without valid host, fall back to canonical_url
     if not host and canonical_url:

@@ -1449,3 +1449,56 @@ input[type="checkbox"] {
   margin-top: 0.2rem;
 }
 
+
+/* ========================================================
+   UX Overhaul Polish (2026-10-10) — professional trust layer
+   Addresses: collapsed cards, deadline prominence, badge discipline
+   ======================================================== */
+
+/* Deadline strip — prominent, scannable */
+.deadline-strip {
+  display: flex; align-items: center; gap: 0.45rem;
+  margin: 0.6rem 0 0.15rem; padding: 0.45rem 0.7rem;
+  background: var(--bg-subtle); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); font-size: 0.82rem;
+}
+.deadline-strip .icon-sm { width: 15px; height: 15px; color: var(--text-muted); flex-shrink: 0; }
+.deadline-strip .deadline-label { color: var(--text-muted); }
+.deadline-strip strong { color: var(--text-main); }
+.deadline-strip.deadline-urgent { background: var(--danger-bg); border-color: var(--danger-border); }
+.deadline-strip.deadline-urgent strong { color: var(--danger); }
+.deadline-strip.deadline-soon { background: var(--warning-bg); border-color: var(--warning-border); }
+.deadline-strip.deadline-soon strong { color: var(--warning-text); }
+.deadline-strip.deadline-expired { opacity: 0.65; }
+
+/* Collapsible tender details */
+.tender-details { margin: 0.35rem 0 0; border-top: 1px dashed var(--border); padding-top: 0.35rem; }
+.tender-details-toggle {
+  cursor: pointer; font-size: 0.8rem; font-weight: 600; color: var(--primary);
+  padding: 0.35rem 0; list-style: none; display: flex; align-items: center; gap: 0.35rem;
+}
+.tender-details-toggle::-webkit-details-marker { display: none; }
+.tender-details-toggle::before { content: "+"; font-weight: 700; font-size: 0.95rem; }
+.tender-details[open] .tender-details-toggle::before { content: "\2212"; }
+.tender-details-toggle:hover { color: var(--primary-hover); }
+
+/* Card discipline — calmer, more professional */
+.tender-card { padding: 1rem 1.15rem; }
+.tender-card .tender-header { margin-bottom: 0.35rem; }
+.tender-title-link { font-size: 1.02rem; line-height: 1.4; font-weight: 650; }
+.tender-meta-tags { margin: 0.3rem 0 0; gap: 0.3rem; }
+
+/* Reduce badge noise: smaller, quieter */
+.badge { font-size: 0.68rem; padding: 0.14rem 0.5rem; letter-spacing: 0.01em; }
+
+/* Hero tightening — less text wall */
+.hero-tagline { max-width: 62ch; font-size: 0.95rem; line-height: 1.55; color: var(--text-sub); }
+.how-it-works-strip { gap: 0.6rem; }
+.how-step-desc { font-size: 0.78rem; }
+
+/* Verdict pills — single row, calmer */
+.verdict-pills-bar { gap: 0.4rem; }
+.verdict-pill { font-size: 0.78rem; padding: 0.4rem 0.75rem; }
+
+/* Trust signal: portal attribution, quieter */
+.portal-attribution { font-size: 0.72rem; color: var(--text-muted); }

@@ -16,7 +16,7 @@
       {% if tender.is_saved %}&starf; Saved{% else %}&star; Save Tender{% endif %}
     </button>
     <a 
-      href="{{ tender.portal_url or select_portal_url(tender.original_url, tender.canonical_url) }}" 
+      href="{{ tender.portal_url or select_portal_url(tender.original_url, tender.canonical_url, tender.portal_name) }}" 
       target="_blank" 
       rel="noopener noreferrer" 
       class="btn btn-primary btn-sm"
@@ -252,7 +252,7 @@
         {% if tender.is_saved %}&starf; Saved{% else %}&star; Save Tender{% endif %}
       </button>
       <a 
-        href="{{ tender.portal_url or select_portal_url(tender.original_url, tender.canonical_url) }}" 
+        href="{{ tender.portal_url or select_portal_url(tender.original_url, tender.canonical_url, tender.portal_name) }}" 
         target="_blank" 
         rel="noopener noreferrer" 
         class="btn btn-primary" 
