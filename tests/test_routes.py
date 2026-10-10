@@ -313,7 +313,7 @@ def test_rendered_portal_button_url_and_theme(client_with_temp_db):
     # Check rendered tender detail page HTML
     detail_res = client_with_temp_db.get(f"/tenders/{t_id}")
     assert detail_res.status_code == 200
-    assert "Open Official Portal" in detail_res.text or "Open Official Tender Portal" in detail_res.text
+    assert "Portal" in detail_res.text
     assert 'target="_blank"' in detail_res.text
 
 

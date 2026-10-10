@@ -46,6 +46,9 @@ def quality_gate(
     Returns {keep: bool, reason: str, tender_type: str}
     """
     settings = get_settings()
+    # Mock mode: keep everything, skip API call (for tests)
+    if getattr(settings, "MOCK_LLM", False):
+        return {"keep": True, "reason": "mock", "tender_type": "unknown", "is_news_article": False}
     api_key = (
         getattr(settings, "FIREWORKS_API_KEY", "")
         or getattr(settings, "LLM_API_KEY", "")
