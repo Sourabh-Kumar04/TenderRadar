@@ -11,6 +11,9 @@ from app.config import get_settings
 logger = logging.getLogger(__name__)
 
 
+from app.deep_dive import fetch_page_text
+
+
 def tender_chat(
     title: str,
     snippet: str,
@@ -18,6 +21,7 @@ def tender_chat(
     scope: str = "",
     history: List[Dict[str, str]] = None,
     user_message: str = "",
+    page_url: str = "",
 ) -> str:
     """Chat with AI scoped to one tender. Returns AI reply text."""
     settings = get_settings()
@@ -35,16 +39,29 @@ def tender_chat(
     if not api_key:
         return "AI chat is not configured (missing API key)."
 
+    # Fetch tender page for real details
+    page_text = fetch_page_text(page_url) if page_url else ""
+    has_page = bool(page_text and len(page_text) > 200)
+
     context = (
-        "You are a sharp procurement assistant. Rules:\n"
+        "You are a sharp procurement assistant with access to the tender page. Rules:\n"
         "- Answer ONLY about this specific tender. Redirect anything else.\n"
         "- Be CONCISE. Max 4-5 lines unless asked for detail.\n"
         "- Use bullet points, not paragraphs.\n"
         "- NEVER say things like 'the title is truncated', 'not in the provided record', 'as an AI'.\n"
         "- If info is missing, just omit it. Don't announce what's missing.\n"
-        "- For greetings, reply briefly and ask what they want to know.\n\n"
+        "- For greetings, reply briefly and ask what they want to know.\n"
+        "- NEVER say 'check the portal' or 'refer to the official document'.\n"
+        "- If the tender page was fetched, EXTRACT the actual EMD, deadline, eligibility from it.\n"
+        "- If not on the page, INFER from tender type and Indian govt norms (e.g. typical EMD % for CPPP works).\n"
+        "- Label inferences as 'Typically:' not as fact.\n\n"
         f"Tender: {title}\nPortal: {portal_name}\nDetails: {snippet}\n"
     )
+    if has_page:
+        context += f"\nFull tender page content:\n{page_text[:6000]}\n"
+    elif page_url:
+        context += "\n(Tender page could not be fetched - use snippet + domain knowledge.)\n"
+
     if scope:
         context += f"Scope: {scope}\n"
 

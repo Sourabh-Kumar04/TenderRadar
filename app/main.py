@@ -776,6 +776,7 @@ async def api_tender_chat(tender_id: int, payload: dict):
         scope=tender.get("scope_summary", ""),
         history=payload.get("history", []),
         user_message=payload.get("message", ""),
+        page_url=tender.get("original_url") or tender.get("canonical_url") or "",
     )
     return {"reply": reply}
 
