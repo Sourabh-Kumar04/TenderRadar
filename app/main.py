@@ -55,6 +55,8 @@ from app.bidder_profile import (
 )
 from app.bid_advisor import get_or_compute_verdict
 from app.deep_dive import deep_dive_analysis
+from app.tender_chat import tender_chat
+from app.verifier import verify_tender
 from app.scheduler import scan_manager
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
@@ -756,6 +758,44 @@ async def api_deep_dive(tender_id: int):
         scope=tender.get("scope_summary", ""),
     )
     return {"tender_id": tender_id, "deep_dive": result}
+
+
+@app.post("/api/tenders/{tender_id}/chat")
+async def api_tender_chat(tender_id: int, payload: dict):
+    """Chat with AI scoped to one tender."""
+    settings = get_settings()
+    tender = get_tender(settings.DATABASE_PATH, tender_id)
+    if not tender:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    reply = tender_chat(
+        title=tender.get("title", ""),
+        snippet=tender.get("snippet", ""),
+        portal_name=tender.get("portal_name", ""),
+        scope=tender.get("scope_summary", ""),
+        history=payload.get("history", []),
+        user_message=payload.get("message", ""),
+    )
+    return {"reply": reply}
+
+
+@app.get("/api/tenders/{tender_id}/verify")
+async def api_verify_tender(tender_id: int):
+    """Verify tender URL, find PDFs/documents (ground truth check)."""
+    settings = get_settings()
+    tender = get_tender(settings.DATABASE_PATH, tender_id)
+    if not tender:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    url = tender.get("original_url") or tender.get("canonical_url") or ""
+    return {"tender_id": tender_id, "verification": verify_tender(url)}
+
+
+@app.get("/auto-bid", response_class=HTMLResponse)
+async def autobid_page(request: Request):
+    """Coming soon page for Auto-Bid Agent."""
+    return templates.TemplateResponse(
+        request=request, name="autobid.html",
+        context={"active_page": "dashboard"},
+    )
 
 
 @app.get("/api/tenders/{tender_id}/verdict")

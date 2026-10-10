@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Auto-Bid Agent — Coming Soon | TenderRadar{% endblock %}
+{% block content %}
+<div class="autobid-page">
+  <div class="autobid-hero">
+    <div class="autobid-icon">
+      <svg viewBox="0 0 64 64" fill="none">
+        <rect x="8" y="16" width="48" height="36" rx="10" fill="#1a1a2e" stroke="#f26625" stroke-width="2.5"/>
+        <circle cx="24" cy="32" r="5" fill="#4ade80"/>
+        <circle cx="40" cy="32" r="5" fill="#4ade80"/>
+        <rect x="26" y="44" width="12" height="3" rx="1.5" fill="#71717a"/>
+        <line x1="32" y1="16" x2="32" y2="8" stroke="#f26625" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="32" cy="6" r="3" fill="#f26625"/>
+        <rect x="4" y="28" width="4" height="12" rx="2" fill="#52525b"/>
+        <rect x="56" y="28" width="4" height="12" rx="2" fill="#52525b"/>
+      </svg>
+    </div>
+    <span class="autobid-badge">Coming Soon</span>
+    <h1>Auto-Bid Agent</h1>
+    <p class="autobid-tagline">AI that prepares and submits bids automatically — only for tenders you explicitly approve.</p>
+  </div>
+  <div class="autobid-features">
+    <div class="autobid-feature">
+      <h3>You approve, it executes</h3>
+      <p>Nothing gets submitted without your explicit permission. You set the rules; the agent follows them.</p>
+    </div>
+    <div class="autobid-feature">
+      <h3>Documents auto-assembled</h3>
+      <p>Technical bids, financial bids, EMD challans, and certificates compiled from your profile.</p>
+    </div>
+    <div class="autobid-feature">
+      <h3>Deadline guardrails</h3>
+      <p>Submits with buffer time. Never misses a cutoff, never submits at the last second.</p>
+    </div>
+  </div>
+  <a href="/" class="btn btn-secondary">Back to dashboard</a>
+</div>
+{% endblock %}

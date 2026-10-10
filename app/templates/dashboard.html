@@ -7,10 +7,20 @@
  {% for t in tenders[:3] %}
  <div class="cmd-signal"><span class="vr-pill vr-{{ t.verdict|lower }}">{{ t.verdict }} {{ t.match_score }}%</span><span class="cmd-signal-title">{{ display_title(t.title, t.portal_name, t.snippet) }}</span></div>
  {% endfor %}
- <div class="cmd-side-note">Scored against your bidder profile</div></div><div class="cmd-tricolor"></div></div><!-- Key Performance Metrics / High-Density Stitch KPI Strip --><!-- Quick Verdict Filter Tabs (Stitch Compliant Pills) --><div class="autobid-banner">
+ <div class="cmd-side-note">Scored against your bidder profile</div></div><div class="cmd-tricolor"></div></div><!-- Key Performance Metrics / High-Density Stitch KPI Strip --><!-- Quick Verdict Filter Tabs (Stitch Compliant Pills) --><a href="/auto-bid" class="autobid-banner">
+  <span class="autobid-icon-sm">
+    <svg viewBox="0 0 64 64" fill="none" width="28" height="28">
+      <rect x="8" y="16" width="48" height="36" rx="10" fill="#1a1a2e" stroke="#f26625" stroke-width="3"/>
+      <circle cx="24" cy="32" r="5" fill="#4ade80"/>
+      <circle cx="40" cy="32" r="5" fill="#4ade80"/>
+      <line x1="32" y1="16" x2="32" y2="8" stroke="#f26625" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="32" cy="6" r="3.5" fill="#f26625"/>
+    </svg>
+  </span>
   <span class="autobid-badge">Coming Soon</span>
   <span class="autobid-text"><strong>Auto-Bid Agent</strong> &mdash; AI prepares and submits bids automatically, only for tenders you explicitly approve.</span>
-</div>
+  <span class="autobid-arrow">&rarr;</span>
+</a>
 <div class="queue-header"><div><h2 class="queue-title">Verdict Queue</h2><p class="queue-sub">Every tender scored against your bidder profile. Expand any row for the reasoning.</p></div></div><div class="verdict-pills-bar"><a href="/?search={{ search_query or '' }}&portal={{ selected_portal or '' }}&urgency={{ selected_urgency or '' }}&watchlist_id={{ selected_watchlist or '' }}&sort_order={{ sort_order or '' }}" 
  class="verdict-pill {% if not selected_verdict and not selected_urgency %}active{% endif %}">
  All Tenders <span class="pill-count">{{ stats.total_tenders }}</span></a><a href="/?verdict=BID&search={{ search_query or '' }}&portal={{ selected_portal or '' }}&watchlist_id={{ selected_watchlist or '' }}&sort_order=match_score" 
@@ -65,7 +75,7 @@
  {% elif tender.urgency_status == 'Expired' %}
  <span class="dl-badge dl-expired">Expired</span>
  {% endif %}
- <div class="tender-row-actions"><button type="button" class="row-btn {% if tender.is_saved %}is-saved{% endif %}" data-tender-id="{{ tender.id }}" onclick="toggleSaveTender(this, {{ tender.id }})" title="{% if tender.is_saved %}Remove from Saved{% else %}Bookmark{% endif %}">{% if tender.is_saved %}&starf;{% else %}&star;{% endif %}</button><a href="{{ select_portal_url(tender.original_url, tender.canonical_url, tender.portal_name) }}" target="_blank" rel="noopener noreferrer" class="row-btn row-btn-primary">Portal &nearr;</a><button type="button" class="row-btn deep-dive-btn" onclick="openDeepDive({{ tender.id }})">Deep Dive</button></div></div><details class="tender-row-details"><summary>Verdict reasoning &amp; scope</summary><div class="tender-row-detail-body">
+ <div class="tender-row-actions"><button type="button" class="row-btn {% if tender.is_saved %}is-saved{% endif %}" data-tender-id="{{ tender.id }}" onclick="toggleSaveTender(this, {{ tender.id }})" title="{% if tender.is_saved %}Remove from Saved{% else %}Bookmark{% endif %}">{% if tender.is_saved %}&starf;{% else %}&star;{% endif %}</button><a href="{{ select_portal_url(tender.original_url, tender.canonical_url, tender.portal_name) }}" target="_blank" rel="noopener noreferrer" class="row-btn row-btn-primary">Portal &nearr;</a><button type="button" class="row-btn chat-btn" onclick="openTenderChat({{ tender.id }}, this)" data-title="{{ display_title(tender.title, tender.portal_name, tender.snippet) | e }}">Chat</button></div></div><details class="tender-row-details"><summary>Verdict reasoning &amp; scope</summary><div class="tender-row-detail-body">
  {% if tender.advisor_verdict and tender.advisor_verdict.reasons %}
  <div class="rd-section"><div class="rd-label">Why this verdict</div><ul class="rd-reasons">{% for reason in tender.advisor_verdict.reasons %}<li>{{ reason }}</li>{% endfor %}</ul></div>
  {% endif %}
@@ -99,52 +109,62 @@
 {% endif %}
 {% endblock %}
 
-<!-- Deep Dive Modal -->
-<div id="deepDiveModal" class="dd-modal" style="display:none;">
-  <div class="dd-modal-content">
+<!-- Tender Chat Modal -->
+<div id="tenderChatModal" class="dd-modal" style="display:none;">
+  <div class="dd-modal-content chat-modal">
     <div class="dd-modal-header">
-      <h3>AI Deep Dive</h3>
-      <button class="dd-close" onclick="closeDeepDive()">&times;</button>
+      <div>
+        <h3>Chat about this tender</h3>
+        <div id="chatTenderTitle" class="chat-tender-title"></div>
+      </div>
+      <button class="dd-close" onclick="closeTenderChat()">&times;</button>
     </div>
-    <div id="ddBody" class="dd-modal-body">
-      <div class="dd-loading">Analyzing tender...</div>
+    <div id="chatMessages" class="chat-messages"></div>
+    <div class="chat-input-row">
+      <input id="chatInput" type="text" placeholder="Ask about deadline, EMD, eligibility..." onkeydown="if(event.key==='Enter')sendChatMsg()" />
+      <button onclick="sendChatMsg()" class="btn btn-primary btn-sm">Send</button>
     </div>
   </div>
 </div>
 <script>
-async function openDeepDive(tenderId) {
-  const modal = document.getElementById('deepDiveModal');
-  const body = document.getElementById('ddBody');
-  modal.style.display = 'flex';
-  body.innerHTML = '<div class="dd-loading">AI agent analyzing tender details...</div>';
-  try {
-    const r = await fetch(`/api/tenders/${tenderId}/deep-dive`, {method: 'POST'});
-    const data = await r.json();
-    const dd = data.deep_dive;
-    let html = `<div class="dd-summary">${dd.summary || ''}</div>`;
-    if (dd.key_details) {
-      html += '<div class="dd-section"><h4>Key Details</h4><dl class="dd-details">';
-      for (const [k, v] of Object.entries(dd.key_details)) {
-        html += `<dt>${k}</dt><dd>${v}</dd>`;
-      }
-      html += '</dl></div>';
-    }
-    if (dd.must_care && dd.must_care.length) {
-      html += '<div class="dd-section"><h4>Must Take Care</h4><ul class="dd-care">';
-      dd.must_care.forEach(c => html += `<li>${c}</li>`);
-      html += '</ul></div>';
-    }
-    if (dd.risks && dd.risks.length) {
-      html += '<div class="dd-section"><h4>Risks</h4><ul class="dd-risks">';
-      dd.risks.forEach(r => html += `<li>${r}</li>`);
-      html += '</ul></div>';
-    }
-    body.innerHTML = html;
-  } catch (e) {
-    body.innerHTML = '<div class="dd-error">Analysis failed. Try again.</div>';
-  }
+let chatTenderId = null, chatHistory = [];
+function openTenderChat(tenderId, btn) {
+  chatTenderId = tenderId; chatHistory = [];
+  document.getElementById('chatTenderTitle').textContent = btn.dataset.title || '';
+  document.getElementById('chatMessages').innerHTML = '';
+  document.getElementById('tenderChatModal').style.display = 'flex';
+  addChatMsg('assistant', 'Hi! Ask me anything about this tender — deadline, EMD, eligibility, risks.');
 }
-function closeDeepDive() {
-  document.getElementById('deepDiveModal').style.display = 'none';
+function closeTenderChat() {
+  document.getElementById('tenderChatModal').style.display = 'none';
+}
+function addChatMsg(role, text) {
+  const d = document.createElement('div');
+  d.className = 'chat-msg chat-' + role;
+  d.textContent = text;
+  document.getElementById('chatMessages').appendChild(d);
+  d.scrollIntoView({behavior: 'smooth', block: 'end'});
+}
+async function sendChatMsg() {
+  const inp = document.getElementById('chatInput');
+  const msg = inp.value.trim();
+  if (!msg) return;
+  inp.value = '';
+  addChatMsg('user', msg);
+  chatHistory.push({role: 'user', content: msg});
+  addChatMsg('assistant', 'Thinking...');
+  try {
+    const r = await fetch(`/api/tenders/${chatTenderId}/chat`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({message: msg, history: chatHistory.slice(0, -1)})
+    });
+    const data = await r.json();
+    const msgs = document.getElementById('chatMessages');
+    msgs.removeChild(msgs.lastChild);
+    addChatMsg('assistant', data.reply);
+    chatHistory.push({role: 'assistant', content: data.reply});
+  } catch (e) {
+    addChatMsg('assistant', 'Something went wrong. Try again.');
+  }
 }
 </script>
