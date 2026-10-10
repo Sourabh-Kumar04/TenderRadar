@@ -3,8 +3,9 @@
 {% block title %}{{ tender.title }} - TenderRadar{% endblock %}
 
 {% block content %}
+<div style="max-width: 860px; margin: 0 auto;">
 <!-- Breadcrumb + Actions -->
-<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.75rem;">
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 2.5rem;">
   <a href="/" style="font-size: 0.85rem; color: var(--text-muted); display: inline-flex; align-items: center; gap: 0.35rem;">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
     Verdict Queue
@@ -23,7 +24,7 @@
 </div>
 
 <!-- Title Block -->
-<div style="margin-bottom: 1.5rem;">
+<div style="margin-bottom: 2rem;">
   <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.6rem;">
     {% if tender.verdict == 'BID' %}
       <span class="vr-pill vr-bid">BID {{ tender.match_score }}%</span>
@@ -52,7 +53,7 @@
 </div>
 
 <!-- Key Facts Strip -->
-<div style="display: flex; gap: 2rem; flex-wrap: wrap; padding: 1.1rem 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: 1.75rem;">
+<div style="display: flex; gap: 2.75rem; flex-wrap: wrap; padding: 1.5rem 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: 2.5rem;">
   <div>
     <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 0.25rem;">Deadline</div>
     <div class="tnum" style="font-size: 1.05rem; font-weight: 700; color: {% if tender.deadline_date %}var(--primary){% else %}var(--text-muted){% endif %};">
@@ -77,14 +78,14 @@
 
 <!-- Verdict Reasoning -->
 {% if tender.advisor_verdict %}
-<div style="margin-bottom: 1.75rem;">
-  <h2 style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.75rem;">
+<div style="margin-bottom: 2.5rem;">
+  <h2 style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 1rem;">
     Why {{ tender.verdict }} — {{ tender.match_score }}% match
   </h2>
   {% if tender.advisor_verdict.reasons %}
   <ul style="list-style: none; padding: 0; margin: 0 0 1rem 0;">
     {% for reason in tender.advisor_verdict.reasons %}
-    <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-light); font-size: 0.92rem; line-height: 1.55; display: flex; gap: 0.6rem;">
+    <li style="padding: 0.75rem 0; border-bottom: 1px solid var(--border-light); font-size: 0.95rem; line-height: 1.7; display: flex; gap: 0.6rem;">
       <span style="color: var(--primary); flex-shrink: 0;">→</span>
       <span>{{ reason }}</span>
     </li>
@@ -104,23 +105,23 @@
 {% endif %}
 
 <!-- Scope / Eligibility / Takeaways -->
-<div style="display: grid; gap: 1.5rem; margin-bottom: 1.75rem;">
+<div style="display: grid; gap: 1.5rem; margin-bottom: 2.5rem;">
   <div>
-    <h2 style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.5rem;">Scope of Work</h2>
-    <p style="font-size: 0.95rem; line-height: 1.65; color: var(--text-sub); margin: 0;">
+    <h2 style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.75rem;">Scope of Work</h2>
+    <p style="font-size: 0.97rem; line-height: 1.8; color: var(--text-sub); margin: 0;">
       {{ tender.scope_summary or 'Detailed scope available in the official RFP document.' }}
     </p>
   </div>
   <div>
-    <h2 style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.5rem;">Eligibility</h2>
-    <p style="font-size: 0.95rem; line-height: 1.65; color: var(--text-sub); margin: 0;">
+    <h2 style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.75rem;">Eligibility</h2>
+    <p style="font-size: 0.97rem; line-height: 1.8; color: var(--text-sub); margin: 0;">
       {{ tender.eligibility or 'Open competitive tender for registered government vendors.' }}
     </p>
   </div>
   {% if tender.key_takeaways %}
   <div>
-    <h2 style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.5rem;">Bid Strategy</h2>
-    <p style="font-size: 0.95rem; line-height: 1.65; color: var(--warning-text); margin: 0;">
+    <h2 style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.75rem;">Bid Strategy</h2>
+    <p style="font-size: 0.97rem; line-height: 1.8; color: var(--warning-text); margin: 0;">
       {{ tender.key_takeaways }}
     </p>
   </div>
@@ -128,7 +129,7 @@
 </div>
 
 <!-- Notes -->
-<div style="margin-bottom: 1.75rem; padding-top: 1.25rem; border-top: 1px solid var(--border);">
+<div style="margin-bottom: 2.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border);">
   <h2 style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.6rem;">Private Notes</h2>
   <textarea id="notes-input-{{ tender.id }}" class="notes-input" placeholder="Bidding strategy, consortium partners, pre-bid questions..." style="width: 100%;">{{ tender.saved_notes }}</textarea>
   <div style="margin-top: 0.5rem;">
@@ -142,5 +143,6 @@
   <span style="font-weight: 600; color: var(--text-sub);">Source:</span> {{ tender.portal_name }}
   <span style="margin: 0 0.4rem;">·</span>
   <a href="{{ tender.portal_url or select_portal_url(tender.original_url, tender.canonical_url, tender.portal_name) }}" target="_blank" rel="noopener" style="color: var(--primary);">Open official notice &nearr;</a>
+</div>
 </div>
 {% endblock %}
