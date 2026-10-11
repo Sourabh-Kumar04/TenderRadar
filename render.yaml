@@ -1,1 +1,20 @@
-/mnt/d/01_Vibe_4_Hackathon/projects/trail-whistle/render.yaml
+services:
+  - type: web
+    name: trailwhistle
+    runtime: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    headers:
+      - path: /*
+        name: Cross-Origin-Opener-Policy
+        value: same-origin
+      - path: /*
+        name: Cross-Origin-Embedder-Policy
+        value: require-corp
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=3600
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

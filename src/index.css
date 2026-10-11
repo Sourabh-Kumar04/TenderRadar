@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    touch-action: manipulation;
+    background-color: #faf9f6;
+    color: #1a2b1e;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    color: #1a2b1e;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s ease-out forwards;
+}
+
+/* Big touch target utility */
+.touch-target-big {
+  min-height: 48px;
+  min-width: 48px;
+}
+
+/* High-contrast outdoor dark mode helpers */
+.sunlight-surface {
+  background-color: #061009 !important;
+  color: #f7faf8 !important;
+  border-color: #275f36 !important;
+}
+
+.sunlight-surface-subtle {
+  background-color: #0d1f14 !important;
+  color: #e5eee6 !important;
+  border-color: #346c43 !important;
+}
+
+.sunlight-text-high-contrast {
+  color: #ffffff !important;
+  font-weight: 700;
+}
+
+/* Light iNaturalist panel styling */
+.canopy-panel {
+  background: #ffffff;
+  border-color: #d4e2d4;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Clean light-theme scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f7f5f0;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #b8ceb9;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #7a9e7e;
+}
+

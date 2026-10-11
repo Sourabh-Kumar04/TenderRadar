@@ -1,1 +1,50 @@
-/mnt/d/01_Vibe_4_Hackathon/projects/trail-whistle/package.json
+{
+  "name": "trailwhistle",
+  "version": "0.1.0",
+  "description": "Offline-first bird-call identifier PWA powered by on-device open-weight AI",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "sync-onnx": "mkdir -p public/onnx && cp node_modules/onnxruntime-web/dist/ort.min.js public/onnx/ort.min.js && cp node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.wasm node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.mjs public/onnx/",
+    "build": "npm run sync-onnx && tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "birding",
+    "audio-classification",
+    "transformers-js",
+    "pwa",
+    "offline-first",
+    "open-source-ai",
+    "touch-grass",
+    "hacktoberfest"
+  ],
+  "author": "TrailWhistle Team",
+  "license": "MIT",
+  "dependencies": {
+    "@xenova/transformers": "^2.17.2",
+    "lucide-react": "^1.52.0",
+    "onnxruntime-web": "^1.30.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^26.6.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "autoprefixer": "^10.6.1",
+    "jsdom": "^30.1.2",
+    "postcss": "^8.5.29",
+    "puppeteer-core": "^25.13.0",
+    "tailwindcss": "^3.4.19",
+    "typescript": "^5.8.2",
+    "vite": "^8.3.3",
+    "vite-plugin-pwa": "^2.0.0",
+    "vitest": "^5.0.3"
+  }
+}

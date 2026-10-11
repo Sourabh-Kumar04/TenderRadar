@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <radialGradient id="sparrowBg" cx="45%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="#9cb094"/>
+      <stop offset="60%" stop-color="#556e50"/>
+      <stop offset="100%" stop-color="#2a3f26"/>
+    </radialGradient>
+    <linearGradient id="sparrowMantle" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#805333"/>
+      <stop offset="50%" stop-color="#5e381e"/>
+      <stop offset="100%" stop-color="#3d2110"/>
+    </linearGradient>
+    <linearGradient id="sparrowBreast" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fdfbf7"/>
+      <stop offset="100%" stop-color="#eae4d3"/>
+    </linearGradient>
+    <clipPath id="sparrowCircleClip">
+      <circle cx="50" cy="50" r="48"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#sparrowCircleClip)">
+    <!-- Natural grassland/brush background -->
+    <rect width="100" height="100" fill="url(#sparrowBg)"/>
+    <circle cx="25" cy="22" r="16" fill="#b8cbb0" opacity="0.25"/>
+    <circle cx="80" cy="72" r="15" fill="#b8cbb0" opacity="0.2"/>
+
+    <!-- Willow twig perch -->
+    <path d="M8 84 Q 48 76 96 82" stroke="#503d2b" stroke-width="5" stroke-linecap="round"/>
+    <path d="M8 84 Q 48 76 96 82" stroke="#71573e" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/>
+
+    <!-- Long rounded tail -->
+    <path d="M20 70 L 6 86 L 12 89 L 26 73 Z" fill="#4d321d"/>
+    <path d="M18 72 L 8 87" stroke="#331f10" stroke-width="1.5"/>
+
+    <!-- Wing with warm rufous and dark streaks -->
+    <path d="M26 48 C 21 58, 24 71, 35 75 C 41 73, 46 64, 43 51 C 38 46, 31 46, 26 48 Z" fill="url(#sparrowMantle)"/>
+    <path d="M28 52 L 23 66 M 32 50 L 28 69 M 36 53 L 33 71" stroke="#2b170a" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M26 56 L 24 64 M 30 54 L 28 66" stroke="#b08154" stroke-width="1.2" stroke-linecap="round"/>
+
+    <!-- Buff-white Breast & Belly with iconic Song Sparrow central spot & streaks -->
+    <path d="M36 42 C 44 42, 60 48, 64 60 C 66 70, 56 78, 42 76 C 34 74, 30 64, 36 42 Z" fill="url(#sparrowBreast)"/>
+    <!-- Iconic central breast spot -->
+    <ellipse cx="50" cy="56" rx="4.5" ry="3.5" fill="#4a2c16"/>
+    <!-- Radiating streaks -->
+    <path d="M44 50 L 41 57 M 47 48 L 45 54 M 53 49 L 55 54 M 57 51 L 60 58 M 46 61 L 43 68 M 51 61 L 51 69 M 55 60 L 57 67" stroke="#4a2c16" stroke-width="1.8" stroke-linecap="round"/>
+
+    <!-- Back mantle -->
+    <path d="M34 35 C 28 43, 26 54, 30 65 C 33 55, 34 46, 40 40 Z" fill="#664125"/>
+
+    <!-- Head: Grey eyebrow (supercilium) & crown with rufous stripes -->
+    <path d="M40 34 C 40 22, 52 18, 63 22 C 70 26, 70 35, 66 40 C 60 46, 46 44, 40 34 Z" fill="#8d9489"/>
+    <!-- Rufous Crown stripe -->
+    <path d="M43 23 C 49 19, 58 19, 64 22 C 61 24, 52 23, 44 26 Z" fill="#75391a"/>
+    <!-- Rufous Post-ocular eyestripe -->
+    <path d="M57 26 C 63 27, 68 31, 67 34 C 64 33, 60 29, 57 27 Z" fill="#75391a"/>
+    <!-- Moustachial stripe & malar stripe -->
+    <path d="M53 37 C 57 37, 63 39, 64 41" stroke="#522b15" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+
+    <!-- Dark eye with specularity -->
+    <circle cx="58" cy="27" r="3" fill="#151210"/>
+    <circle cx="57.2" cy="26.3" r="0.9" fill="#ffffff"/>
+
+    <!-- Conical grey/horn seed-eating bill -->
+    <polygon points="65,28 78,32 65,35" fill="#6c757d"/>
+    <polygon points="65,28 78,32 68,32" fill="#495057"/>
+    <line x1="65" y1="32" x2="77" y2="32" stroke="#212529" stroke-width="0.8"/>
+
+    <!-- Feet clutching branch -->
+    <path d="M36 76 L 35 81 M 40 76 L 40 81 M 43 75 L 44 80" stroke="#4a3728" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+  <circle cx="50" cy="50" r="48" fill="none" stroke="#688f6c" stroke-width="2.5" opacity="0.6"/>
+</svg>

@@ -1,1 +1,6 @@
-/mnt/d/01_Vibe_4_Hackathon/projects/trail-whistle/postcss.config.js
+export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}

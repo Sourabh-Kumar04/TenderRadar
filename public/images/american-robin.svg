@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <radialGradient id="robinBg" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#8fa382"/>
+      <stop offset="60%" stop-color="#4a6345"/>
+      <stop offset="100%" stop-color="#283a25"/>
+    </radialGradient>
+    <linearGradient id="robinBreast" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#df6238"/>
+      <stop offset="50%" stop-color="#c44520"/>
+      <stop offset="100%" stop-color="#9a3014"/>
+    </linearGradient>
+    <linearGradient id="robinBack" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#404649"/>
+      <stop offset="60%" stop-color="#2b3033"/>
+      <stop offset="100%" stop-color="#1c2022"/>
+    </linearGradient>
+    <clipPath id="circleClip">
+      <circle cx="50" cy="50" r="48"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#circleClip)">
+    <!-- Natural forest background bokeh -->
+    <rect width="100" height="100" fill="url(#robinBg)"/>
+    <circle cx="20" cy="25" r="14" fill="#a4ba96" opacity="0.25"/>
+    <circle cx="82" cy="70" r="18" fill="#a4ba96" opacity="0.2"/>
+
+    <!-- Pine branch perch -->
+    <path d="M5 82 Q 45 74 95 86" stroke="#4a3728" stroke-width="6" stroke-linecap="round"/>
+    <path d="M5 82 Q 45 74 95 86" stroke="#684e3a" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+
+    <!-- Tail -->
+    <path d="M22 68 L 8 85 L 14 88 L 29 72 Z" fill="#1e2224"/>
+
+    <!-- Wing -->
+    <path d="M26 48 C 22 58, 25 70, 36 74 C 42 72, 48 64, 45 52 C 40 46, 32 46, 26 48 Z" fill="#2d3336"/>
+    <path d="M28 54 C 27 62, 30 68, 38 71" stroke="#485257" stroke-width="1.5" fill="none"/>
+
+    <!-- Red-orange Breast & Belly -->
+    <path d="M38 42 C 46 42, 62 48, 66 60 C 68 70, 58 78, 44 76 C 36 74, 32 64, 38 42 Z" fill="url(#robinBreast)"/>
+    <!-- Lower white vent -->
+    <path d="M34 72 C 38 75, 44 76, 46 76 C 42 78, 36 77, 32 74 Z" fill="#e8ede4"/>
+
+    <!-- Back & Nape -->
+    <path d="M36 34 C 30 42, 28 54, 32 66 C 35 56, 36 46, 42 40 Z" fill="url(#robinBack)"/>
+
+    <!-- Head & Throat -->
+    <path d="M42 34 C 42 22, 54 18, 65 22 C 72 26, 72 35, 68 40 C 62 46, 48 44, 42 34 Z" fill="#222628"/>
+    <!-- Throat streaks -->
+    <path d="M60 36 L 56 42 M 63 38 L 59 44 M 57 34 L 53 40" stroke="#ffffff" stroke-width="1" opacity="0.75"/>
+
+    <!-- Eye & white eye-arcs -->
+    <path d="M56 24 C 58 22, 62 22, 64 24" stroke="#ffffff" stroke-width="1.2" fill="none"/>
+    <path d="M56 28 C 58 30, 62 30, 64 28" stroke="#ffffff" stroke-width="1.2" fill="none"/>
+    <circle cx="60" cy="26" r="3.2" fill="#0d1011"/>
+    <circle cx="59.2" cy="25.2" r="1" fill="#ffffff"/>
+
+    <!-- Yellow Beak -->
+    <polygon points="68,26 83,31 67,34" fill="#f5af19"/>
+    <polygon points="76,29 83,31 75,32" fill="#5a3d00"/>
+    <line x1="68" y1="30" x2="81" y2="31" stroke="#3d2a00" stroke-width="0.8"/>
+
+    <!-- Feet clasping branch -->
+    <path d="M38 76 L 37 81 M 42 76 L 42 81 M 45 75 L 46 80" stroke="#3a2e24" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+  <circle cx="50" cy="50" r="48" fill="none" stroke="#688f6c" stroke-width="2.5" opacity="0.6"/>
+</svg>
