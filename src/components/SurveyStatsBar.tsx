@@ -56,13 +56,20 @@ export const SurveyStatsBar: React.FC<SurveyStatsBarProps> = ({
           </div>
         </div>
 
-        {/* Column 3: Survey Time */}
-        <div className="p-4 sm:p-6 flex flex-col items-center justify-center text-center">
+        {/* Column 3: Total Field Time */}
+        <div
+          className="p-4 sm:p-6 flex flex-col items-center justify-center text-center group cursor-help"
+          title="Total Field Time (all sessions): Cumulative bioacoustic survey time across all sessions. Resets when starting a new survey transect."
+        >
           <div className="text-3xl sm:text-4xl lg:text-5xl font-bold font-sans tracking-tight leading-none text-white">
             {surveyTimeDisplay}
           </div>
-          <div className="text-xs uppercase tracking-wider font-semibold text-[#A89B8C] mt-2">
-            Survey Time
+          <div className="text-xs uppercase tracking-wider font-semibold text-[#A89B8C] mt-2 flex items-center justify-center gap-1">
+            <span>Total Field Time</span>
+            <span className="text-[10px] text-[#D8CDC2] font-mono font-normal">ⓘ</span>
+          </div>
+          <div className="text-[10px] text-[#A89B8C]/80 font-medium mt-0.5">
+            (all sessions)
           </div>
         </div>
 

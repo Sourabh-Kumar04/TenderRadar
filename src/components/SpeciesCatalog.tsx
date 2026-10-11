@@ -75,16 +75,28 @@ interface SpeciesCatalogProps {
   detectedChecklist: SurveyChecklistItem[];
   locationName: string;
   isSunlightMode: boolean;
+  searchQuery?: string;
+  onSearchChange?: (q: string) => void;
 }
 
 export const SpeciesCatalog: React.FC<SpeciesCatalogProps> = ({
   detectedChecklist,
   locationName,
-  isSunlightMode,
+  isSunlightMode: _isSunlightMode,
+  searchQuery: externalSearchQuery,
+  onSearchChange,
 }) => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [internalQuery, setInternalQuery] = useState('');
+  const currentSearchQuery = externalSearchQuery !== undefined ? externalSearchQuery : internalQuery;
   const [playingId, setPlayingId] = useState<string | null>(null);
   const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
+
+  const handleSearchChange = (val: string) => {
+    setInternalQuery(val);
+    if (onSearchChange) {
+      onSearchChange(val);
+    }
+  };
 
   const handleTogglePlay = (id: string, audioUrl: string) => {
     if (!audioPlayerRef.current) return;
@@ -100,11 +112,24 @@ export const SpeciesCatalog: React.FC<SpeciesCatalogProps> = ({
     }
   };
 
+  const q = currentSearchQuery.trim().toLowerCase();
   const filteredDemoSpecies = DEMO_SPECIES_LIST.filter(
     (s) =>
-      s.commonName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.scientificName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.family.toLowerCase().includes(searchQuery.toLowerCase())
+      !q ||
+      s.commonName.toLowerCase().includes(q) ||
+      s.scientificName.toLowerCase().includes(q) ||
+      s.family.toLowerCase().includes(q) ||
+      s.habitat.toLowerCase().includes(q) ||
+      s.description.toLowerCase().includes(q)
+  );
+
+  const filteredDetected = detectedChecklist.filter(
+    (item) =>
+      !q ||
+      item.commonName.toLowerCase().includes(q) ||
+      item.scientificName.toLowerCase().includes(q) ||
+      (item.family && item.family.toLowerCase().includes(q)) ||
+      (item.habitat && item.habitat.toLowerCase().includes(q))
   );
 
   return (
@@ -136,28 +161,28 @@ export const SpeciesCatalog: React.FC<SpeciesCatalogProps> = ({
           <input
             type="text"
             placeholder="Search species or family..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={currentSearchQuery}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="w-full pl-9 pr-3 py-2 text-xs rounded-full border border-[#E5E0D8] bg-[#F7F5F2] text-[#241B12] placeholder-[#736B63] outline-none focus:border-[#D73C30] transition-colors"
           />
         </div>
       </div>
 
       {/* Active Transect Detections (if any logged) */}
-      {detectedChecklist.length > 0 && (
+      {filteredDetected.length > 0 && (
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-serif font-bold text-lg text-[#241B12] flex items-center gap-2">
               <span>Active Transect Detections</span>
               <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-[#3D8B40]/10 text-[#3D8B40]">
-                {detectedChecklist.length} Logged
+                {filteredDetected.length} Logged
               </span>
             </h3>
             <span className="text-xs text-[#736B63]">Verified on-device BirdNET observations</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {detectedChecklist.map((item) => (
+            {filteredDetected.map((item) => (
               <div
                 key={item.speciesId}
                 className="p-5 rounded-xl border border-[#E5E0D8] bg-white shadow-sm flex flex-col justify-between"
@@ -201,7 +226,7 @@ export const SpeciesCatalog: React.FC<SpeciesCatalogProps> = ({
             <h3 className="font-serif font-bold text-lg sm:text-xl text-[#241B12] flex items-center gap-2">
               <span>Habitat Reference Examples</span>
               <span className="text-[11px] font-sans font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#D73C30]/10 text-[#D73C30] border border-[#D73C30]/20">
-                4 Example Species
+                {filteredDemoSpecies.length} of 4 Available
               </span>
             </h3>
             <p className="text-xs text-[#736B63] mt-0.5">
@@ -210,9 +235,25 @@ export const SpeciesCatalog: React.FC<SpeciesCatalogProps> = ({
           </div>
         </div>
 
-        {/* 4 Demo Species Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {filteredDemoSpecies.map((species) => {
+        {filteredDemoSpecies.length === 0 ? (
+          <div className="p-8 text-center rounded-xl border border-dashed border-[#E5E0D8] bg-[#FAF8F5]">
+            <p className="text-base font-serif font-bold text-[#241B12]">
+              No reference species found matching &ldquo;{currentSearchQuery}&rdquo;
+            </p>
+            <p className="text-xs text-[#736B63] mt-1.5">
+              Try searching by common name (e.g., &ldquo;Robin&rdquo;), scientific name, or family.
+            </p>
+            <button
+              type="button"
+              onClick={() => handleSearchChange('')}
+              className="mt-4 px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider bg-[#D73C30] text-white hover:bg-[#C23328] transition-colors cursor-pointer"
+            >
+              Clear Search Filter
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {filteredDemoSpecies.map((species) => {
             const isPlaying = playingId === species.id;
             return (
               <div
@@ -305,7 +346,8 @@ export const SpeciesCatalog: React.FC<SpeciesCatalogProps> = ({
             );
           })}
         </div>
-      </section>
+      )}
+    </section>
     </div>
   );
 };

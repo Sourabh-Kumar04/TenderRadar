@@ -92,14 +92,36 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* (2) CENTER: Pill Search Field */}
         <div className="flex-1 max-w-md hidden md:block">
-          <div className="relative flex items-center">
-            <Search className="w-4 h-4 text-[#B8ACA0] absolute left-3.5 pointer-events-none" />
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (onSearchChange) onSearchChange(localSearch);
+              onTabChange('species');
+            }}
+            className="relative flex items-center"
+          >
+            <button
+              type="submit"
+              className="absolute left-3 text-[#B8ACA0] hover:text-white transition-colors cursor-pointer p-0.5 focus:outline-none"
+              title="Filter species catalog"
+              aria-label="Filter species catalog"
+            >
+              <Search className="w-4 h-4 text-[#B8ACA0] hover:text-white" />
+            </button>
             <input
               type="text"
               value={localSearch}
               onChange={handleSearchInput}
-              placeholder="Search species, calls, or surveys..."
-              className="w-full bg-[#36291E] hover:bg-[#3D2E22] focus:bg-[#443326] text-white placeholder-[#B8ACA0] text-sm rounded-full pl-10 pr-4 py-2 border border-[#4E3A2B] focus:border-[#D73C30] outline-none transition-all shadow-inner"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  if (onSearchChange) onSearchChange(localSearch);
+                  onTabChange('species');
+                }
+              }}
+              placeholder="Search species, calls, or families... (Press Enter)"
+              aria-label="Search species catalog"
+              className="w-full bg-[#36291E] hover:bg-[#3D2E22] focus:bg-[#443326] text-white placeholder-[#B8ACA0] text-sm rounded-full pl-10 pr-9 py-2 border border-[#4E3A2B] focus:border-[#D73C30] outline-none transition-all shadow-inner"
             />
             {localSearch && (
               <button
@@ -114,7 +136,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <X className="w-3.5 h-3.5" />
               </button>
             )}
-          </div>
+          </form>
         </div>
 
         {/* (3) RIGHT: Text Nav Links (Survey, Species, Journal) + Coral-Red Pill Buttons (#D73C30) */}

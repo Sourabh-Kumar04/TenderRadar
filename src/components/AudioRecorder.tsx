@@ -317,8 +317,8 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
           </div>
         )}
 
-        {/* Quick Field Simulation Pills (dev testing only, hidden on main hero) */}
-        {!embeddedInHero && onSelectSample && (
+        {/* Quick Field Simulation Pills */}
+        {onSelectSample && (
           <div
             className={`w-full pt-4 mt-2 border-t ${
               isSunlightMode

@@ -7,6 +7,7 @@ interface PredictionCardProps {
   onConfirm: (prediction: PredictionResult) => void;
   onOpenEditModal: (prediction: PredictionResult) => void;
   isSunlightMode: boolean;
+  embeddedInHero?: boolean;
 }
 
 export const PredictionCard: React.FC<PredictionCardProps> = ({
@@ -14,6 +15,7 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
   onConfirm,
   onOpenEditModal,
   isSunlightMode,
+  embeddedInHero: _embeddedInHero = false,
 }) => {
   if (!predictions || predictions.length === 0) return null;
 

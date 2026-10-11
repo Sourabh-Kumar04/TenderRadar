@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { ModelDownloadBanner } from './components/ModelDownloadBanner';
 import { AudioRecorder } from './components/AudioRecorder';
@@ -526,6 +526,7 @@ export const App: React.FC = () => {
                       checklist={surveyChecklist}
                       locationName={activeSurvey.locationName}
                       isSunlightMode={isSunlightMode}
+                      onRunSampleDemo={() => handleSelectSample(SAMPLE_AUDIO_LIST[0])}
                     />
                   </div>
                   <div className="lg:col-span-4">
@@ -566,6 +567,8 @@ export const App: React.FC = () => {
                   detectedChecklist={surveyChecklist}
                   locationName={activeSurvey.locationName}
                   isSunlightMode={isSunlightMode}
+                  searchQuery={searchQuery}
+                  onSearchChange={setSearchQuery}
                 />
               </div>
             </section>

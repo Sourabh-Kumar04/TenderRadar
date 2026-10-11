@@ -318,7 +318,8 @@ describe('UI Components', () => {
     expect(screen.getAllByText('4')[0]).toBeInTheDocument();
     expect(screen.getByText('Recordings')).toBeInTheDocument();
     expect(screen.getByText('9')).toBeInTheDocument();
-    expect(screen.getByText('Survey Time')).toBeInTheDocument();
+    expect(screen.getByText('Total Field Time')).toBeInTheDocument();
+    expect(screen.getByText('(all sessions)')).toBeInTheDocument();
     expect(screen.getByText('Sites')).toBeInTheDocument();
     expect(screen.getByText(/±8m/)).toBeInTheDocument();
   });
