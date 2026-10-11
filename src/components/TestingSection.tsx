@@ -15,7 +15,7 @@ export const TestingSection: React.FC<TestingSectionProps> = ({
   isProcessing,
   isSunlightMode: _isSunlightMode,
 }) => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className="rounded-xl border border-[#E5E0D8] bg-white text-[#241B12] shadow-sm transition-all overflow-hidden">

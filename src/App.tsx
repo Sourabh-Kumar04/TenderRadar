@@ -297,7 +297,7 @@ export const App: React.FC = () => {
 
     setJournalEntries(getJournalEntries());
     setPredictions(null);
-    showToast(`Saved "${saved.commonName}" to Field Journal!`);
+    showToast(`Saved "${saved.commonName}" to Field Log!`);
   };
 
   // Delete journal entry
@@ -313,7 +313,7 @@ export const App: React.FC = () => {
     setJournalEntries([]);
     clearSurveyTimeline();
     setSurveyTimeline([]);
-    showToast('Field journal cleared.');
+    showToast('Field Log cleared.');
   };
 
   // Update active survey metadata
@@ -575,10 +575,10 @@ export const App: React.FC = () => {
           </div>
         )}
 
-        {/* VIEW 3: Journal Tab (Field Survey Log) */}
+        {/* VIEW 3: Field Log */}
         {activeTab === 'journal' && (
           <div className="animate-fade-in">
-            {/* Mini Hero for Journal */}
+            {/* Mini Hero for Field Log */}
             <section
               className="w-full relative py-12 sm:py-16 px-4 sm:px-6 lg:px-8 text-white overflow-hidden bg-cover bg-center"
               style={{
@@ -605,7 +605,7 @@ export const App: React.FC = () => {
                   onGoToIdentify={() => setActiveTab('identify')}
                   onJournalImported={(count) => {
                     setJournalEntries(getJournalEntries());
-                    showToast(`Restored ${count} observation(s) to Field Journal!`);
+                    showToast(`Restored ${count} observation(s) to Field Log!`);
                   }}
                 />
               </div>
@@ -706,7 +706,7 @@ export const App: React.FC = () => {
                     onClick={() => setActiveTab('journal')}
                     className="hover:text-white transition-colors cursor-pointer text-left"
                   >
-                    Field Observations Journal
+                    Field Log
                   </button>
                 </li>
                 <li>

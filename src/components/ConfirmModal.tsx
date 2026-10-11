@@ -301,7 +301,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
             className="flex-1 py-3 px-5 rounded-full font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md bg-[#3D8B40] hover:bg-[#2E7D32] text-white transition-all cursor-pointer"
           >
             <Check className="w-4 h-4 text-white" />
-            <span>Save to Journal</span>
+            <span>Save to Field Log</span>
           </button>
         </div>
       </div>

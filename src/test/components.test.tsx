@@ -33,10 +33,10 @@ describe('UI Components', () => {
     expect(screen.getByText('Offline')).toBeInTheDocument();
     expect(screen.getAllByText('Survey')[0]).toBeInTheDocument();
     expect(screen.getAllByText('Species')[0]).toBeInTheDocument();
-    expect(screen.getAllByText('Journal')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Field Log')[0]).toBeInTheDocument();
     expect(screen.queryByText('Touch Grass')).not.toBeInTheDocument();
 
-    const journalTab = screen.getAllByText('Journal')[0];
+    const journalTab = screen.getAllByText('Field Log')[0];
     fireEvent.click(journalTab);
     expect(onTabChange).toHaveBeenCalledWith('journal');
 

@@ -139,7 +139,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </form>
         </div>
 
-        {/* (3) RIGHT: Text Nav Links (Survey, Species, Journal) + Coral-Red Pill Buttons (#D73C30) */}
+        {/* (3) RIGHT: Text Nav Links (Survey, Species, Field Log) + Coral-Red Pill Buttons (#D73C30) */}
         <div className="flex items-center space-x-2 sm:space-x-4 shrink-0">
           <nav className="flex items-center space-x-1 sm:space-x-3 font-sans">
             {/* Nav Item: Survey */}
@@ -168,7 +168,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               Species
             </button>
 
-            {/* Nav Item: Journal */}
+            {/* Nav Item: Field Log */}
             <button
               type="button"
               onClick={() => onTabChange('journal')}
@@ -178,7 +178,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   : 'text-[#E7E2DC] hover:text-white hover:bg-[#36291E]/60'
               }`}
             >
-              <span>Journal</span>
+              <span>Field Log</span>
               {journalCount > 0 && (
                 <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-[#D73C30] text-white">
                   {journalCount}

@@ -88,7 +88,7 @@ export const JournalList: React.FC<JournalListProps> = ({
 
   const handleExportCsv = () => {
     if (entries.length === 0) {
-      alert('Your field journal is empty. Make an observation first!');
+      alert('Your Field Log is empty. Make an observation first!');
       return;
     }
     exportJournalToCsvFile(filteredEntries.length > 0 ? filteredEntries : entries);
@@ -96,7 +96,7 @@ export const JournalList: React.FC<JournalListProps> = ({
 
   const handleExportJson = () => {
     if (entries.length === 0) {
-      alert('Your field journal is empty. Make an observation first!');
+      alert('Your Field Log is empty. Make an observation first!');
       return;
     }
     exportJournalToJsonFile(entries);
@@ -132,7 +132,7 @@ export const JournalList: React.FC<JournalListProps> = ({
   };
 
   const handleClearAll = () => {
-    if (confirm('Are you sure you want to clear your local field journal? This cannot be undone.')) {
+    if (confirm('Are you sure you want to clear your local Field Log? This cannot be undone.')) {
       onClearJournal();
     }
   };
@@ -167,7 +167,7 @@ export const JournalList: React.FC<JournalListProps> = ({
               <div>
                 {/* Large Serif Heading in Sentence Case */}
                 <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#241B12] tracking-tight">
-                  Field survey log
+                  Field Log
                 </h2>
                 <p className="text-xs sm:text-sm text-[#736B63] mt-0.5">
                   {entries.length} {entries.length === 1 ? 'observation' : 'observations'} across {locationGroups.length} {locationGroups.length === 1 ? 'survey site' : 'survey sites'}
@@ -235,7 +235,7 @@ export const JournalList: React.FC<JournalListProps> = ({
                 type="button"
                 onClick={handleClearAll}
                 className="p-2.5 rounded-full border border-red-200 text-red-700 hover:bg-red-50 transition-all cursor-pointer"
-                title="Clear all journal records"
+                title="Clear all Field Log records"
                 aria-label="Clear all observations"
               >
                 <Trash2 className="w-4 h-4" />
