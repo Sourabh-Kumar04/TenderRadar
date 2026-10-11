@@ -10,6 +10,18 @@
     <meta name="apple-mobile-web-app-title" content="TrailWhistle" />
     <meta name="description" content="Offline-first Area Biodiversity Survey Tool powered by on-device BirdNET v2.4 (6,522 species). Zero cloud, zero cellular signal needed." />
     <title>TrailWhistle — Offline Area Biodiversity Survey & Bird Call Identifier</title>
+    <script>
+      (function() {
+        try {
+          var params = new URLSearchParams(window.location.search);
+          var isSunlight = params.get('mode') === 'sunlight' || localStorage.getItem('trailwhistle_sunlight_mode') === 'true';
+          if (isSunlight) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.style.backgroundColor = '#061009';
+          }
+        } catch(e) {}
+      })();
+    </script>
   </head>
   <body class="bg-[#faf9f6] text-[#1a2b1e] antialiased select-none min-h-screen">
     <div id="root"></div>

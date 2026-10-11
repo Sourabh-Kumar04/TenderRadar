@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <radialGradient id="owlBg" cx="50%" cy="40%" r="65%">
+      <stop offset="0%" stop-color="#3a4856"/>
+      <stop offset="60%" stop-color="#1e2730"/>
+      <stop offset="100%" stop-color="#0f151b"/>
+    </radialGradient>
+    <linearGradient id="owlWings" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#cf9e57"/>
+      <stop offset="50%" stop-color="#a67433"/>
+      <stop offset="100%" stop-color="#694318"/>
+    </linearGradient>
+    <clipPath id="owlClip">
+      <circle cx="50" cy="50" r="48"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#owlClip)">
+    <rect width="100" height="100" fill="url(#owlBg)"/>
+    <circle cx="20" cy="25" r="14" fill="#62778c" opacity="0.2"/>
+    <circle cx="82" cy="70" r="18" fill="#62778c" opacity="0.15"/>
+
+    <!-- Perch beam / barn rafter -->
+    <path d="M5 82 L 95 82" stroke="#423326" stroke-width="6" stroke-linecap="round"/>
+
+    <!-- Body & Mantle -->
+    <path d="M30 46 C 26 62, 32 78, 48 80 C 64 78, 70 62, 66 46 Z" fill="url(#owlWings)"/>
+    <!-- Speckled feather flecks -->
+    <circle cx="44" cy="62" r="1.5" fill="#ffffff" opacity="0.7"/>
+    <circle cx="52" cy="66" r="1.5" fill="#ffffff" opacity="0.7"/>
+    <circle cx="48" cy="72" r="1.5" fill="#ffffff" opacity="0.7"/>
+    <circle cx="58" cy="60" r="1.5" fill="#ffffff" opacity="0.7"/>
+
+    <!-- Heart-shaped White Facial Disc -->
+    <path d="M50 26 C 42 20, 32 24, 32 36 C 32 46, 42 54, 50 58 C 58 54, 68 46, 68 36 C 68 24, 58 20, 50 26 Z" fill="#f4ede2"/>
+    <path d="M50 28 C 44 23, 35 26, 35 36 C 35 44, 43 51, 50 55 C 57 51, 65 44, 65 36 C 65 26, 56 23, 50 28 Z" fill="#fffcf7"/>
+    <path d="M50 26 C 42 20, 32 24, 32 36 C 32 46, 42 54, 50 58 C 58 54, 68 46, 68 36 C 68 24, 58 20, 50 26 Z" stroke="#a67433" stroke-width="1.2" fill="none" opacity="0.8"/>
+
+    <!-- Eyes (Forward-facing dark hypnotic eyes) -->
+    <circle cx="43" cy="36" r="3.5" fill="#18130e"/>
+    <circle cx="44" cy="35" r="1" fill="#ffffff"/>
+
+    <circle cx="57" cy="36" r="3.5" fill="#18130e"/>
+    <circle cx="58" cy="35" r="1" fill="#ffffff"/>
+
+    <!-- Pale hooked beak -->
+    <path d="M49 38 L 51 38 L 50 45 Z" fill="#d9c39e"/>
+  </g>
+
+  <circle cx="50" cy="50" r="48" fill="none" stroke="#cf9e57" stroke-width="2.5" opacity="0.6"/>
+</svg>

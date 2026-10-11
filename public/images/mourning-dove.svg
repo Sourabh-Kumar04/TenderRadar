@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <radialGradient id="doveBg" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#b0aba1"/>
+      <stop offset="60%" stop-color="#736d64"/>
+      <stop offset="100%" stop-color="#3d3831"/>
+    </radialGradient>
+    <linearGradient id="doveBody" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#d4cdc3"/>
+      <stop offset="50%" stop-color="#a89f92"/>
+      <stop offset="100%" stop-color="#786e61"/>
+    </linearGradient>
+    <clipPath id="doveClip">
+      <circle cx="50" cy="50" r="48"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#doveClip)">
+    <rect width="100" height="100" fill="url(#doveBg)"/>
+    <circle cx="20" cy="25" r="14" fill="#c7c0b5" opacity="0.25"/>
+    <circle cx="82" cy="70" r="18" fill="#c7c0b5" opacity="0.2"/>
+
+    <!-- Wire / perch -->
+    <path d="M5 80 L 95 80" stroke="#36322b" stroke-width="4" stroke-linecap="round"/>
+
+    <!-- Tail -->
+    <path d="M25 65 L 10 88 L 16 90 L 32 70 Z" fill="#61584c"/>
+
+    <!-- Wing with dark spots -->
+    <path d="M28 46 C 24 56, 27 68, 40 72 C 48 70, 52 60, 48 48 C 42 42, 34 42, 28 46 Z" fill="url(#doveBody)"/>
+    <circle cx="34" cy="58" r="2" fill="#2b261f"/>
+    <circle cx="39" cy="62" r="2.2" fill="#2b261f"/>
+    <circle cx="43" cy="56" r="1.8" fill="#2b261f"/>
+
+    <!-- Head & Neck with iridescent sheen hint -->
+    <path d="M44 48 C 48 38, 54 26, 66 26 C 76 26, 80 34, 76 44 C 72 52, 60 58, 48 58 Z" fill="#b8afa2"/>
+    <path d="M58 34 C 62 34, 65 37, 63 42 C 60 44, 56 42, 56 38 Z" fill="#cca6b5" opacity="0.5"/>
+
+    <!-- Eye (large dark pupil with pale eye ring) -->
+    <circle cx="68" cy="32" r="4.5" fill="#8ca0b8" opacity="0.6"/>
+    <circle cx="68" cy="32" r="3" fill="#1f1b17"/>
+    <circle cx="69" cy="31" r="1" fill="#ffffff"/>
+
+    <!-- Bill -->
+    <path d="M78 34 L 89 36 L 78 39 Z" fill="#3b352d"/>
+  </g>
+
+  <circle cx="50" cy="50" r="48" fill="none" stroke="#a89f92" stroke-width="2.5" opacity="0.6"/>
+</svg>

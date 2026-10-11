@@ -11,8 +11,15 @@
     background-color: #faf9f6;
     color: #1a2b1e;
   }
+  html.dark body {
+    background-color: #061009 !important;
+    color: #f7faf8 !important;
+  }
   h1, h2, h3, h4, h5, h6 {
     color: #1a2b1e;
+  }
+  html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark h5, html.dark h6 {
+    color: #ffffff !important;
   }
 }
 

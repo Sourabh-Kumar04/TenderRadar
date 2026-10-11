@@ -82,87 +82,130 @@ export const AreaSpeciesChecklist: React.FC<AreaSpeciesChecklistProps> = ({
 
       {/* Checklist Content */}
       {checklist.length === 0 ? (
-        <div className={`flex-1 flex flex-col items-center justify-center p-6 sm:p-8 text-center rounded-xl border transition-all ${
-          isSunlightMode 
-            ? 'bg-[#06120a] border-emerald-900/60 text-emerald-100' 
-            : 'bg-[#faf9f6] border-[#d4e2d4] text-[#1a2b1e]'
-        }`}>
-          {/* Animated Sonar Radar Visualizer */}
-          <div className="relative mb-4 flex items-center justify-center">
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center shadow-sm transition-transform ${
-              isSunlightMode 
-                ? 'bg-emerald-800 text-white border border-emerald-500 shadow-emerald-950/40' 
-                : 'bg-[#eef4ee] text-[#2d5a37] border border-[#d4e2d4]'
+        <div className="space-y-3">
+          <div className={`p-3 rounded-xl border flex items-center justify-between gap-2 ${
+            isSunlightMode ? 'bg-[#06120a] border-emerald-900/60' : 'bg-[#faf9f6] border-[#d4e2d4]'
+          }`}>
+            <div className="flex items-center gap-2">
+              <span className={`w-2 h-2 rounded-full ${isSunlightMode ? 'bg-emerald-400' : 'bg-[#7a9e7e]'}`} />
+              <div>
+                <h3 className={`text-xs font-bold ${isSunlightMode ? 'text-white' : 'text-[#1a2b1e]'}`}>
+                  Census Station Active
+                </h3>
+                <p className={`text-[11px] ${isSunlightMode ? 'text-emerald-300/80' : 'text-[#4a5d4e]'}`}>
+                  Habitat Reference Checklist ({locationName})
+                </p>
+              </div>
+            </div>
+            <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
+              isSunlightMode ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : 'bg-[#eef4ee] text-[#2d5a37] border border-[#d4e2d4]'
             }`}>
-              <Bird className="w-8 h-8" />
-            </div>
-            <div className={`absolute -inset-2 rounded-full border animate-ping opacity-30 pointer-events-none ${
-              isSunlightMode ? 'border-emerald-400' : 'border-[#7a9e7e]'
-            }`} />
-            <div className={`absolute -inset-4 rounded-full border pointer-events-none ${
-              isSunlightMode ? 'border-emerald-500/20' : 'border-[#d4e2d4]'
-            }`} />
+              4 Reference Examples
+            </span>
           </div>
 
-          <h3 className={`font-extrabold text-base mb-1 tracking-tight font-sans ${
-            isSunlightMode ? 'text-white' : 'text-[#1a2b1e]'
-          }`}>
-            Census Station Active
-          </h3>
-          <p className={`text-xs max-w-sm mb-5 leading-relaxed ${
-            isSunlightMode ? 'text-emerald-300/80 font-medium' : 'text-[#4a5d4e]'
-          }`}>
-            Waiting for audio captures in <strong className={isSunlightMode ? 'text-white' : 'text-[#1a2b1e]'}>{locationName}</strong>. Tap Record or test with a field sample to populate this live area checklist.
-          </p>
+          <div className="space-y-2.5 overflow-y-auto max-h-[460px] pr-1">
+            {[
+              {
+                id: 'american-robin',
+                commonName: 'American Robin',
+                scientificName: 'Turdus migratorius',
+                family: 'Turdidae (Thrushes)',
+                iucnStatus: 'LC',
+                image: '/images/american-robin.svg',
+                callType: 'Melodic Caroled Whistles (2.5 – 4.5 kHz)',
+              },
+              {
+                id: 'song-sparrow',
+                commonName: 'Song Sparrow',
+                scientificName: 'Melospiza melodia',
+                family: 'Passerellidae (Sparrows)',
+                iucnStatus: 'LC',
+                image: '/images/song-sparrow.svg',
+                callType: 'Crisp Trills & Chants (3.5 – 6.0 kHz)',
+              },
+              {
+                id: 'mourning-dove',
+                commonName: 'Mourning Dove',
+                scientificName: 'Zenaida macroura',
+                family: 'Columbidae (Doves)',
+                iucnStatus: 'LC',
+                image: '/images/mourning-dove.svg',
+                callType: 'Soft Low Cooing (400 – 700 Hz)',
+              },
+              {
+                id: 'barn-owl',
+                commonName: 'Barn Owl',
+                scientificName: 'Tyto alba',
+                family: 'Tytonidae (Barn Owls)',
+                iucnStatus: 'LC',
+                image: '/images/barn-owl.svg',
+                callType: 'Raspy Hissing Shriek (2.0 – 5.0 kHz)',
+              },
+            ].map((bird) => (
+              <div
+                key={bird.id}
+                className={`p-3 sm:p-3.5 rounded-xl border transition-all ${
+                  isSunlightMode
+                    ? 'bg-[#06120a] border-emerald-900/60 hover:border-emerald-700 text-white'
+                    : 'bg-[#faf9f6] border-[#d4e2d4] hover:border-[#7a9e7e] text-[#1a2b1e]'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <img
+                      src={bird.image}
+                      alt={bird.commonName}
+                      className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full object-cover shrink-0 border-2 shadow-xs ${
+                        isSunlightMode ? 'border-emerald-700 bg-emerald-950' : 'border-[#d4e2d4] bg-[#eef4ee]'
+                      }`}
+                    />
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <h4 className={`font-extrabold text-sm sm:text-base tracking-tight font-sans truncate ${
+                          isSunlightMode ? 'text-white' : 'text-[#1a2b1e]'
+                        }`}>
+                          {bird.commonName}
+                        </h4>
+                        <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full ${
+                          isSunlightMode ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : 'bg-[#eef4ee] text-[#2d5a37] border border-[#d4e2d4]'
+                        }`}>
+                          Example
+                        </span>
+                        <span className={`text-[9px] font-extrabold px-1.5 py-0.2 rounded ${
+                          isSunlightMode ? 'bg-emerald-900/70 text-emerald-300' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                        }`}>
+                          {bird.iucnStatus}
+                        </span>
+                      </div>
+                      <p className={`text-xs italic truncate ${isSunlightMode ? 'text-emerald-300/80' : 'text-[#4a5d4e]'}`}>
+                        {bird.scientificName} • <span className="not-italic font-medium">{bird.family}</span>
+                      </p>
+                      <p className={`text-[10px] truncate mt-0.5 ${isSunlightMode ? 'text-emerald-400/60' : 'text-[#4a5d4e]/80'}`}>
+                        {bird.callType}
+                      </p>
+                    </div>
+                  </div>
 
-          {/* Expected Taxa in Habitat Preview */}
-          <div className={`w-full max-w-md p-3 rounded-xl border mb-5 text-left ${
-            isSunlightMode ? 'bg-[#040e07] border-emerald-900/60' : 'bg-white border-[#d4e2d4]'
-          }`}>
-            <div className="flex items-center justify-between text-xs font-semibold mb-2.5">
-              <span className={isSunlightMode ? 'text-emerald-300' : 'text-[#4a5d4e]'}>
-                Expected bioacoustic signatures:
-              </span>
-              <span className={`text-[11px] font-normal ${isSunlightMode ? 'text-emerald-400/80' : 'text-[#4a5d4e]'}`}>
-                4 common taxa
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {[
-                { name: 'Turdidae (Thrushes)', status: 'LC' },
-                { name: 'Passerellidae (Sparrows)', status: 'LC' },
-                { name: 'Columbidae (Doves)', status: 'LC' },
-                { name: 'Tytonidae (Owls)', status: 'LC' },
-              ].map((taxa, i) => (
-                <span
-                  key={i}
-                  className={`text-[10px] font-semibold px-2 py-0.5 rounded-md flex items-center gap-1 ${
-                    isSunlightMode 
-                      ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' 
-                      : 'bg-[#f4f7f4] text-[#2d5a37] border border-[#d4e2d4]'
-                  }`}
-                >
-                  <span className={`w-1.5 h-1.5 rounded-full ${isSunlightMode ? 'bg-emerald-400' : 'bg-[#7a9e7e]'}`} />
-                  <span>{taxa.name}</span>
-                </span>
-              ))}
-            </div>
+                  {onRunSampleDemo && (
+                    <button
+                      type="button"
+                      onClick={onRunSampleDemo}
+                      className={`px-3 py-1.5 min-h-[36px] rounded-lg text-xs font-bold shrink-0 flex items-center gap-1.5 transition-all cursor-pointer ${
+                        isSunlightMode
+                          ? 'bg-emerald-800 hover:bg-emerald-700 text-white border border-emerald-600'
+                          : 'bg-[#7a9e7e] hover:bg-[#688f6c] text-white shadow-xs'
+                      }`}
+                      title={`Simulate audio sample for ${bird.commonName}`}
+                    >
+                      <Sparkles className="w-3 h-3" />
+                      <span>{bird.id === 'american-robin' ? 'Simulate American Robin Call' : 'Simulate Call'}</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
-
-          {onRunSampleDemo && (
-            <button
-              type="button"
-              onClick={onRunSampleDemo}
-              className={`py-2.5 px-5 rounded-xl text-xs font-bold flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer hover:scale-105 ${
-                isSunlightMode
-                  ? 'bg-emerald-700 hover:bg-emerald-600 text-white border border-emerald-500 shadow-md font-bold'
-                  : 'bg-[#7a9e7e] hover:bg-[#688f6c] text-white shadow-sm font-bold'
-              }`}
-            >
-              <Sparkles className="w-3.5 h-3.5 text-white" />
-              <span>Simulate American Robin Call</span>
-            </button>
-          )}
         </div>
       ) : (
         <div className="space-y-3 overflow-y-auto max-h-[480px] pr-1">
