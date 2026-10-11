@@ -14,10 +14,17 @@
     line-height: 1.6;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
+  html.dark body {
+    background-color: #061009 !important;
+    color: #f7faf8 !important;
+  }
   h1, h2, h3, h4, h5, h6 {
     font-family: Georgia, Cambria, "Times New Roman", Times, serif;
     color: #241B12;
     font-weight: 700;
+  }
+  html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark h5, html.dark h6 {
+    color: #ffffff !important;
   }
 }
 

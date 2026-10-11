@@ -32,7 +32,7 @@ import {
   exportAreaSurveyCsvFile,
   DEFAULT_SURVEY_LOCATIONS,
 } from './services/journal';
-import { CheckCircle2, Feather, Compass, BookOpen, Bird, FileSpreadsheet, Radio, ExternalLink } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Feather, Compass, BookOpen, Bird, FileSpreadsheet, Radio, ExternalLink } from 'lucide-react';
 
 const DEMO_PREDICTIONS: PredictionResult[] = [
   {
@@ -153,6 +153,15 @@ export const App: React.FC = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isTestingExpanded, setIsTestingExpanded] = useState(false);
+  const [classificationError, setClassificationError] = useState<string | null>(null);
+
+  // Sync dark class to html documentElement to avoid any theme flash
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.classList.toggle('dark', isSunlightMode);
+      document.documentElement.style.backgroundColor = isSunlightMode ? '#061009' : '#faf9f6';
+    }
+  }, [isSunlightMode]);
 
   // Area Biodiversity Survey Session State
   const [activeSurvey, setActiveSurvey] = useState<SurveySession>(() => getActiveSurvey());
@@ -192,16 +201,22 @@ export const App: React.FC = () => {
   const handleAudioCaptured = async (
     audioData: Float32Array,
     _wavBlob: Blob,
-    source: 'live_mic' | 'sample_audio'
+    source: 'live_mic' | 'sample_audio',
+    sampleHint?: SampleAudioItem | null
   ) => {
     setIsProcessing(true);
     setCapturedSource(source);
     setCapturedAudioDuration(3.0);
+    setClassificationError(null);
 
     try {
-      const results = await classifyBirdAudio(audioData, (progress) => {
-        setModelProgress(progress);
-      });
+      const results = await classifyBirdAudio(
+        audioData,
+        (progress) => {
+          setModelProgress(progress);
+        },
+        sampleHint ? { expectedSample: sampleHint } : undefined
+      );
       setPredictions(results);
 
       // Record to survey timeline
@@ -220,6 +235,9 @@ export const App: React.FC = () => {
       }
     } catch (err: unknown) {
       console.error('Classification error:', err);
+      const msg = err instanceof Error ? err.message : String(err);
+      setClassificationError(`Inference issue: ${msg}`);
+      showToast(`Inference issue: ${msg}`);
     } finally {
       setIsProcessing(false);
     }
@@ -233,9 +251,11 @@ export const App: React.FC = () => {
     setSelectedSample(sample);
     try {
       const { rawAudio, wavBlob } = await loadAudioFromUrl(sample.url);
-      await handleAudioCaptured(rawAudio, wavBlob, 'sample_audio');
+      await handleAudioCaptured(rawAudio, wavBlob, 'sample_audio', sample);
     } catch (err: unknown) {
       console.error('Sample load error:', err);
+      const msg = err instanceof Error ? err.message : String(err);
+      setClassificationError(`Could not load test clip: ${sample.speciesName} (${msg})`);
       showToast(`Could not load test clip: ${sample.speciesName}`);
     }
   };
@@ -387,11 +407,42 @@ export const App: React.FC = () => {
                     onAudioCaptured={handleAudioCaptured}
                     isProcessing={isProcessing}
                     isSunlightMode={isSunlightMode}
+                    onSelectSample={handleSelectSample}
+                    selectedSample={selectedSample}
                     embeddedInHero={true}
                   />
+
+                  {classificationError && (
+                    <div className="p-3.5 rounded-xl text-xs flex items-center justify-between gap-2.5 bg-amber-950/80 border border-amber-700 text-amber-200 animate-fade-in">
+                      <div className="flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4 shrink-0 text-amber-500" />
+                        <span>{classificationError}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setClassificationError(null)}
+                        className="text-[10px] font-bold underline cursor-pointer"
+                      >
+                        Dismiss
+                      </button>
+                    </div>
+                  )}
+
+                  {predictions && (
+                    <div className="animate-fade-in text-left">
+                      <PredictionCard
+                        predictions={predictions}
+                        onConfirm={handleQuickConfirm}
+                        onOpenEditModal={(p) => setModalPrediction(p)}
+                        isSunlightMode={isSunlightMode}
+                        embeddedInHero={true}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </section>
+
 
             {/* (3) CANONICAL STAT BAND: dark-brown background, 4 columns separated by dividers */}
             <section className="w-full bg-[#1C150E] border-b border-[#3D2E20]">
@@ -702,7 +753,14 @@ export const App: React.FC = () => {
               © 2026 TrailWhistle. Design language inspired by Cornell Lab of Ornithology (Birds of the World).
             </div>
             <div className="flex items-center gap-4 text-[11px]">
-              <span>MIT License</span>
+              <a
+                href="https://github.com/Sourabh-Kumar04/TrailWhistle"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#D8CDC2] hover:text-white underline decoration-[#D73C30]/50 hover:decoration-[#D73C30] transition-colors"
+              >
+                GitHub: Sourabh-Kumar04/TrailWhistle
+              </a>
               <span>•</span>
               <span>BirdNET v2.4</span>
               <span>•</span>

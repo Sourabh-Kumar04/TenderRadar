@@ -10,6 +10,18 @@
     <meta name="apple-mobile-web-app-title" content="TrailWhistle" />
     <meta name="description" content="Cornell Lab Birds of the World inspired offline-first bioacoustic biodiversity survey tool powered by on-device BirdNET v2.4 (6,522 species)." />
     <title>TrailWhistle — Birds of the World Bioacoustic Field Survey</title>
+    <script>
+      (function() {
+        try {
+          var params = new URLSearchParams(window.location.search);
+          var isSunlight = params.get('mode') === 'sunlight' || localStorage.getItem('trailwhistle_sunlight_mode') === 'true';
+          if (isSunlight) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.style.backgroundColor = '#061009';
+          }
+        } catch(e) {}
+      })();
+    </script>
   </head>
   <body class="bg-[#241B12] text-[#EAE4DC] antialiased select-none min-h-screen">
     <div id="root">
