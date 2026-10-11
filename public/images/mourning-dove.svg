@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <radialGradient id="doveBg" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#b8a898"/>
+      <stop offset="60%" stop-color="#6e6255"/>
+      <stop offset="100%" stop-color="#3d342a"/>
+    </radialGradient>
+    <linearGradient id="doveBody" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#d4bfa8"/>
+      <stop offset="50%" stop-color="#bfa58a"/>
+      <stop offset="100%" stop-color="#917b62"/>
+    </linearGradient>
+    <linearGradient id="doveWing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9a8c7c"/>
+      <stop offset="60%" stop-color="#695b4d"/>
+      <stop offset="100%" stop-color="#42392f"/>
+    </linearGradient>
+    <clipPath id="doveCircleClip">
+      <circle cx="50" cy="50" r="48"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#doveCircleClip)">
+    <!-- Earthy meadow background -->
+    <rect width="100" height="100" fill="url(#doveBg)"/>
+    <circle cx="25" cy="25" r="14" fill="#decbc0" opacity="0.2"/>
+    <circle cx="80" cy="70" r="18" fill="#d9c5ba" opacity="0.15"/>
+
+    <!-- Rustic wire / branch perch -->
+    <path d="M5 80 Q 45 74 95 82" stroke="#4a3b2c" stroke-width="5" stroke-linecap="round"/>
+    <path d="M5 80 Q 45 74 95 82" stroke="#7d6750" stroke-width="1.8" stroke-linecap="round" opacity="0.6"/>
+
+    <!-- Long tapered tail -->
+    <path d="M22 66 L 5 88 L 12 91 L 28 70 Z" fill="#52483d"/>
+    <path d="M12 78 L 7 86 L 14 89 Z" fill="#bfa58a" opacity="0.6"/>
+
+    <!-- Primary folded wing -->
+    <path d="M25 46 C 20 56, 24 68, 36 72 C 43 70, 50 62, 47 48 C 42 42, 33 42, 25 46 Z" fill="url(#doveWing)"/>
+    <!-- Wing spots (characteristic of mourning dove) -->
+    <circle cx="34" cy="56" r="2.2" fill="#241b12"/>
+    <circle cx="39" cy="60" r="2" fill="#241b12"/>
+    <circle cx="32" cy="63" r="1.8" fill="#241b12"/>
+
+    <!-- Breast & Belly -->
+    <path d="M42 44 C 47 48, 54 55, 53 66 C 52 74, 44 76, 37 75 C 43 73, 47 67, 45 56 C 44 50, 42 45, 42 44 Z" fill="url(#doveBody)"/>
+
+    <!-- Neck & Slender Head -->
+    <path d="M37 45 C 38 34, 46 22, 58 23 C 68 24, 74 34, 70 45 C 66 54, 52 56, 42 50 Z" fill="url(#doveBody)"/>
+
+    <!-- Characteristic black cheek mark -->
+    <ellipse cx="58" cy="35" rx="1.5" ry="3" fill="#2e241c" transform="rotate(25 58 35)"/>
+
+    <!-- Eye with soft blue orbital ring -->
+    <circle cx="62" cy="30" r="4" fill="#7fa0b5" opacity="0.7"/>
+    <circle cx="62" cy="30" r="2.8" fill="#1c1610"/>
+    <circle cx="63.2" cy="28.8" r="0.8" fill="#ffffff"/>
+
+    <!-- Slender dark beak -->
+    <path d="M69 31 L 81 35 L 68 37 Z" fill="#241c14"/>
+  </g>
+  <circle cx="50" cy="50" r="48" fill="none" stroke="#6e5d4d" stroke-width="2" opacity="0.5"/>
+</svg>

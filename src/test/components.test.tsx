@@ -31,7 +31,8 @@ describe('UI Components', () => {
 
     expect(screen.getByText('TrailWhistle')).toBeInTheDocument();
     expect(screen.getByText('Offline')).toBeInTheDocument();
-    expect(screen.getAllByText('Identify')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Survey')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Species')[0]).toBeInTheDocument();
     expect(screen.getAllByText('Journal')[0]).toBeInTheDocument();
     expect(screen.queryByText('Touch Grass')).not.toBeInTheDocument();
 
@@ -313,15 +314,13 @@ describe('UI Components', () => {
       />
     );
 
-    expect(screen.getByText('Species Life Count')).toBeInTheDocument();
-    expect(screen.getByText(/4/)).toBeInTheDocument();
-    expect(screen.getByText('species')).toBeInTheDocument();
-    expect(screen.getByText('Acoustic Census')).toBeInTheDocument();
+    expect(screen.getByText('Species Found')).toBeInTheDocument();
+    expect(screen.getAllByText('4')[0]).toBeInTheDocument();
+    expect(screen.getByText('Recordings')).toBeInTheDocument();
     expect(screen.getByText('9')).toBeInTheDocument();
-    expect(screen.getByText('recordings')).toBeInTheDocument();
-    expect(screen.getByText('Survey Elapsed')).toBeInTheDocument();
-    expect(screen.getByText('Transect Coverage')).toBeInTheDocument();
-    expect(screen.getByText('±8m GPS')).toBeInTheDocument();
+    expect(screen.getByText('Survey Time')).toBeInTheDocument();
+    expect(screen.getByText('Sites')).toBeInTheDocument();
+    expect(screen.getByText(/±8m/)).toBeInTheDocument();
   });
 
   it('AreaSpeciesChecklist renders live species tally and empty state workflow', () => {

@@ -18,7 +18,7 @@ export const AreaSurveyHeader: React.FC<AreaSurveyHeaderProps> = ({
   onUpdateSurvey,
   onNewSurvey,
   onExportCsv,
-  speciesCount,
+  speciesCount: _speciesCount,
   totalRecordings,
   isSunlightMode,
 }) => {
@@ -49,174 +49,109 @@ export const AreaSurveyHeader: React.FC<AreaSurveyHeaderProps> = ({
   };
 
   return (
-    <div className={`p-4 sm:p-5 rounded-2xl border transition-all mb-4 ${
-      isSunlightMode
-        ? 'bg-[#06140b] border-emerald-800/80 text-white shadow-xl'
-        : 'bg-white border-[#d4e2d4] text-[#1a2b1e] shadow-sm'
-    }`}>
-      {/* Headline Feature: BirdNET v2.4 6,522 Species Headline */}
-      <div className={`flex flex-wrap items-center justify-between gap-2 pb-3 mb-3 border-b ${
-        isSunlightMode ? 'border-emerald-900/60' : 'border-[#eef4ee]'
-      }`}>
-        <div className="flex items-center gap-2">
-          <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-xs ${
-            isSunlightMode
-              ? 'bg-emerald-900 text-white border border-emerald-700'
-              : 'bg-[#eef4ee] text-[#2d5a37] border border-[#d4e2d4]'
-          }`}>
-            <Sparkles className={`w-3.5 h-3.5 ${isSunlightMode ? 'text-feather-yellow' : 'text-[#7a9e7e]'}`} />
+    <div
+      className={`p-6 sm:p-7 rounded-xl border transition-all mb-6 ${
+        isSunlightMode
+          ? 'bg-[#120D08] border-[#4A3A2C] text-white shadow-xl'
+          : 'bg-white border-[#E5E0D8] text-[#241B12] shadow-sm'
+      }`}
+    >
+      {/* Top Meta Headline */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-4 border-b border-[#E5E0D8]">
+        <div className="flex items-center gap-2.5">
+          <span className="text-xs uppercase tracking-wider font-bold px-3 py-1 rounded-full bg-[#D73C30]/10 text-[#D73C30] border border-[#D73C30]/20 flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5" />
             <span>Area biodiversity survey</span>
           </span>
-          <span className={`text-xs font-medium hidden md:inline-flex items-center gap-1.5 ${
-            isSunlightMode ? 'text-emerald-200' : 'text-[#4a5d4e]'
-          }`}>
-            <Database className={`w-3.5 h-3.5 ${isSunlightMode ? 'text-emerald-400' : 'text-[#7a9e7e]'}`} />
-            <strong className={`font-semibold ${isSunlightMode ? 'text-white' : 'text-[#1a2b1e]'}`}>BirdNET v2.4 Neural Core</strong> • 6,522 Species Global Taxonomy
+          <span className="text-xs font-sans text-[#736B63] hidden md:inline-flex items-center gap-1.5">
+            <Database className="w-3.5 h-3.5 text-[#E67E22]" />
+            <strong className="font-bold text-[#241B12]">BirdNET v2.4 Core</strong> • 6,522 Species Global Taxonomy
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           {/* Active Survey Pulse indicator */}
-          <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full ${
-            isSunlightMode
-              ? 'bg-emerald-950 text-emerald-300 border border-emerald-700/60'
-              : 'bg-[#e5eee6] text-[#16351d] border border-[#b8ceb9] shadow-xs'
-          }`}>
-            <span className={`w-2 h-2 rounded-full animate-ping shrink-0 ${isSunlightMode ? 'bg-emerald-400' : 'bg-[#23532c]'}`} />
-            <Clock className={`w-3 h-3 ${isSunlightMode ? 'text-emerald-300' : 'text-[#16351d]'}`} />
-            <span className={isSunlightMode ? 'text-emerald-200' : 'text-[#16351d] font-bold'}>{elapsedMinutes}m active</span>
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full bg-[#F7F5F2] border border-[#E5E0D8] text-[#736B63]">
+            <span className="w-2 h-2 rounded-full bg-[#3D8B40] animate-ping shrink-0" />
+            <Clock className="w-3.5 h-3.5 text-[#736B63]" />
+            <span>{elapsedMinutes}m active</span>
           </span>
 
-          {/* New Survey Button */}
+          {/* New Survey Pill Button */}
           <button
             type="button"
             onClick={onNewSurvey}
-            className={`px-3 py-1.5 min-h-[36px] text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
-              isSunlightMode
-                ? 'bg-emerald-900/80 hover:bg-emerald-800 text-emerald-200 hover:text-white border border-emerald-700/60 shadow-sm'
-                : 'bg-[#f4f7f4] hover:bg-[#eef4ee] text-[#1a2b1e] border border-[#d4e2d4]'
-            }`}
+            className="px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-full bg-[#F7F5F2] hover:bg-[#ECE7E1] text-[#241B12] border border-[#E5E0D8] flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
             title="Start a new area survey session at another site"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="w-3.5 h-3.5 text-[#D73C30]" />
             <span>New Site</span>
           </button>
         </div>
       </div>
 
       {/* Survey Site & Transect Controls */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         {/* Location & Habitat */}
-        <div className="flex-1 space-y-2">
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className={`p-1.5 rounded-lg shrink-0 ${
-              isSunlightMode
-                ? 'bg-emerald-950 text-emerald-400 border border-emerald-800'
-                : 'bg-[#eef4ee] text-[#2d5a37] border border-[#d4e2d4]'
-            }`}>
+        <div className="flex-1 space-y-2.5">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-full bg-[#D73C30]/10 text-[#D73C30] shrink-0">
               <MapPin className="w-4 h-4" />
             </div>
             {isEditingName ? (
-              <div className="flex items-center gap-1.5 flex-1 max-w-md">
+              <div className="flex items-center gap-2 flex-1 max-w-md">
                 <input
                   type="text"
                   value={tempName}
                   onChange={(e) => setTempName(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSaveName()}
-                  className={`px-3 py-1.5 text-sm font-bold rounded-lg border flex-1 outline-none ${
-                    isSunlightMode
-                      ? 'bg-[#061009] border-emerald-700 text-white focus:border-emerald-400'
-                      : 'bg-[#faf9f6] border-[#d4e2d4] text-[#1a2b1e] focus:border-[#7a9e7e]'
-                  }`}
+                  className="px-3.5 py-1.5 text-sm font-bold rounded-full border border-[#D73C30] flex-1 outline-none bg-[#F7F5F2] text-[#241B12]"
                   autoFocus
                 />
                 <button
                   type="button"
                   onClick={handleSaveName}
-                  className="p-2 bg-[#7a9e7e] hover:bg-[#688f6c] text-white rounded-lg cursor-pointer"
+                  className="p-2 bg-[#3D8B40] hover:bg-[#2E7D32] text-white rounded-full cursor-pointer"
                   title="Save site name"
                 >
                   <Check className="w-4 h-4" />
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-2.5 flex-wrap">
-                <h1 className={`text-xl sm:text-2xl font-black tracking-tight font-sans ${
-                  isSunlightMode ? 'text-white' : 'text-[#1a2b1e]'
-                }`}>{survey.locationName}</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#241B12] tracking-tight">
+                  {survey.locationName}
+                </h1>
                 <button
                   type="button"
                   onClick={() => {
                     setTempName(survey.locationName);
                     setIsEditingName(true);
                   }}
-                  className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                    isSunlightMode
-                      ? 'text-emerald-400/80 hover:text-white hover:bg-emerald-900/50'
-                      : 'text-[#4a5d4e] hover:text-[#1a2b1e] hover:bg-[#eef4ee]'
-                  }`}
+                  className="p-1.5 rounded-full text-[#736B63] hover:text-[#241B12] hover:bg-[#F7F5F2] transition-colors cursor-pointer"
                   title="Rename survey site"
                 >
                   <Edit2 className="w-3.5 h-3.5" />
                 </button>
-
-                {/* Hero indicator bird thumbnails next to headline */}
-                <div className="flex items-center gap-2 pl-1 sm:pl-2">
-                  <div
-                    className="relative group cursor-pointer"
-                    title="American Robin (Turdus migratorius) - Site indicator species"
-                  >
-                    <img
-                      src="/images/american-robin.svg"
-                      alt="American Robin"
-                      className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover border-2 shadow-sm transition-transform group-hover:scale-105 ${
-                        isSunlightMode
-                          ? 'border-emerald-700 bg-emerald-950'
-                          : 'border-[#b8ceb9] bg-[#eef4ee]'
-                      }`}
-                    />
-                    <span className="sr-only">American Robin</span>
-                  </div>
-
-                  <div
-                    className="relative group cursor-pointer"
-                    title="Song Sparrow (Melospiza melodia) - Riparian indicator species"
-                  >
-                    <img
-                      src="/images/song-sparrow.svg"
-                      alt="Song Sparrow"
-                      className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover border-2 shadow-sm transition-transform group-hover:scale-105 ${
-                        isSunlightMode
-                          ? 'border-emerald-700 bg-emerald-950'
-                          : 'border-[#b8ceb9] bg-[#eef4ee]'
-                      }`}
-                    />
-                    <span className="sr-only">Song Sparrow</span>
-                  </div>
-                </div>
               </div>
             )}
           </div>
 
           {/* Quick Preset Selector & Habitat Tag */}
-          <div className="flex flex-wrap items-center gap-2.5 text-xs">
+          <div className="flex flex-wrap items-center gap-3 text-xs">
             {/* Location Quick Switcher */}
             <div className="relative">
               <select
                 value={DEFAULT_SURVEY_LOCATIONS.includes(survey.locationName) ? survey.locationName : ''}
                 onChange={handleSelectPreset}
-                className={`text-xs font-semibold py-1.5 px-3 rounded-lg border appearance-none pr-8 cursor-pointer transition-all ${
-                  isSunlightMode
-                    ? 'bg-[#06120a] border-emerald-800/80 text-emerald-200 hover:border-emerald-600'
-                    : 'bg-[#faf9f6] border-[#d4e2d4] text-[#1a2b1e] hover:border-[#7a9e7e]'
-                }`}
+                className="text-xs font-semibold py-1.5 px-3.5 rounded-full border border-[#E5E0D8] bg-[#F7F5F2] text-[#241B12] appearance-none pr-8 cursor-pointer hover:border-[#D73C30] transition-colors outline-none"
               >
                 <option value="" disabled>Trail Presets...</option>
                 {DEFAULT_SURVEY_LOCATIONS.map((loc) => (
                   <option key={loc} value={loc}>{loc}</option>
                 ))}
               </select>
-              <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] opacity-60">▼</span>
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[#736B63]">▼</span>
             </div>
 
             {/* Habitat Selector */}
@@ -224,42 +159,32 @@ export const AreaSurveyHeader: React.FC<AreaSurveyHeaderProps> = ({
               <select
                 value={survey.habitatTag || 'Mixed Woodland'}
                 onChange={handleSelectHabitat}
-                className={`text-xs font-semibold py-1.5 pl-7 pr-8 rounded-lg border appearance-none cursor-pointer transition-all ${
-                  isSunlightMode
-                    ? 'bg-[#06120a] border-emerald-800/80 text-emerald-200 hover:border-emerald-600'
-                    : 'bg-[#faf9f6] border-[#d4e2d4] text-[#1a2b1e] hover:border-[#7a9e7e]'
-                }`}
+                className="text-xs font-semibold py-1.5 pl-8 pr-8 rounded-full border border-[#E5E0D8] bg-[#F7F5F2] text-[#241B12] appearance-none cursor-pointer hover:border-[#D73C30] transition-colors outline-none"
               >
                 {HABITAT_TAGS.map((tag) => (
                   <option key={tag} value={tag}>{tag}</option>
                 ))}
               </select>
-              <Trees className={`pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 ${
-                isSunlightMode ? 'text-emerald-400' : 'text-[#7a9e7e]'
-              }`} />
-              <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] opacity-60">▼</span>
+              <Trees className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#3D8B40]" />
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[#736B63]">▼</span>
             </div>
           </div>
         </div>
 
-        {/* Survey Action: Export CSV */}
+        {/* Action: Export CSV Button (Pill button with generous padding) */}
         <div className="flex items-center gap-2 shrink-0">
           <button
             type="button"
             onClick={onExportCsv}
             disabled={totalRecordings === 0}
-            className={`py-2.5 px-4 min-h-[44px] rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer ${
+            className={`py-3 px-6 rounded-full font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer ${
               totalRecordings === 0
-                ? isSunlightMode 
-                  ? 'opacity-40 cursor-not-allowed bg-emerald-950/40 text-emerald-500/50 border border-emerald-900/40' 
-                  : 'opacity-40 cursor-not-allowed bg-[#f4f7f4] text-[#4a5d4e] border border-[#d4e2d4]'
-                : isSunlightMode
-                  ? 'bg-emerald-700 hover:bg-emerald-600 text-white border border-emerald-500/50 shadow-md hover:scale-[1.02] active:scale-95'
-                  : 'bg-[#7a9e7e] hover:bg-[#688f6c] text-white shadow-sm hover:scale-[1.02] active:scale-95'
+                ? 'opacity-40 cursor-not-allowed bg-[#F7F5F2] text-[#736B63] border border-[#E5E0D8]'
+                : 'bg-[#3D8B40] hover:bg-[#2E7D32] text-white shadow-md hover:scale-102 active:scale-95'
             }`}
             title="Download CSV report of current area biodiversity survey"
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-4 h-4 text-white" />
             <span>Export Area Survey CSV</span>
           </button>
         </div>

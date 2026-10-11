@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Navbar } from './components/Navbar';
 import { ModelDownloadBanner } from './components/ModelDownloadBanner';
 import { AudioRecorder } from './components/AudioRecorder';
@@ -11,6 +11,7 @@ import { AreaSurveyHeader } from './components/AreaSurveyHeader';
 import { SurveyStatsBar } from './components/SurveyStatsBar';
 import { AreaSpeciesChecklist } from './components/AreaSpeciesChecklist';
 import { RecordingTimeline } from './components/RecordingTimeline';
+import { SpeciesCatalog } from './components/SpeciesCatalog';
 import { PredictionResult, JournalEntry, SurveySession, SurveyRecordingEvent } from './types/journal';
 import { ModelProgressInfo } from './types/model';
 import { SampleAudioItem, SAMPLE_AUDIO_LIST } from './data/sampleAudio';
@@ -31,7 +32,7 @@ import {
   exportAreaSurveyCsvFile,
   DEFAULT_SURVEY_LOCATIONS,
 } from './services/journal';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Feather, Compass, BookOpen, Bird, FileSpreadsheet, Radio, ExternalLink } from 'lucide-react';
 
 const DEMO_PREDICTIONS: PredictionResult[] = [
   {
@@ -119,9 +120,10 @@ const DEMO_JOURNAL_ENTRIES: JournalEntry[] = [
 
 export const App: React.FC = () => {
   const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
-  const [activeTab, setActiveTab] = useState<'identify' | 'journal'>(() => {
+  const [activeTab, setActiveTab] = useState<'identify' | 'journal' | 'species'>(() => {
     const tabParam = searchParams?.get('tab');
     if (tabParam === 'journal') return 'journal';
+    if (tabParam === 'species') return 'species';
     return 'identify';
   });
   const [isSunlightMode, setIsSunlightMode] = useState<boolean>(() => {
@@ -149,6 +151,8 @@ export const App: React.FC = () => {
     return getJournalEntries();
   });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isTestingExpanded, setIsTestingExpanded] = useState(false);
 
   // Area Biodiversity Survey Session State
   const [activeSurvey, setActiveSurvey] = useState<SurveySession>(() => getActiveSurvey());
@@ -330,126 +334,229 @@ export const App: React.FC = () => {
 
   return (
     <div className={`min-h-screen flex flex-col font-sans transition-colors ${
-      isSunlightMode ? 'bg-[#061009] text-[#f7faf8]' : 'bg-[#faf9f6] text-[#1a2b1e]'
+      isSunlightMode ? 'bg-[#120D08] text-white' : 'bg-white text-[#332A22]'
     }`}>
-      {/* Top Navigation */}
+      {/* (1) HEADER: dark warm brown bar (#241B12), left logo wordmark, center pill search, right text nav + coral-red pill buttons */}
       <Navbar
         activeTab={activeTab}
         onTabChange={setActiveTab}
         isSunlightMode={isSunlightMode}
         onToggleSunlightMode={handleToggleSunlightMode}
         journalCount={journalEntries.length}
+        onStartSurvey={handleNewSurvey}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
       />
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 pb-20">
-        {/* Global Toast */}
-        {toastMessage && (
-          <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 animate-bounce">
-            <div className={`px-4 py-2.5 rounded-full shadow-2xl flex items-center gap-2 text-xs font-bold ${
-              isSunlightMode ? 'bg-black text-white border border-emerald-700' : 'bg-[#1a2b1e] text-white border border-[#2d5a37]'
-            }`}>
-              <CheckCircle2 className="w-4 h-4 text-[#7a9e7e]" />
-              <span>{toastMessage}</span>
-            </div>
+      {/* Global Notification Toast */}
+      {toastMessage && (
+        <div className="fixed top-24 left-1/2 transform -translate-x-1/2 z-50 animate-bounce">
+          <div className="px-5 py-3 rounded-full shadow-2xl flex items-center gap-2.5 text-xs font-bold bg-[#241B12] text-white border border-[#D73C30]">
+            <CheckCircle2 className="w-4 h-4 text-[#3D8B40]" />
+            <span>{toastMessage}</span>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Tab 1: Identify & Area Biodiversity Survey Mode */}
+      {/* Main Container */}
+      <main className="flex-1 w-full">
+        {/* VIEW 1: Survey (Default) */}
         {activeTab === 'identify' && (
-          <div className="space-y-5 animate-fade-in">
-            {/* Prominent Area Biodiversity Survey Header */}
-            <AreaSurveyHeader
-              survey={activeSurvey}
-              onUpdateSurvey={handleUpdateSurvey}
-              onNewSurvey={handleNewSurvey}
-              onExportCsv={handleExportCurrentSurveyCsv}
-              speciesCount={surveyChecklist.length}
-              totalRecordings={currentSurveyRecordingsCount}
-              isSunlightMode={isSunlightMode}
-            />
+          <div className="animate-fade-in">
+            {/* (2) HERO: Full-width with nature photo background + dark gradient overlay, large WHITE SERIF headline, small sans subhead, centered. Below: prominent record button */}
+            <section
+              className="w-full relative py-16 sm:py-24 px-4 sm:px-6 lg:px-8 text-white overflow-hidden bg-cover bg-center"
+              style={{
+                backgroundImage: `linear-gradient(180deg, rgba(36, 27, 18, 0.78) 0%, rgba(36, 27, 18, 0.65) 50%, rgba(36, 27, 18, 0.92) 100%), url('/hero-nature-bg.jpg')`,
+              }}
+            >
+              <div className="max-w-4xl mx-auto text-center relative z-10">
+                {/* Large WHITE SERIF headline */}
+                <h1 className="font-serif text-3xl sm:text-5xl md:text-6xl font-bold text-white tracking-tight leading-tight drop-shadow-md">
+                  Discover the birds around you.
+                </h1>
 
-            {/* Prominent Survey Stats Bar (Full-Width Overview) */}
-            <SurveyStatsBar
-              speciesCount={surveyChecklist.length}
-              totalRecordings={currentSurveyRecordingsCount}
-              startTime={activeSurvey.startTime}
-              location={activeSurvey.location}
-              locationName={activeSurvey.locationName}
-              isSunlightMode={isSunlightMode}
-            />
+                {/* Small sans subhead, centered */}
+                <p className="font-sans text-sm sm:text-base md:text-lg text-[#EAE4DC] max-w-2xl mx-auto mt-4 mb-8 leading-relaxed font-normal">
+                  Real-time acoustic biodiversity surveying powered by on-device BirdNET v2.4 AI. 6,522 species, 100% offline, zero cloud telemetry in the field.
+                </p>
 
-            {/* Model Download Banner (Only expands during download/ready/error) */}
-            <ModelDownloadBanner
-              progressInfo={modelProgress}
-              onRetry={handleRetryModel}
-              isSunlightMode={isSunlightMode}
-            />
-
-            {/* Compact 4-Step Survey Workflow Guide */}
-            <SurveyOnboardingHint isSunlightMode={isSunlightMode} />
-
-            {/* Two-Column Side-by-Side Survey Layout on Desktop/Tablet */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-              {/* Left Column: Acoustic Field Recorder (with Quick Test Pills) & Latest Inference */}
-              <div className="lg:col-span-5 space-y-4">
-                <AudioRecorder
-                  onAudioCaptured={handleAudioCaptured}
-                  isProcessing={isProcessing}
-                  isSunlightMode={isSunlightMode}
-                  onSelectSample={handleSelectSample}
-                  selectedSample={selectedSample}
-                />
-
-                {predictions && (
-                  <PredictionCard
-                    predictions={predictions}
-                    onConfirm={handleQuickConfirm}
-                    onOpenEditModal={(p) => setModalPrediction(p)}
+                {/* Prominent record button (embedded in hero with live bioacoustic visualizer) */}
+                <div className="max-w-xl mx-auto">
+                  <AudioRecorder
+                    onAudioCaptured={handleAudioCaptured}
+                    isProcessing={isProcessing}
                     isSunlightMode={isSunlightMode}
+                    embeddedInHero={true}
                   />
-                )}
+                </div>
               </div>
+            </section>
 
-              {/* Right Column: Live Species Checklist & Timeline */}
-              <div className="lg:col-span-7 space-y-4">
-                <AreaSpeciesChecklist
-                  checklist={surveyChecklist}
+            {/* (3) CANONICAL STAT BAND: dark-brown background, 4 columns separated by dividers */}
+            <section className="w-full bg-[#1C150E] border-b border-[#3D2E20]">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+                <SurveyStatsBar
+                  speciesCount={surveyChecklist.length}
+                  totalRecordings={currentSurveyRecordingsCount}
+                  startTime={activeSurvey.startTime}
+                  location={activeSurvey.location}
                   locationName={activeSurvey.locationName}
                   isSunlightMode={isSunlightMode}
-                  onRunSampleDemo={() => handleSelectSample(SAMPLE_AUDIO_LIST[0])}
-                />
-
-                <RecordingTimeline
-                  events={surveyTimeline}
-                  isSunlightMode={isSunlightMode}
+                  sitesCount={DEFAULT_SURVEY_LOCATIONS.length}
                 />
               </div>
-            </div>
+            </section>
 
-            {/* Demoted Collapsible Testing Section at Bottom */}
-            <TestingSection
-              onSelectSample={handleSelectSample}
-              selectedSample={selectedSample}
-              isProcessing={isProcessing}
-              isSunlightMode={isSunlightMode}
-            />
+            {/* (4) SECTION BANDS: alternate white and warm off-white (#F7F5F2) */}
+            
+            {/* BAND 1: Warm off-white (#F7F5F2) - Active Survey Station & Detections */}
+            <section className="w-full bg-[#F7F5F2] py-10 sm:py-14 border-b border-[#E5E0D8]">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+                <div className="text-center max-w-2xl mx-auto mb-6">
+                  <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#241B12] tracking-tight">
+                    Active survey transect & acoustic telemetry
+                  </h2>
+                  <p className="text-sm text-[#736B63] mt-1 font-sans">
+                    Configure observation site metadata, review on-device neural progress, and inspect live detections.
+                  </p>
+                </div>
+
+                {/* Area Survey Header */}
+                <AreaSurveyHeader
+                  survey={activeSurvey}
+                  onUpdateSurvey={handleUpdateSurvey}
+                  onNewSurvey={handleNewSurvey}
+                  onExportCsv={handleExportCurrentSurveyCsv}
+                  speciesCount={surveyChecklist.length}
+                  totalRecordings={currentSurveyRecordingsCount}
+                  isSunlightMode={isSunlightMode}
+                />
+
+                {/* Model Download Banner */}
+                <ModelDownloadBanner
+                  progressInfo={modelProgress}
+                  onRetry={handleRetryModel}
+                  isSunlightMode={isSunlightMode}
+                />
+
+                {/* 4-Step Survey Workflow Protocol */}
+                <SurveyOnboardingHint isSunlightMode={isSunlightMode} />
+
+                {/* Latest Inference Species Card (if active) */}
+                {predictions && (
+                  <div className="max-w-2xl mx-auto">
+                    <PredictionCard
+                      predictions={predictions}
+                      onConfirm={handleQuickConfirm}
+                      onOpenEditModal={(p) => setModalPrediction(p)}
+                      isSunlightMode={isSunlightMode}
+                    />
+                  </div>
+                )}
+              </div>
+            </section>
+
+            {/* BAND 2: White (#FFFFFF) - Species Checklist & Area Census */}
+            <section className="w-full bg-white py-10 sm:py-14 border-b border-[#E5E0D8]">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+                <div className="text-center max-w-2xl mx-auto mb-6">
+                  <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#241B12] tracking-tight">
+                    Area species checklist
+                  </h2>
+                  <p className="text-sm text-[#736B63] mt-1 font-sans">
+                    Verified taxa logged at {activeSurvey.locationName} with peak acoustic confidence and frequency counts.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                  <div className="lg:col-span-8">
+                    <AreaSpeciesChecklist
+                      checklist={surveyChecklist}
+                      locationName={activeSurvey.locationName}
+                      isSunlightMode={isSunlightMode}
+                    />
+                  </div>
+                  <div className="lg:col-span-4">
+                    <RecordingTimeline
+                      events={surveyTimeline}
+                      isSunlightMode={isSunlightMode}
+                    />
+                  </div>
+                </div>
+              </div>
+            </section>
           </div>
         )}
 
-        {/* Tab 2: Field Survey Log (Journal) */}
+        {/* VIEW 2: Species Catalog Tab */}
+        {activeTab === 'species' && (
+          <div className="animate-fade-in">
+            {/* Mini Hero for Species Catalog */}
+            <section
+              className="w-full relative py-12 sm:py-16 px-4 sm:px-6 lg:px-8 text-white overflow-hidden bg-cover bg-center"
+              style={{
+                backgroundImage: `linear-gradient(180deg, rgba(36, 27, 18, 0.85) 0%, rgba(36, 27, 18, 0.95) 100%), url('/hero-nature-bg.jpg')`,
+              }}
+            >
+              <div className="max-w-4xl mx-auto text-center">
+                <h1 className="font-serif text-3xl sm:text-4xl font-bold text-white tracking-tight">
+                  Regional species checklist & taxonomy
+                </h1>
+                <p className="font-sans text-sm sm:text-base text-[#EAE4DC] max-w-xl mx-auto mt-2">
+                  Browse detected avian taxa and reference the BirdNET v2.4 6,522-species global taxonomic database.
+                </p>
+              </div>
+            </section>
+
+            <section className="w-full bg-white py-10 sm:py-14">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <SpeciesCatalog
+                  detectedChecklist={surveyChecklist}
+                  locationName={activeSurvey.locationName}
+                  isSunlightMode={isSunlightMode}
+                />
+              </div>
+            </section>
+          </div>
+        )}
+
+        {/* VIEW 3: Journal Tab (Field Survey Log) */}
         {activeTab === 'journal' && (
-          <JournalList
-            entries={journalEntries}
-            onDeleteEntry={handleDeleteEntry}
-            onClearJournal={handleClearJournal}
-            isSunlightMode={isSunlightMode}
-            onGoToIdentify={() => setActiveTab('identify')}
-            onJournalImported={(count) => {
-              setJournalEntries(getJournalEntries());
-              showToast(`Restored ${count} observation(s) to Field Journal!`);
-            }}
-          />
+          <div className="animate-fade-in">
+            {/* Mini Hero for Journal */}
+            <section
+              className="w-full relative py-12 sm:py-16 px-4 sm:px-6 lg:px-8 text-white overflow-hidden bg-cover bg-center"
+              style={{
+                backgroundImage: `linear-gradient(180deg, rgba(36, 27, 18, 0.85) 0%, rgba(36, 27, 18, 0.95) 100%), url('/hero-nature-bg.jpg')`,
+              }}
+            >
+              <div className="max-w-4xl mx-auto text-center">
+                <h1 className="font-serif text-3xl sm:text-4xl font-bold text-white tracking-tight">
+                  Avian survey logbook & observations
+                </h1>
+                <p className="font-sans text-sm sm:text-base text-[#EAE4DC] max-w-xl mx-auto mt-2">
+                  Review historical bioacoustic encounters, export RFC 4180 CSV surveys, and manage private on-device backups.
+                </p>
+              </div>
+            </section>
+
+            <section className="w-full bg-[#F7F5F2] py-10 sm:py-14">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <JournalList
+                  entries={journalEntries}
+                  onDeleteEntry={handleDeleteEntry}
+                  onClearJournal={handleClearJournal}
+                  isSunlightMode={isSunlightMode}
+                  onGoToIdentify={() => setActiveTab('identify')}
+                  onJournalImported={(count) => {
+                    setJournalEntries(getJournalEntries());
+                    showToast(`Restored ${count} observation(s) to Field Journal!`);
+                  }}
+                />
+              </div>
+            </section>
+          </div>
         )}
       </main>
 
@@ -467,15 +574,141 @@ export const App: React.FC = () => {
         />
       )}
 
-      {/* Outdoor Trail Footer */}
-      <footer className={`border-t py-4 text-center text-xs transition-colors ${
-        isSunlightMode 
-          ? 'border-emerald-900/60 text-emerald-300 bg-[#061009]' 
-          : 'border-[#d4e2d4] text-[#4a5d4e] bg-[#f7f5f0]'
-      }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-1">
-          <span>TrailWhistle • Area Biodiversity Survey Tool • BirdNET v2.4</span>
-          <span>100% On-Device Offline AI • Zero Cloud Telemetry • MIT License</span>
+      {/* Discreet Collapsed Developer Testing Section at Bottom */}
+      <section className="w-full bg-[#18120B] border-t border-[#3D2E20] py-4 text-xs transition-colors">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center">
+          <button
+            type="button"
+            onClick={() => setIsTestingExpanded((prev) => !prev)}
+            className="text-[#A89B8C] hover:text-white transition-colors flex items-center gap-2 cursor-pointer font-medium text-xs px-4 py-2 rounded-full border border-[#3D2E20] bg-[#241B12]/90 hover:bg-[#2E2217] shadow-sm"
+            aria-expanded={isTestingExpanded}
+          >
+            <span>{isTestingExpanded ? 'Hide' : 'Show'} Developer Audio Simulation & Testing</span>
+            <span className="text-[10px] text-[#A89B8C]">({isTestingExpanded ? '▲' : '▼'})</span>
+          </button>
+
+          {isTestingExpanded && (
+            <div className="w-full max-w-4xl mt-5 animate-fade-in">
+              <TestingSection
+                onSelectSample={handleSelectSample}
+                selectedSample={selectedSample}
+                isProcessing={isProcessing}
+                isSunlightMode={isSunlightMode}
+              />
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* (8) FOOTER: dark brown (#241B12) with link columns */}
+      <footer className="w-full bg-[#241B12] text-[#EAE4DC] border-t border-[#3D2E20] pt-12 pb-8 transition-colors">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-10 border-b border-[#3D2E20]">
+            {/* Column 1: Brand & Cornell Bioacoustics */}
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-8 h-8 rounded-full bg-[#D73C30] text-white flex items-center justify-center">
+                  <Feather className="w-4 h-4" />
+                </div>
+                <span className="font-serif font-bold text-xl text-white tracking-tight">TrailWhistle</span>
+              </div>
+              <p className="text-xs text-[#B8ACA0] leading-relaxed">
+                Cornell Lab Birds of the World inspired offline-first bioacoustic surveying system. Identifies 6,522 bird species directly on-device using BirdNET v2.4.
+              </p>
+              <div className="flex items-center gap-2 pt-1">
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#36291E] border border-[#4E3A2B] text-[#D8CDC2]">
+                  v0.1.0 • PWA Offline
+                </span>
+              </div>
+            </div>
+
+            {/* Column 2: Survey Tools */}
+            <div className="space-y-2.5">
+              <h3 className="font-serif font-bold text-sm text-white uppercase tracking-wider">
+                Field Survey Tools
+              </h3>
+              <ul className="space-y-2 text-xs text-[#B8ACA0]">
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('identify')}
+                    className="hover:text-white transition-colors cursor-pointer text-left"
+                  >
+                    Acoustic Census & Live Recorder
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('species')}
+                    className="hover:text-white transition-colors cursor-pointer text-left"
+                  >
+                    Area Species Checklist
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('journal')}
+                    className="hover:text-white transition-colors cursor-pointer text-left"
+                  >
+                    Field Observations Journal
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={handleExportCurrentSurveyCsv}
+                    className="hover:text-white transition-colors cursor-pointer text-left"
+                  >
+                    Export RFC 4180 CSV Dataset
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 3: Science & Taxonomy */}
+            <div className="space-y-2.5">
+              <h3 className="font-serif font-bold text-sm text-white uppercase tracking-wider">
+                Science & Bioacoustics
+              </h3>
+              <ul className="space-y-2 text-xs text-[#B8ACA0]">
+                <li>BirdNET v2.4 Neural Core</li>
+                <li>6,522 Species Global Taxonomy</li>
+                <li>48kHz AudioWorklet Ingest</li>
+                <li>Honest Confidence Calibration (&lt;25% Unknown)</li>
+                <li>GPS Transect Geo-referencing</li>
+              </ul>
+            </div>
+
+            {/* Column 4: Offline Field Ethics */}
+            <div className="space-y-2.5">
+              <h3 className="font-serif font-bold text-sm text-white uppercase tracking-wider">
+                Field Ethics & Privacy
+              </h3>
+              <ul className="space-y-2 text-xs text-[#B8ACA0]">
+                <li>100% On-Device Local Processing</li>
+                <li>Zero Cloud Telemetry & Tracking</li>
+                <li>Zero Cellular Signal Required</li>
+                <li>Open-Source MIT License</li>
+                <li>Touch Grass Bioacoustics Initiative</li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-[#8A7E73] gap-2">
+            <div>
+              © 2026 TrailWhistle. Design language inspired by Cornell Lab of Ornithology (Birds of the World).
+            </div>
+            <div className="flex items-center gap-4 text-[11px]">
+              <span>MIT License</span>
+              <span>•</span>
+              <span>BirdNET v2.4</span>
+              <span>•</span>
+              <span>WebAssembly SIMD</span>
+            </div>
+          </div>
         </div>
       </footer>
     </div>

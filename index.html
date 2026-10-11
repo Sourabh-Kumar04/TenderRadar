@@ -4,15 +4,40 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <meta name="theme-color" content="#faf9f6" />
+    <meta name="theme-color" content="#241B12" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="TrailWhistle" />
-    <meta name="description" content="Offline-first Area Biodiversity Survey Tool powered by on-device BirdNET v2.4 (6,522 species). Zero cloud, zero cellular signal needed." />
-    <title>TrailWhistle — Offline Area Biodiversity Survey & Bird Call Identifier</title>
+    <meta name="description" content="Cornell Lab Birds of the World inspired offline-first bioacoustic biodiversity survey tool powered by on-device BirdNET v2.4 (6,522 species)." />
+    <title>TrailWhistle — Birds of the World Bioacoustic Field Survey</title>
   </head>
-  <body class="bg-[#faf9f6] text-[#1a2b1e] antialiased select-none min-h-screen">
-    <div id="root"></div>
+  <body class="bg-[#241B12] text-[#EAE4DC] antialiased select-none min-h-screen">
+    <div id="root">
+      <div style="background-color:#241B12;min-height:100vh;color:#EAE4DC;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;">
+        <header style="height:64px;border-bottom:1px solid #3D2E20;background-color:#241B12;display:flex;align-items:center;padding:0 24px;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:36px;height:36px;border-radius:50%;background-color:#D73C30;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:18px;">🪶</div>
+            <span style="font-family:Georgia,serif;font-weight:bold;font-size:20px;color:white;">TrailWhistle</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="background-color:#36291E;color:#D8CDC2;padding:4px 12px;border-radius:9999px;font-size:11px;font-weight:bold;border:1px solid #4E3A2B;">OFFLINE READY</span>
+          </div>
+        </header>
+        <section style="background:linear-gradient(180deg, rgba(36,27,18,0.78) 0%, rgba(36,27,18,0.92) 100%), url('/hero-nature-bg.jpg') center/cover;padding:64px 24px;text-align:center;">
+          <h1 style="font-family:Georgia,serif;font-size:40px;font-weight:bold;color:white;margin:0 0 16px 0;">Discover the birds around you.</h1>
+          <p style="color:#EAE4DC;font-size:16px;max-width:600px;margin:0 auto 32px auto;">Real-time acoustic biodiversity surveying powered by on-device BirdNET v2.4 AI.</p>
+          <div style="width:128px;height:128px;border-radius:50%;background:linear-gradient(135deg,#D73C30,#B8281C);margin:0 auto;box-shadow:0 12px 30px rgba(215,60,48,0.4);border:4px solid rgba(255,255,255,0.2);"></div>
+        </section>
+        <section style="background-color:#1C150E;border-top:1px solid #3D2E20;border-bottom:1px solid #3D2E20;padding:20px 24px;">
+          <div style="max-width:1200px;margin:0 auto;display:flex;justify-content:space-around;text-align:center;">
+            <div><div style="font-size:36px;font-weight:bold;color:white;">0</div><div style="font-size:11px;color:#A89B8C;letter-spacing:1px;font-weight:bold;text-transform:uppercase;">SPECIES FOUND</div></div>
+            <div><div style="font-size:36px;font-weight:bold;color:white;">0</div><div style="font-size:11px;color:#A89B8C;letter-spacing:1px;font-weight:bold;text-transform:uppercase;">RECORDINGS</div></div>
+            <div><div style="font-size:36px;font-weight:bold;color:white;">1m</div><div style="font-size:11px;color:#A89B8C;letter-spacing:1px;font-weight:bold;text-transform:uppercase;">SURVEY TIME</div></div>
+            <div><div style="font-size:36px;font-weight:bold;color:white;">4</div><div style="font-size:11px;color:#A89B8C;letter-spacing:1px;font-weight:bold;text-transform:uppercase;">SITES</div></div>
+          </div>
+        </section>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

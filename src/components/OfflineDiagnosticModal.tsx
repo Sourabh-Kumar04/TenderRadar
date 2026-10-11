@@ -3,7 +3,6 @@ import {
   Wifi,
   WifiOff,
   Database,
-  ShieldCheck,
   CheckCircle2,
   HardDrive,
   X,
@@ -26,7 +25,7 @@ export const OfflineDiagnosticModal: React.FC<OfflineDiagnosticModalProps> = ({
   isOpen,
   onClose,
   isSunlightMode,
-  onExportJsonBackup,
+  onExportJsonBackup: _onExportJsonBackup,
 }) => {
   const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
   const [swRegistered, setSwRegistered] = useState<boolean>(false);
@@ -96,205 +95,158 @@ export const OfflineDiagnosticModal: React.FC<OfflineDiagnosticModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
-      <div className={`w-full max-w-lg rounded-2xl border p-5 sm:p-6 shadow-2xl transition-all ${
-        isSunlightMode
-          ? 'bg-[#06140b] border border-emerald-800/80 text-white shadow-2xl'
-          : 'bg-white border border-[#d4e2d4] text-[#1a2b1e] shadow-xl'
-      }`}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+      <div
+        className={`w-full max-w-lg rounded-2xl border p-6 sm:p-7 shadow-2xl transition-all ${
+          isSunlightMode
+            ? 'bg-[#120D08] text-white border-[#4A3A2C]'
+            : 'bg-white text-[#241B12] border-[#E5E0D8]'
+        }`}
+      >
         {/* Header */}
-        <div className={`flex items-center justify-between pb-3 mb-4 border-b ${
-          isSunlightMode ? 'border-emerald-900/60' : 'border-[#eef4ee]'
-        }`}>
+        <div className="flex items-center justify-between pb-4 border-b border-[#E5E0D8] mb-5">
           <div className="flex items-center gap-2.5">
-            <div className={`p-2 rounded-xl flex items-center justify-center ${
-              isSunlightMode ? 'bg-emerald-950 border border-emerald-800 text-emerald-400' : 'bg-[#eef4ee] border border-[#d4e2d4] text-[#2d5a37]'
-            }`}>
-              <ShieldCheck className="w-5 h-5" />
+            <div className="p-2 rounded-full bg-[#D73C30]/10 text-[#D73C30]">
+              <Radio className="w-5 h-5" />
             </div>
             <div>
-              <h3 className={`text-base sm:text-lg font-black tracking-tight font-sans ${isSunlightMode ? 'text-white' : 'text-[#1a2b1e]'}`}>
+              <h3 className="font-serif font-bold text-lg sm:text-xl text-[#241B12] tracking-tight">
                 Field Readiness & Offline Diagnostic
               </h3>
-              <p className={`text-xs ${isSunlightMode ? 'text-emerald-300/80' : 'text-[#4a5d4e]'}`}>
-                100% on-device autonomy verification for backcountry expeditions
+              <p className="text-xs text-[#736B63]">
+                Zero-telemetry on-device hardware verification
               </p>
             </div>
           </div>
-
           <button
             type="button"
             onClick={onClose}
-            className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-              isSunlightMode
-                ? 'bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-800'
-                : 'bg-[#faf9f6] hover:bg-[#f0ede6] text-[#4a5d4e] border border-[#d4e2d4]'
-            }`}
-            aria-label="Close diagnostic modal"
+            aria-label="Close diagnostic dialog"
+            className="p-2 rounded-full text-[#736B63] hover:text-[#241B12] hover:bg-[#F7F5F2] transition-colors cursor-pointer"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Diagnostic Items */}
-        <div className="space-y-2.5 mb-5 text-xs">
+        {/* Diagnostic Checkpoints */}
+        <div className="space-y-3 mb-6">
           {/* 1. Network Status */}
-          <div className={`p-3 rounded-xl border flex items-center justify-between gap-3 ${
-            isSunlightMode
-              ? 'bg-[#040e07] border-emerald-900/60'
-              : 'bg-[#faf9f6] border-[#d4e2d4]'
-          }`}>
-            <div className="flex items-center gap-2.5">
+          <div className="p-3.5 rounded-lg border border-[#E5E0D8] bg-[#F7F5F2] flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
               {isOnline ? (
-                <Wifi className="w-4 h-4 text-emerald-600 shrink-0" />
+                <Wifi className="w-4 h-4 text-[#3D8B40] shrink-0" />
               ) : (
-                <WifiOff className="w-4 h-4 text-[#7a9e7e] shrink-0" />
+                <WifiOff className="w-4 h-4 text-[#D73C30] shrink-0" />
               )}
               <div>
-                <div className={`font-bold ${isSunlightMode ? 'text-white' : 'text-[#1a2b1e]'}`}>
-                  {isOnline ? 'Online (Wi-Fi / Cell Connected)' : 'Offline / Backcountry Mode Active'}
+                <div className="font-bold text-sm text-[#241B12]">
+                  Field Connectivity State
                 </div>
-                <div className={`text-[11px] ${isSunlightMode ? 'text-emerald-300/70' : 'text-[#4a5d4e]'}`}>
-                  {isOnline
-                    ? 'Ready to prime local caches before leaving trailhead'
-                    : 'Zero cloud dependency. TrailWhistle operates entirely on-device'}
+                <div className="text-xs text-[#736B63]">
+                  {isOnline ? 'Online (ready to pre-cache neural models)' : 'Offline (pure on-device field operation)'}
                 </div>
               </div>
             </div>
-            <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
-              isOnline
-                ? isSunlightMode ? 'bg-emerald-950 text-emerald-300 border border-emerald-700/60' : 'bg-[#eef4ee] text-[#2d5a37] border border-[#d4e2d4]'
-                : isSunlightMode ? 'bg-emerald-950 text-emerald-300 border border-emerald-700/60' : 'bg-[#eef4ee] text-[#2d5a37] border border-[#d4e2d4]'
+            <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${
+              isOnline ? 'bg-[#3D8B40]/10 text-[#3D8B40]' : 'bg-[#D73C30]/10 text-[#D73C30]'
             }`}>
               {isOnline ? 'CONNECTED' : 'STANDALONE'}
             </span>
           </div>
 
-          {/* 2. BirdNET v2.4 ONNX Model Cache */}
-          <div className={`p-3 rounded-xl border flex items-center justify-between gap-3 ${
-            isSunlightMode
-              ? 'bg-[#040e07] border-emerald-900/60'
-              : 'bg-[#faf9f6] border-[#d4e2d4]'
-          }`}>
-            <div className="flex items-center gap-2.5">
-              <Cpu className={`w-4 h-4 ${isSunlightMode ? 'text-emerald-400' : 'text-[#7a9e7e]'} shrink-0`} />
+          {/* 2. Neural Weights Cache */}
+          <div className="p-3.5 rounded-lg border border-[#E5E0D8] bg-[#F7F5F2] flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <Database className="w-4 h-4 text-[#E67E22] shrink-0" />
               <div>
-                <div className={`font-bold ${isSunlightMode ? 'text-white' : 'text-[#1a2b1e]'}`}>
-                  BirdNET v2.4 Neural Core (~47MB)
+                <div className="font-bold text-sm text-[#241B12]">
+                  BirdNET v2.4 Weights Cache
                 </div>
-                <div className={`text-[11px] ${isSunlightMode ? 'text-emerald-300/70' : 'text-[#4a5d4e]'}`}>
-                  {modelCached
-                    ? 'INT8 quantized weights cached locally in browser Cache API'
-                    : 'Model loads on-demand on first recording or test clip'}
+                <div className="text-xs text-[#736B63]">
+                  6,522 Species Global Taxonomy model buffer
                 </div>
               </div>
             </div>
-            <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
-              isSunlightMode ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : 'bg-[#eef4ee] text-[#2d5a37] border border-[#d4e2d4]'
+            <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${
+              modelCached ? 'bg-[#3D8B40]/10 text-[#3D8B40]' : 'bg-[#E67E22]/10 text-[#E67E22]'
             }`}>
-              {modelCached ? 'CACHED' : 'ON-DEMAND'}
+              {modelCached ? 'CACHED' : 'READY TO CACHE'}
             </span>
           </div>
 
-          {/* 3. Global Avian Taxonomy */}
-          <div className={`p-3 rounded-xl border flex items-center justify-between gap-3 ${
-            isSunlightMode
-              ? 'bg-[#040e07] border-emerald-900/60'
-              : 'bg-[#faf9f6] border-[#d4e2d4]'
-          }`}>
-            <div className="flex items-center gap-2.5">
-              <Database className={`w-4 h-4 ${isSunlightMode ? 'text-emerald-400' : 'text-[#7a9e7e]'} shrink-0`} />
+          {/* 3. Service Worker PWA Cache */}
+          <div className="p-3.5 rounded-lg border border-[#E5E0D8] bg-[#F7F5F2] flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <DownloadCloud className="w-4 h-4 text-[#3D8B40] shrink-0" />
               <div>
-                <div className={`font-bold ${isSunlightMode ? 'text-white' : 'text-[#1a2b1e]'}`}>
-                  6,522 Species Global Taxonomy
+                <div className="font-bold text-sm text-[#241B12]">
+                  PWA Offline Service Worker
                 </div>
-                <div className={`text-[11px] ${isSunlightMode ? 'text-emerald-300/70' : 'text-[#4a5d4e]'}`}>
-                  Full Latin binomial & English common names bundled offline
+                <div className="text-xs text-[#736B63]">
+                  Static assets precached for trail launch without signal
                 </div>
               </div>
             </div>
-            <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
-              isSunlightMode ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : 'bg-[#eef4ee] text-[#2d5a37] border border-[#d4e2d4]'
+            <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${
+              swRegistered ? 'bg-[#3D8B40]/10 text-[#3D8B40]' : 'bg-[#F0ECE6] text-[#736B63]'
             }`}>
-              6,522 ACTIVE
+              {swRegistered ? 'ACTIVE' : 'LOCAL DEV'}
             </span>
           </div>
 
-          {/* 4. AudioWorklet & WebAssembly Core */}
-          <div className={`p-3 rounded-xl border flex items-center justify-between gap-3 ${
-            isSunlightMode
-              ? 'bg-[#040e07] border-emerald-900/60'
-              : 'bg-[#faf9f6] border-[#d4e2d4]'
-          }`}>
-            <div className="flex items-center gap-2.5">
-              <Radio className={`w-4 h-4 ${isSunlightMode ? 'text-emerald-400' : 'text-[#7a9e7e]'} shrink-0`} />
+          {/* 4. AudioWorklet & WebAssembly SIMD */}
+          <div className="p-3.5 rounded-lg border border-[#E5E0D8] bg-[#F7F5F2] flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <Cpu className="w-4 h-4 text-[#D73C30] shrink-0" />
               <div>
-                <div className={`font-bold ${isSunlightMode ? 'text-white' : 'text-[#1a2b1e]'}`}>
+                <div className="font-bold text-sm text-[#241B12]">
                   48kHz AudioWorklet + WebAssembly SIMD
                 </div>
-                <div className={`text-[11px] ${isSunlightMode ? 'text-emerald-300/70' : 'text-[#4a5d4e]'}`}>
-                  Hardware-accelerated on-device neural tensor computation
+                <div className="text-xs text-[#736B63]">
+                  Hardware-accelerated neural tensor inference engine
                 </div>
               </div>
             </div>
-            <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
-              isSunlightMode ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : 'bg-[#eef4ee] text-[#2d5a37] border border-[#d4e2d4]'
-            }`}>
+            <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-[#3D8B40]/10 text-[#3D8B40]">
               WASM SIMD
             </span>
           </div>
 
           {/* 5. Storage Quota */}
-          <div className={`p-3 rounded-xl border flex items-center justify-between gap-3 ${
-            isSunlightMode
-              ? 'bg-[#040e07] border-emerald-900/60'
-              : 'bg-[#faf9f6] border-[#d4e2d4]'
-          }`}>
-            <div className="flex items-center gap-2.5">
-              <HardDrive className={`w-4 h-4 ${isSunlightMode ? 'text-emerald-400' : 'text-[#7a9e7e]'} shrink-0`} />
+          <div className="p-3.5 rounded-lg border border-[#E5E0D8] bg-[#F7F5F2] flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <HardDrive className="w-4 h-4 text-[#736B63] shrink-0" />
               <div>
-                <div className={`font-bold ${isSunlightMode ? 'text-white' : 'text-[#1a2b1e]'}`}>
+                <div className="font-bold text-sm text-[#241B12]">
                   Local Device Storage Quota
                 </div>
-                <div className={`text-[11px] ${isSunlightMode ? 'text-emerald-300/70' : 'text-[#4a5d4e]'}`}>
+                <div className="text-xs text-[#736B63]">
                   {entries.length} observations saved in private localStorage
                 </div>
               </div>
             </div>
-            <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
-              isSunlightMode ? 'bg-emerald-950 text-emerald-200 border border-emerald-800' : 'bg-[#eef4ee] text-[#2d5a37] border border-[#d4e2d4]'
-            }`}>
+            <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-white border border-[#E5E0D8] text-[#241B12]">
               {storageEstimate ? `${storageEstimate.usageMB}MB / ${storageEstimate.quotaMB}MB` : 'LOCAL OK'}
             </span>
           </div>
         </div>
 
-        {/* Footer Actions */}
-        <div className={`flex flex-col sm:flex-row items-center justify-between gap-2.5 pt-3 border-t ${
-          isSunlightMode ? 'border-emerald-900/40' : 'border-[#eef4ee]'
-        }`}>
+        {/* Footer Actions: Pill-shaped buttons with generous padding */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-[#E5E0D8]">
           <button
             type="button"
             onClick={handleExportJson}
-            className={`w-full sm:w-auto py-2.5 px-3.5 min-h-[44px] rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-              isSunlightMode
-                ? 'bg-emerald-950 hover:bg-emerald-900 text-emerald-200 border border-emerald-800'
-                : 'bg-[#faf9f6] hover:bg-[#f0ede6] border border-[#d4e2d4] text-[#1a2b1e]'
-            }`}
+            className="w-full sm:w-auto py-2.5 px-5 rounded-full text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 border border-[#E5E0D8] bg-[#F7F5F2] hover:bg-[#ECE7E1] text-[#241B12] transition-all cursor-pointer"
             title="Download full JSON survey backup"
           >
-            <FileJson className={`w-4 h-4 ${isSunlightMode ? 'text-emerald-400' : 'text-[#7a9e7e]'}`} />
+            <FileJson className="w-4 h-4 text-[#E67E22]" />
             <span>Export Raw JSON Backup</span>
           </button>
 
           <button
             type="button"
             onClick={onClose}
-            className={`w-full sm:w-auto py-2.5 px-5 min-h-[44px] rounded-xl text-xs font-bold flex items-center justify-center transition-all cursor-pointer ${
-              isSunlightMode
-                ? 'bg-emerald-800 hover:bg-emerald-700 text-white shadow-md'
-                : 'bg-[#2d5a37] hover:bg-[#23472b] text-white shadow-sm'
-            }`}
+            className="w-full sm:w-auto py-2.5 px-6 rounded-full text-xs font-bold uppercase tracking-wider flex items-center justify-center transition-all cursor-pointer bg-[#D73C30] hover:bg-[#C23328] text-white shadow-md"
           >
             <span>Close Diagnostic</span>
           </button>

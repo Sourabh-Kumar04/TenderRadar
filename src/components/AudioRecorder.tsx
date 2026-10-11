@@ -9,6 +9,7 @@ interface AudioRecorderProps {
   isSunlightMode: boolean;
   onSelectSample?: (sample: SampleAudioItem) => void;
   selectedSample?: SampleAudioItem | null;
+  embeddedInHero?: boolean;
 }
 
 export const AudioRecorder: React.FC<AudioRecorderProps> = ({
@@ -17,6 +18,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
   isSunlightMode,
   onSelectSample,
   selectedSample,
+  embeddedInHero = false,
 }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [countdown, setCountdown] = useState(3.0);
@@ -91,112 +93,142 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
   };
 
   return (
-    <div className={`p-5 sm:p-6 rounded-2xl border transition-all duration-300 relative overflow-hidden ${
-      isSunlightMode 
-        ? 'bg-[#06140b] border-emerald-800/80 text-white shadow-2xl' 
-        : 'bg-white border-[#d4e2d4] text-[#1a2b1e] shadow-sm'
-    }`}>
-      {/* Header Badge */}
-      <div className={`flex items-center justify-between pb-3.5 mb-5 border-b relative z-10 ${
-        isSunlightMode ? 'border-emerald-900/60' : 'border-[#eef4ee]'
-      }`}>
+    <div
+      className={`transition-all duration-300 relative overflow-hidden ${
+        embeddedInHero
+          ? 'bg-transparent text-white'
+          : `p-6 sm:p-7 rounded-2xl border ${
+              isSunlightMode
+                ? 'bg-[#120D08] border-[#4A3A2C] text-white shadow-xl'
+                : 'bg-white border-[#E5E0D8] text-[#241B12] shadow-sm'
+            }`
+      }`}
+    >
+      {/* Header Info Bar */}
+      <div
+        className={`flex items-center justify-between pb-3.5 mb-5 border-b relative z-10 ${
+          embeddedInHero
+            ? 'border-white/15'
+            : isSunlightMode
+              ? 'border-[#4A3A2C]'
+              : 'border-[#E5E0D8]'
+        }`}
+      >
         <div className="flex items-center gap-2.5">
-          <div className={`p-1.5 rounded-lg ${
-            isSunlightMode ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-[#eef4ee] text-[#2d5a37] border border-[#d4e2d4]'
-          }`}>
+          <div
+            className={`p-2 rounded-full ${
+              embeddedInHero
+                ? 'bg-white/15 text-white'
+                : isSunlightMode
+                  ? 'bg-[#241B12] text-[#E67E22] border border-[#4A3A2C]'
+                  : 'bg-[#F7F5F2] text-[#D73C30] border border-[#E5E0D8]'
+            }`}
+          >
             <Radio className="w-4 h-4 animate-pulse" />
           </div>
           <div>
-            <h2 className={`text-sm font-bold font-sans ${isSunlightMode ? 'text-white' : 'text-[#1a2b1e]'}`}>
+            <h2
+              className={`text-sm font-bold font-serif ${
+                embeddedInHero ? 'text-white' : isSunlightMode ? 'text-white' : 'text-[#241B12]'
+              }`}
+            >
               Acoustic field recorder
             </h2>
-            <p className={`text-[11px] ${isSunlightMode ? 'text-emerald-300/80' : 'text-[#4a5d4e]'}`}>
-              Real-time on-device audio worklet
+            <p
+              className={`text-xs ${
+                embeddedInHero ? 'text-[#EAE4DC]' : isSunlightMode ? 'text-[#B8ACA0]' : 'text-[#736B63]'
+              }`}
+            >
+              Real-time on-device bioacoustic sensor
             </p>
           </div>
         </div>
-        <span className={`text-[10px] font-mono font-bold px-2.5 py-1 rounded-full flex items-center gap-1 ${
-          isSunlightMode 
-            ? 'bg-emerald-950 text-emerald-300 border border-emerald-700/60' 
-            : 'bg-[#eef4ee] text-[#2d5a37] border border-[#d4e2d4]'
-        }`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${isSunlightMode ? 'bg-emerald-400' : 'bg-[#7a9e7e]'}`} />
+        <span
+          className={`text-[11px] font-sans font-bold uppercase tracking-wider px-3 py-1 rounded-full flex items-center gap-1.5 ${
+            embeddedInHero
+              ? 'bg-white/15 text-white border border-white/20'
+              : isSunlightMode
+                ? 'bg-[#241B12] text-[#EAE4DC] border border-[#4A3A2C]'
+                : 'bg-[#F7F5F2] text-[#332A22] border border-[#E5E0D8]'
+          }`}
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-[#3D8B40]" />
           <span>48kHz Worklet</span>
         </span>
       </div>
 
       {/* Capture Section */}
       <div className="flex flex-col items-center justify-center text-center relative z-10">
-        <h3 className={`text-lg sm:text-xl font-extrabold tracking-tight mb-1 font-sans ${
-          isSunlightMode ? 'text-white' : 'text-[#1a2b1e]'
-        }`}>
-          {isRecording 
-            ? 'Sampling Canopy Acoustics...' 
-            : isProcessing 
-              ? 'Inferring BirdNET v2.4 Neural Core...' 
+        <h3
+          className={`text-lg sm:text-xl font-serif font-bold tracking-tight mb-1.5 ${
+            embeddedInHero ? 'text-white' : isSunlightMode ? 'text-white' : 'text-[#241B12]'
+          }`}
+        >
+          {isRecording
+            ? 'Sampling Canopy Acoustics...'
+            : isProcessing
+              ? 'Classifying with BirdNET Neural Core...'
               : 'Record 3 Seconds of Birdsong'}
         </h3>
-        <p className={`text-xs mb-6 max-w-sm leading-relaxed ${
-          isSunlightMode ? 'text-emerald-300/80' : 'text-[#4a5d4e]'
-        }`}>
-          Aim microphone toward trees or shrubs. High-fidelity 48kHz audio is analyzed locally on device.
+        <p
+          className={`text-xs sm:text-sm mb-6 max-w-md leading-relaxed ${
+            embeddedInHero ? 'text-[#EAE4DC]' : isSunlightMode ? 'text-[#B8ACA0]' : 'text-[#736B63]'
+          }`}
+        >
+          Point microphone toward singing birds. Analyzed on-device with BirdNET v2.4 (6,522 species) in 100% offline isolation.
         </p>
 
-        {/* Big Tap Target Record Button with Glowing Sonar Rings */}
-        <div className="relative mb-6 flex items-center justify-center group">
-          {/* Subtle outer ambient pulse halo in idle */}
+        {/* PROMINENT RECORD BUTTON (Coral-red #D73C30, Pill or Circular Sonar, Generous Padding) */}
+        <div className="relative mb-6 flex flex-col items-center justify-center group">
+          {/* Subtle outer halo in idle */}
           {!isRecording && !isProcessing && (
-            <div className={`absolute w-36 h-36 rounded-full transition-all duration-700 group-hover:scale-110 opacity-30 ${
-              isSunlightMode ? 'bg-amber-400/20 blur-md' : 'bg-amber-200/50 blur-md'
-            }`} />
+            <div className="absolute w-36 h-36 rounded-full bg-[#D73C30]/20 blur-xl transition-all duration-700 group-hover:scale-125" />
           )}
 
           {/* Dynamic Sonar Rings when recording */}
           {isRecording && (
             <>
               <div
-                className="absolute w-44 h-44 rounded-full border-2 border-red-500/40 animate-ping"
+                className="absolute w-44 h-44 rounded-full border-2 border-[#D73C30]/50 animate-ping"
                 style={{ transform: `scale(${1.1 + volume * 0.5})` }}
               />
               <div
-                className="absolute w-36 h-36 rounded-full border-2 border-red-400/60 animate-pulse"
+                className="absolute w-36 h-36 rounded-full border-2 border-[#E67E22]/60 animate-pulse"
                 style={{ transform: `scale(${1 + volume * 0.3})` }}
               />
             </>
           )}
 
-          {/* Tactile Record Button - Warm Amber (#f59e0b) ONLY for the record button */}
+          {/* The Prominent Coral-Red Pill / Sonar Button */}
           <button
             type="button"
             onClick={handleStartRecording}
             disabled={isRecording || isProcessing}
             aria-label={isRecording ? 'Recording in progress' : 'Record 3 seconds of bird call'}
-            className={`w-32 h-32 rounded-full flex flex-col items-center justify-center transition-all duration-300 transform active:scale-95 shadow-xl select-none relative z-10 cursor-pointer ${
+            className={`min-w-[180px] sm:min-w-[220px] py-4 px-8 rounded-full flex items-center justify-center gap-3 transition-all duration-300 transform active:scale-95 shadow-xl select-none relative z-10 cursor-pointer ${
               isRecording
-                ? 'bg-gradient-to-br from-red-500 to-red-700 text-white ring-8 ring-red-500/30 shadow-[0_0_50px_rgba(239,68,68,0.5)]'
+                ? 'bg-[#D73C30] text-white ring-8 ring-[#D73C30]/30 shadow-[0_0_40px_rgba(215,60,48,0.6)] animate-pulse'
                 : isProcessing
-                  ? isSunlightMode
-                    ? 'bg-emerald-950 text-emerald-300 cursor-not-allowed border-2 border-emerald-700 opacity-90'
-                    : 'bg-[#eef4ee] text-[#2d5a37] cursor-not-allowed border-2 border-[#d4e2d4]'
-                  : 'bg-[#f59e0b] hover:bg-[#d97706] text-white border-4 border-amber-300/40 hover:scale-105 shadow-lg shadow-amber-500/25'
+                  ? 'bg-[#36291E] text-white cursor-not-allowed border-2 border-[#523F2F] opacity-90'
+                  : 'bg-[#D73C30] hover:bg-[#C23328] text-white border-2 border-white/20 hover:scale-105 shadow-lg shadow-[#D73C30]/30'
             }`}
           >
             {isRecording ? (
               <>
-                <Square className="w-9 h-9 fill-current mb-1 animate-pulse" />
-                <span className="font-mono font-black text-sm tracking-wider">{countdown.toFixed(1)}s</span>
+                <Square className="w-5 h-5 fill-current" />
+                <span className="font-mono font-bold text-base tracking-wider">{countdown.toFixed(1)}s Recording</span>
               </>
             ) : isProcessing ? (
               <>
-                <Sparkles className="w-9 h-9 animate-spin text-[#7a9e7e] mb-1" />
-                <span className="text-xs font-bold text-[#2d5a37]">Classifying...</span>
+                <Sparkles className="w-5 h-5 animate-spin text-white" />
+                <span className="font-sans font-bold text-sm text-white">Classifying Call...</span>
               </>
             ) : (
               <>
-                <div className="p-2.5 rounded-full bg-white/20 mb-1">
-                  <Mic className="w-8 h-8 text-white" />
+                <div className="p-2 rounded-full bg-white/20">
+                  <Mic className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-sm font-bold tracking-normal text-white">Record</span>
+                <span className="font-sans font-bold text-base tracking-wide text-white">Record Call</span>
               </>
             )}
           </button>
@@ -204,23 +236,27 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
 
         {/* Live Audio Visualizer / Bioacoustic Spectrum Meter */}
         {isRecording && (
-          <div className={`w-64 mb-5 space-y-2 animate-fade-in p-3 rounded-xl border ${
-            isSunlightMode ? 'bg-black/60 border-emerald-900/60' : 'bg-[#faf9f6] border-[#d4e2d4]'
-          }`}>
-            <div className="flex items-center justify-between text-[11px] font-mono">
-              <span className={`flex items-center gap-1.5 font-bold ${isSunlightMode ? 'text-emerald-300' : 'text-[#2d5a37]'}`}>
-                <Volume2 className={`w-3.5 h-3.5 ${isSunlightMode ? 'text-feather-yellow' : 'text-[#7a9e7e]'}`} />
+          <div
+            className={`w-72 mb-5 space-y-2.5 animate-fade-in p-4 rounded-xl border ${
+              embeddedInHero
+                ? 'bg-[#241B12]/80 border-white/20 text-white backdrop-blur-md'
+                : isSunlightMode
+                  ? 'bg-black/60 border-[#4A3A2C] text-white'
+                  : 'bg-[#F7F5F2] border-[#E5E0D8] text-[#241B12]'
+            }`}
+          >
+            <div className="flex items-center justify-between text-xs font-mono">
+              <span className="flex items-center gap-1.5 font-bold text-[#D73C30]">
+                <Volume2 className="w-4 h-4" />
                 <span>Bioacoustic Level</span>
               </span>
-              <span className={`font-bold ${isSunlightMode ? 'text-feather-yellow' : 'text-[#1a2b1e]'}`}>{Math.round(volume * 100)}% RMS</span>
+              <span className="font-bold">{Math.round(volume * 100)}% RMS</span>
             </div>
-            
+
             {/* Primary RMS Level Bar */}
-            <div className={`w-full h-2 rounded-full overflow-hidden ${isSunlightMode ? 'bg-[#050e08]' : 'bg-[#eef4ee]'}`}>
+            <div className="w-full h-2 rounded-full overflow-hidden bg-black/20">
               <div
-                className={`h-full transition-all duration-75 rounded-full ${
-                  isSunlightMode ? 'bg-emerald-400' : 'bg-[#7a9e7e]'
-                }`}
+                className="h-full transition-all duration-75 rounded-full bg-[#D73C30]"
                 style={{ width: `${Math.min(100, Math.max(6, volume * 100))}%` }}
               />
             </div>
@@ -234,19 +270,13 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
                 { label: '6.0k+', height: Math.min(100, Math.max(10, volume * 65 + 8)) },
               ].map((band, i) => (
                 <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                  <div className={`w-full h-5 rounded-md overflow-hidden flex items-end ${
-                    isSunlightMode ? 'bg-[#050e08] border border-emerald-950' : 'bg-[#eef4ee]'
-                  }`}>
+                  <div className="w-full h-6 rounded overflow-hidden flex items-end bg-black/20">
                     <div
-                      className={`w-full transition-all duration-100 rounded-t ${
-                        isSunlightMode ? 'bg-emerald-400' : 'bg-[#7a9e7e]'
-                      }`}
+                      className="w-full transition-all duration-100 rounded-t bg-[#E67E22]"
                       style={{ height: `${band.height}%` }}
                     />
                   </div>
-                  <span className={`text-[9px] font-mono font-semibold ${isSunlightMode ? 'text-emerald-400/80' : 'text-[#4a5d4e]'}`}>
-                    {band.label}
-                  </span>
+                  <span className="text-[9px] font-mono text-[#736B63]">{band.label}</span>
                 </div>
               ))}
             </div>
@@ -255,7 +285,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
 
         {/* Playback preview for last captured audio */}
         {recordedWavUrl && !isRecording && (
-          <div className="mb-4 flex items-center gap-2">
+          <div className="mb-5 flex items-center gap-2">
             <audio
               ref={audioPreviewRef}
               src={recordedWavUrl}
@@ -265,48 +295,60 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
             <button
               type="button"
               onClick={handleTogglePreview}
-              className={`px-4 py-2 min-h-[40px] rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-xs ${
-                isSunlightMode
-                  ? 'bg-emerald-950/80 hover:bg-emerald-900 text-emerald-200 border border-emerald-700/60'
-                  : 'bg-[#f4f7f4] hover:bg-[#eef4ee] text-[#1a2b1e] border border-[#d4e2d4]'
+              className={`px-5 py-2.5 rounded-full text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-sm border ${
+                embeddedInHero
+                  ? 'bg-white/20 hover:bg-white/30 text-white border-white/30'
+                  : isSunlightMode
+                    ? 'bg-[#1C150E] hover:bg-[#241B12] text-white border-[#4A3A2C]'
+                    : 'bg-[#F7F5F2] hover:bg-[#ECE7E1] text-[#241B12] border-[#E5E0D8]'
               }`}
             >
-              <Play className={`w-3.5 h-3.5 ${isSunlightMode ? 'text-emerald-400' : 'text-[#7a9e7e]'} ${isPlayingPreview ? 'fill-current' : ''}`} />
-              <span>{isPlayingPreview ? 'Playing Captured Audio...' : 'Replay 3s Captured Audio'}</span>
+              <Play className={`w-3.5 h-3.5 text-[#D73C30] ${isPlayingPreview ? 'fill-current' : ''}`} />
+              <span>{isPlayingPreview ? 'Replaying Audio...' : 'Replay 3s Audio Recording'}</span>
             </button>
           </div>
         )}
 
         {/* Error message */}
         {errorMessage && (
-          <div className={`p-3.5 rounded-xl text-xs flex items-center gap-2.5 mb-4 w-full text-left ${
-            isSunlightMode ? 'bg-red-950/80 border border-red-700 text-red-200' : 'bg-red-50 border border-red-200 text-red-900'
-          }`}>
-            <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
+          <div className="p-3.5 rounded-xl text-xs flex items-center gap-2.5 mb-4 w-full text-left bg-red-950/80 border border-red-700 text-red-100">
+            <AlertCircle className="w-4 h-4 shrink-0 text-red-300" />
             <span>{errorMessage}</span>
           </div>
         )}
 
-        {/* Quick Field Test Simulator for Immediate 30s Discovery */}
-        {onSelectSample && (
-          <div className={`w-full pt-4 mt-2 border-t ${
-            isSunlightMode ? 'border-emerald-900/60' : 'border-[#eef4ee]'
-          }`}>
-            <div className="flex items-center justify-between mb-2.5">
-              <span className={`text-xs font-semibold flex items-center gap-1.5 ${
-                isSunlightMode ? 'text-emerald-200' : 'text-[#1a2b1e]'
-              }`}>
-                <FlaskConical className={`w-3.5 h-3.5 ${isSunlightMode ? 'text-emerald-400' : 'text-[#7a9e7e]'}`} />
-                <span>Simulate field call:</span>
+        {/* Quick Field Simulation Pills (dev testing only, hidden on main hero) */}
+        {!embeddedInHero && onSelectSample && (
+          <div
+            className={`w-full pt-4 mt-2 border-t ${
+              isSunlightMode
+                ? 'border-[#4A3A2C]'
+                : 'border-[#E5E0D8]'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <span
+                className={`text-xs font-serif font-bold flex items-center gap-1.5 ${
+                  embeddedInHero ? 'text-white' : isSunlightMode ? 'text-white' : 'text-[#241B12]'
+                }`}
+              >
+                <FlaskConical className="w-3.5 h-3.5 text-[#E67E22]" />
+                <span>Simulate field bird call:</span>
               </span>
-              <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
-                isSunlightMode ? 'bg-emerald-950 text-emerald-400 border border-emerald-900' : 'bg-[#f4f7f4] text-[#4a5d4e] border border-[#d4e2d4]'
-              }`}>
+              <span
+                className={`text-[10px] font-sans uppercase tracking-wider px-2.5 py-0.5 rounded-full ${
+                  embeddedInHero
+                    ? 'bg-white/15 text-[#EAE4DC]'
+                    : isSunlightMode
+                      ? 'bg-[#241B12] text-[#B8ACA0] border border-[#4A3A2C]'
+                      : 'bg-[#F7F5F2] text-[#736B63] border border-[#E5E0D8]'
+                }`}
+              >
                 48kHz xeno-canto
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 w-full">
+            <div className="grid grid-cols-2 gap-2.5 w-full">
               {SAMPLE_AUDIO_LIST.map((sample) => {
                 const isSelected = selectedSample?.id === sample.id;
                 return (
@@ -315,33 +357,31 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
                     type="button"
                     onClick={() => onSelectSample(sample)}
                     disabled={isRecording || isProcessing}
-                    className={`p-2.5 rounded-xl text-left text-xs font-bold flex items-center justify-between transition-all min-h-[44px] cursor-pointer group ${
+                    className={`p-3 rounded-full text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer group border ${
                       isSelected
-                        ? isSunlightMode
-                          ? 'bg-emerald-800 text-white border border-emerald-400 shadow-md'
-                          : 'bg-[#7a9e7e] text-white border border-[#7a9e7e] shadow-xs'
-                        : isSunlightMode
-                          ? 'bg-[#06120a] border border-emerald-900/70 hover:border-emerald-600 hover:bg-[#0a1a0f] text-emerald-100'
-                          : 'bg-[#faf9f6] border border-[#d4e2d4] hover:bg-[#eef4ee] text-[#1a2b1e]'
+                        ? 'bg-[#D73C30] text-white border-[#D73C30] shadow-md'
+                        : embeddedInHero
+                          ? 'bg-black/30 hover:bg-black/50 text-white border-white/20'
+                          : isSunlightMode
+                            ? 'bg-[#1C150E] hover:bg-[#241B12] text-white border-[#4A3A2C]'
+                            : 'bg-[#FFFFFF] hover:bg-[#F7F5F2] text-[#241B12] border-[#E5E0D8]'
                     }`}
                     title={`Run on-device BirdNET inference on ${sample.speciesName}`}
                   >
-                    <div className="truncate pr-1">
-                      <div className="truncate font-semibold">{sample.speciesName}</div>
-                      <div className={`text-[10px] font-mono font-normal truncate ${
-                        isSelected 
-                          ? 'opacity-90 text-white' 
-                          : isSunlightMode ? 'opacity-60 text-emerald-300' : 'text-[#4a5d4e]'
-                      }`}>
-                        3.0s sample
+                    <div className="truncate pr-2">
+                      <div className="truncate font-sans font-bold text-xs">{sample.speciesName}</div>
+                      <div className="text-[10px] italic text-[#B8ACA0] truncate font-serif">
+                        {sample.scientificName}
                       </div>
                     </div>
-                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 ${
-                      isSelected
-                        ? 'bg-white text-[#2d5a37]'
-                        : isSunlightMode ? 'bg-emerald-950 text-emerald-400' : 'bg-[#eef4ee] text-[#2d5a37]'
-                    }`}>
-                      <Play className="w-3 h-3 fill-current" />
+                    <div
+                      className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 ${
+                        isSelected
+                          ? 'bg-white text-[#D73C30]'
+                          : 'bg-[#E67E22] text-white'
+                      }`}
+                    >
+                      <Play className="w-3 h-3 fill-current ml-0.5" />
                     </div>
                   </button>
                 );

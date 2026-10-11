@@ -8,11 +8,16 @@
   }
   body {
     touch-action: manipulation;
-    background-color: #faf9f6;
-    color: #1a2b1e;
+    background-color: #241B12;
+    color: #332A22;
+    font-size: 16px;
+    line-height: 1.6;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
   h1, h2, h3, h4, h5, h6 {
-    color: #1a2b1e;
+    font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+    color: #241B12;
+    font-weight: 700;
   }
 }
 
@@ -37,17 +42,66 @@
   min-width: 48px;
 }
 
+/* Cornell Lab Birds of the World Pill Button Utilities */
+.btn-pill-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background-color: #D73C30;
+  color: #FFFFFF;
+  font-weight: 700;
+  padding: 0.625rem 1.5rem;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.btn-pill-primary:hover {
+  background-color: #C23328;
+}
+
+.btn-pill-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background-color: #E67E22;
+  color: #FFFFFF;
+  font-weight: 700;
+  padding: 0.625rem 1.5rem;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.btn-pill-secondary:hover {
+  background-color: #D35400;
+}
+
+.btn-pill-success {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background-color: #3D8B40;
+  color: #FFFFFF;
+  font-weight: 700;
+  padding: 0.625rem 1.5rem;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.btn-pill-success:hover {
+  background-color: #2E7D32;
+}
+
 /* High-contrast outdoor dark mode helpers */
 .sunlight-surface {
-  background-color: #061009 !important;
-  color: #f7faf8 !important;
-  border-color: #275f36 !important;
+  background-color: #120D08 !important;
+  color: #FAF6F0 !important;
+  border-color: #4A3A2C !important;
 }
 
 .sunlight-surface-subtle {
-  background-color: #0d1f14 !important;
-  color: #e5eee6 !important;
-  border-color: #346c43 !important;
+  background-color: #1C150E !important;
+  color: #EAE4DC !important;
+  border-color: #5A4838 !important;
 }
 
 .sunlight-text-high-contrast {
@@ -55,30 +109,31 @@
   font-weight: 700;
 }
 
-/* Light iNaturalist panel styling */
-.canopy-panel {
-  background: #ffffff;
-  border-color: #d4e2d4;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+/* Birds of the World Card styling */
+.bow-card {
+  background: #FFFFFF;
+  border: 1px solid #E5E0D8;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(36, 27, 18, 0.04);
 }
 
-/* Clean light-theme scrollbars */
+/* Warm scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f7f5f0;
+  background: #F7F5F2;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #b8ceb9;
+  background: #D8D2C9;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #7a9e7e;
+  background: #A89F93;
 }
 
